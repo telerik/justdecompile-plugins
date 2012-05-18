@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{190F98C9-DCF2-497E-9BF0-230D35A43879}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Reflexil.JustDecompile</RootNamespace>
+    <AssemblyName>Reflexil.JustDecompile</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Source\UI\DebugBuild\Plugins\Reflexil\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Source\UI\ReleaseBuild\Plugins\Reflexil\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Practices.Prism">
+      <HintPath>..\..\Source\Binaries\Microsoft.Practices.Prism.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Prism.MefExtensions">
+      <HintPath>..\..\Source\Binaries\Microsoft.Practices.Prism.MefExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="JustDecompileCecilStudioPackage.cs" />
+    <Compile Include="MenuItems\AssemblyNodeContextMenu.cs" />
+    <Compile Include="MenuItems\AssemblyReferenceNode.cs" />
+    <Compile Include="MenuItems\EmbeddedResourceContextMenu.cs" />
+    <Compile Include="MenuItems\MemberDefinitionContextMenu.cs" />
+    <Compile Include="JustDecompileCecilPlugin.cs" />
+    <Compile Include="MenuItems\MenuItem.cs" />
+    <Compile Include="MenuItems\MenuItemBase.cs" />
+    <Compile Include="MenuItems\MenuSeparator.cs" />
+    <Compile Include="MenuItems\ModuleDefinitionContextMenu.cs" />
+    <Compile Include="MenuItems\ReflexilToolsMenuItem.cs" />
+    <Compile Include="MenuItems\TypeDefinitionContextMenu.cs" />
+    <Compile Include="ReflexilHost.xaml.cs">
+      <DependentUpon>ReflexilHost.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="ReflexilModule.cs" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="ReflexilHost.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\Tools\JustDecompile.Core\JustDecompile.Core.csproj">
+      <Project>{8A549CC3-55AC-46F8-9BC9-83E0804D87B9}</Project>
+      <Name>JustDecompile.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\reflexil.1.5.src\Libs\Sources\Mono.Cecil.Mdb\Mono.Cecil.Mdb.Reflexil.csproj">
+      <Project>{C5D12431-9C20-4789-8FEC-46094B0F81B5}</Project>
+      <Name>Mono.Cecil.Mdb.Reflexil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\reflexil.1.5.src\Libs\Sources\Mono.Cecil.Pdb\Mono.Cecil.Pdb.Reflexil.csproj">
+      <Project>{4FEBBB25-D5C0-48F0-A822-2E0D6F3D777E}</Project>
+      <Name>Mono.Cecil.Pdb.Reflexil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\reflexil.1.5.src\Libs\Sources\Mono.Cecil\Mono.Cecil.Reflexil.csproj">
+      <Project>{D8F63DFF-5230-43E4-9AB2-DA6E721A1FAE}</Project>
+      <Name>Mono.Cecil.Reflexil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\reflexil.1.5.src\Plugins\Cecil.Decompiler.Gui.Services\Cecil.Decompiler.Gui.Services.csproj">
+      <Project>{7FEC91D0-6FE4-4B91-B44A-8AF248BC88E0}</Project>
+      <Name>Cecil.Decompiler.Gui.Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\reflexil.1.5.src\Plugins\Reflexil.CecilStudio\Reflexil.CecilStudio.csproj">
+      <Project>{E95BF266-CA23-4488-B519-2B15395297AD}</Project>
+      <Name>Reflexil.CecilStudio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\reflexil.1.5.src\Reflexil.csproj">
+      <Project>{DC7B5E39-FF49-4FE9-922B-3AE3DE36F2C6}</Project>
+      <Name>Reflexil %28Reflexil\ReflexilLibs\Reflexil%29</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
