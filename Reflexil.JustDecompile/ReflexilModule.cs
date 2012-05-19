@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using JustDecompile.Core;
 using Microsoft.Practices.Prism.Events;
 using Microsoft.Practices.Prism.MefExtensions.Modularity;
@@ -10,7 +11,6 @@ using Reflexil.Forms;
 using Reflexil.Handlers;
 using Reflexil.JustDecompile.MenuItems;
 using Reflexil.Plugins;
-using System.Linq;
 
 namespace Reflexil.JustDecompile
 {
@@ -45,6 +45,15 @@ namespace Reflexil.JustDecompile
             this.justDecompileCecilPlugin = new JustDecompileCecilPlugin(this);
 
             PluginFactory.Register(justDecompileCecilPlugin);
+
+            this.regionManager.AddToRegion("ToolMenuRegion", new ReflexilToolsMenuItem(regionManager, ReflexilWindow));
+            this.regionManager.AddToRegion("AssemblyTreeViewContextMenuRegion", assemblyNodeContextMenu);
+            this.regionManager.AddToRegion("TypeTreeViewContextMenuRegion", typeDefinitionNodeContextMenu);
+            this.regionManager.AddToRegion("EmbeddedResourceTreeViewContextMenuRegion", resourceNodeContextMenu);
+            this.regionManager.AddToRegion("ResourceTreeViewContextMenuRegion", resourceNodeContextMenu);
+            this.regionManager.AddToRegion("AssemblyReferenceTreeViewContextMenuRegion", assemblyReferenceContextMenu);
+            this.regionManager.AddToRegion("MemberTreeViewContextMenuRegion", memberDefinitionNodeContextMenu);
+            this.regionManager.AddToRegion("ModuleDefinitionTreeViewContextMenuRegion", moduleDefinitionNodeContextMenu);
         }
 
         public void OnImportsSatisfied()
@@ -57,15 +66,6 @@ namespace Reflexil.JustDecompile
             this.assemblyReferenceContextMenu = new AssemblyReferenceNode(eventAggregator);
             this.memberDefinitionNodeContextMenu = new MemberDefinitionContextMenu(eventAggregator);
             this.moduleDefinitionNodeContextMenu = new ModuleDefinitionContextMenu(eventAggregator);
-
-            this.regionManager.AddToRegion("ToolMenuRegion", new ReflexilToolsMenuItem(regionManager, ReflexilWindow));
-            this.regionManager.AddToRegion("AssemblyTreeViewContextMenuRegion", assemblyNodeContextMenu);
-            this.regionManager.AddToRegion("TypeTreeViewContextMenuRegion", typeDefinitionNodeContextMenu);
-            this.regionManager.AddToRegion("EmbeddedResourceTreeViewContextMenuRegion", resourceNodeContextMenu);
-            this.regionManager.AddToRegion("ResourceTreeViewContextMenuRegion", resourceNodeContextMenu);
-            this.regionManager.AddToRegion("AssemblyReferenceTreeViewContextMenuRegion", assemblyReferenceContextMenu);
-            this.regionManager.AddToRegion("MemberTreeViewContextMenuRegion", memberDefinitionNodeContextMenu);
-            this.regionManager.AddToRegion("ModuleDefinitionTreeViewContextMenuRegion", moduleDefinitionNodeContextMenu);
 
             this.eventAggregator.GetEvent<SelectedTreeViewItemChangedEvent>().Subscribe(SetReflexilHandler);
             this.eventAggregator.GetEvent<TreeViewItemCollectionChangedEvent>().Subscribe(LoadAssembliesIntoPlugin);
