@@ -27,7 +27,9 @@ namespace Reflexil.JustDecompile
         {
             CheckAssemblyNode(item);
 
-            return LoadAssembly((item as IAssemblyDefinitionTreeViewItem).AssemblyDefinition.MainModule.FilePath, false);
+            var assemblyDefinitionTreeViewItem = item as IAssemblyDefinitionTreeViewItem;
+
+            return LoadAssembly(assemblyDefinitionTreeViewItem.AssemblyDefinition.MainModule.FilePath, false);
         }
         #endregion
 
@@ -269,9 +271,18 @@ namespace Reflexil.JustDecompile
 
         public override AssemblyDefinition LoadAssembly(string location, bool loadsymbols)
         {
+            AssemblyDefinition assemblyDefinition = base.LoadAssembly(location, loadsymbols);
             try
             {
-                return AssemblyDefinition.ReadAssembly(location);
+                if (assemblyDefinition == null)
+                {
+                    assemblyDefinition = AssemblyDefinition.ReadAssembly(location);
+
+                    var newCollection = m_assemblies.OfType<AssemblyDefinition>().Union(new AssemblyDefinition[] { assemblyDefinition });
+
+                    ReloadAssemblies(new List<AssemblyDefinition>(newCollection));
+                }
+                return assemblyDefinition;
             }
             catch
             {
