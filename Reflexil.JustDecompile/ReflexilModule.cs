@@ -32,10 +32,10 @@ namespace Reflexil.JustDecompile
 	public class ReflexilModule : IModule, IPartImportsSatisfiedNotification, IPackage
 	{
 		[Import]
-		private readonly IRegionManager regionManager;
+		private IRegionManager regionManager;
 
 		[Import]
-		private readonly IEventAggregator eventAggregator;
+		private IEventAggregator eventAggregator;
 
 		private JustDecompileCecilPlugin justDecompileCecilPlugin;
 
