@@ -1,4 +1,18 @@
-﻿using System;
+﻿// Copyright 2012 Telerik AD
+// 
+// This program is free software: you can redistribute it and/or modify 
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// 
+using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
@@ -10,65 +24,65 @@ using Reflexil.Forms;
 
 namespace Reflexil.JustDecompile
 {
-    public partial class ReflexilHost
-    {
-        public static readonly DependencyProperty HeaderProperty =
-            DependencyProperty.Register("Header", typeof(string), typeof(ReflexilHost), null);
+	public partial class ReflexilHost
+	{
+		public static readonly DependencyProperty HeaderProperty =
+			DependencyProperty.Register("Header", typeof(string), typeof(ReflexilHost), null);
+		private readonly IRegionManager regionManager;
+		private ReflexilWindow reflexilWindow;
+		public ReflexilHost()
+		{
+			InitializeComponent();
 
-        private ReflexilWindow reflexilWindow;
+			this.Loaded += OnLoaded;
 
-        private readonly IRegionManager regionManager;
+			this.CloseCommand = new DelegateCommand(OnCloseExecuted);
+		}
 
-        public ReflexilHost()
-        {
-            InitializeComponent();
+		public ReflexilHost(IRegionManager regionManager, ReflexilWindow reflexilWindow) : this()
+		{
+			this.regionManager = regionManager;
 
-            this.Loaded += OnLoaded;
+			this.reflexilWindow = reflexilWindow;
 
-            this.CloseCommand = new DelegateCommand(OnCloseExecuted);
-        }
+			var cecilStudioPackage = new JustDecompileCecilStudioPackage();
 
-        public ReflexilHost(IRegionManager regionManager, ReflexilWindow reflexilWindow)
-            : this()
-        {
-            this.regionManager = regionManager;
+			this.Header = cecilStudioPackage.GetProductTitle();
+		}
 
-            this.reflexilWindow = reflexilWindow;
+		public ICommand CloseCommand { get; private set; }
+		public string Header
+		{
+			get
+			{
+				return (string)GetValue(HeaderProperty);
+			}
+			set
+			{
+				SetValue(HeaderProperty, value);
+			}
+		}
+		private void OnCloseExecuted()
+		{
+			regionManager.Regions["PluginRegion"].Remove(this);
+		}
 
-            var cecilStudioPackage = new JustDecompileCecilStudioPackage();
+		private void OnLoaded(object sender, RoutedEventArgs e)
+		{
+			var hostPanel = new Panel { };
+			hostPanel.Controls.Add(reflexilWindow);
 
-            this.Header = cecilStudioPackage.GetProductTitle();
-        }
+			var host = new WindowsFormsHost { };
+			host.Child = hostPanel;
 
-        public ICommand CloseCommand { get; private set; }
+			root.Children.Add(host);
+		}
 
-        public string Header
-        {
-            get { return (string)GetValue(HeaderProperty); }
-            set { SetValue(HeaderProperty, value); }
-        }
+		private void RootSizeChanged(object sender, SizeChangedEventArgs e)
+		{
+			reflexilWindow.Width = (int)this.ActualWidth;
 
-        private void OnCloseExecuted()
-        {
-            regionManager.Regions["PluginRegion"].Remove(this);
-        }
-
-        private void OnLoaded(object sender, RoutedEventArgs e)
-        {
-            var hostPanel = new Panel { };
-            hostPanel.Controls.Add(reflexilWindow);
-
-            var host = new WindowsFormsHost { };
-            host.Child = hostPanel;
-
-            root.Children.Add(host);
-        }
-
-        private void RootSizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            reflexilWindow.Width = (int)this.ActualWidth;
-
-            reflexilWindow.Height = (int)this.root.ActualHeight;
-        }
-    }
+			reflexilWindow.Height = (int)this.root.ActualHeight;
+		}
+	}
 }

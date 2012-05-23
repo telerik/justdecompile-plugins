@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReflexilLibs", "ReflexilLibs", "{C86029CD-1084-42CD-9270-DF79D857B217}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reflexil", "Reflexil", "{2C44895F-FE03-4F7F-B8D8-981FC088890F}"
+	ProjectSection(SolutionItems) = preProject
+		COPYING.txt = COPYING.txt
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reflexil.JustDecompile", "Reflexil.JustDecompile\Reflexil.JustDecompile.csproj", "{190F98C9-DCF2-497E-9BF0-230D35A43879}"
 EndProject
