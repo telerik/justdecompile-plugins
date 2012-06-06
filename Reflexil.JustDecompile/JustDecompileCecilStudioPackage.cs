@@ -18,14 +18,15 @@ using JustDecompile.Core;
 using Mono.Cecil;
 using Reflexil.Plugins.CecilStudio;
 using Reflexil.Utils;
+using Reflexil.Handlers;
+using Reflexil.Plugins;
+using System.Windows.Forms;
 
 namespace Reflexil.JustDecompile
 {
 	internal class JustDecompileCecilStudioPackage : CecilStudioPackage
 	{
-		public JustDecompileCecilStudioPackage()
-		{
-		}
+        public JustDecompileCecilStudioPackage() { }
 
 		public override object ActiveItem
 		{
@@ -68,6 +69,24 @@ namespace Reflexil.JustDecompile
 		internal void ReloadAssembly()
 		{
 			this.ReloadAssembly(this, EventArgs.Empty);
+
+            ////string originallocation = GetCurrentModuleOriginalLocation();
+
+            ////if (MessageBox.Show("Are you sure to reload assembly, discarding all changes?", "Confirmation", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            ////{
+            ////    IAssemblyContext context = PluginFactory.GetInstance().ReloadAssemblyContext(originallocation);
+            ////    if (context != null)
+            ////    {
+            ////        //return context.AssemblyDefinition;
+            ////    }
+            ////}
+            //////return null;
+
+            ////IHandler handler = PluginFactory.GetInstance().Package.ActiveHandler;
+            ////if (handler != null && handler.IsItemHandled(ActiveItem))
+            ////{
+            ////    handler.HandleItem(ActiveItem);
+            ////}
 		}
 
 		protected override void ActiveItemChanged(object sender, EventArgs e)

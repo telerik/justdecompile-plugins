@@ -38,6 +38,8 @@ namespace Reflexil.JustDecompile
 		private IEventAggregator eventAggregator;
 
 		private JustDecompileCecilPlugin justDecompileCecilPlugin;
+        private ReflexilHost reflexilHost;
+        private ITreeViewItem selectedItem;
 
 		#region TreeViewContextMenu region
 		private AssemblyNodeContextMenu assemblyNodeContextMenu;
@@ -48,13 +50,16 @@ namespace Reflexil.JustDecompile
 		private ModuleDefinitionContextMenu moduleDefinitionNodeContextMenu;
 		#endregion
 
-		public ReflexilModule()
-		{
-		}
+        public ReflexilModule() { }
 
 		public IHandler ActiveHandler { get; set; }
 
 		public ReflexilWindow ReflexilWindow { get; set; }
+
+        private bool IsReflexilHostLoaded
+        {
+            get { return regionManager.Regions["PluginRegion"].Views.Contains(reflexilHost); }
+        }
 
 		public void Initialize()
 		{
@@ -62,7 +67,7 @@ namespace Reflexil.JustDecompile
 
 			PluginFactory.Register(justDecompileCecilPlugin);
 
-			this.regionManager.AddToRegion("ToolMenuRegion", new ReflexilToolsMenuItem(regionManager, ReflexilWindow));
+            this.regionManager.AddToRegion("ToolMenuRegion", new ReflexilToolsMenuItem(OnClickExecuted));
 			this.regionManager.AddToRegion("AssemblyTreeViewContextMenuRegion", assemblyNodeContextMenu);
 			this.regionManager.AddToRegion("TypeTreeViewContextMenuRegion", typeDefinitionNodeContextMenu);
 			this.regionManager.AddToRegion("EmbeddedResourceTreeViewContextMenuRegion", resourceNodeContextMenu);
@@ -87,12 +92,45 @@ namespace Reflexil.JustDecompile
 			this.eventAggregator.GetEvent<TreeViewItemCollectionChangedEvent>().Subscribe(LoadAssembliesIntoPlugin);
 		}
 
+        private void OnClickExecuted()
+        {
+            if (!IsReflexilHostLoaded)
+            {
+                if (this.reflexilHost == null)
+                {
+                    this.reflexilHost = new ReflexilHost(OnCloseReflexilHostExecuted, ReflexilWindow);
+                }
+                regionManager.AddToRegion("PluginRegion", reflexilHost);
+
+                SetReflexilHandler(this.selectedItem);
+            }
+        }
+
+        private void OnCloseReflexilHostExecuted()
+        {
+            regionManager.Regions["PluginRegion"].Remove(reflexilHost);
+        }
+
 		private void SetReflexilHandler(ITreeViewItem selectedTreeItem)
 		{
-			if (selectedTreeItem != null)
-			{
-				ActiveHandler = ReflexilWindow.HandleItem(selectedTreeItem);
-			}
+            this.selectedItem = selectedTreeItem;
+
+            if (!this.IsReflexilHostLoaded)
+            {
+                return;
+            }
+            if (this.selectedItem != null)
+            {
+                if (!ReflexilWindow.Visible)
+                {
+                    ReflexilWindow.Visible = true;
+                }
+                ActiveHandler = ReflexilWindow.HandleItem(this.selectedItem);
+            }
+            else
+            {
+                ReflexilWindow.Visible = false;
+            }
 		}
 
 		private void LoadAssembliesIntoPlugin(IEnumerable<ITreeViewItem> assemblies)

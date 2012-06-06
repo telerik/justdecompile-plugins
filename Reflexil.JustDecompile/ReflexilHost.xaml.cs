@@ -19,70 +19,60 @@ using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 using System.Windows.Input;
 using Microsoft.Practices.Prism.Commands;
-using Microsoft.Practices.Prism.Regions;
 using Reflexil.Forms;
 
 namespace Reflexil.JustDecompile
 {
-	public partial class ReflexilHost
-	{
-		public static readonly DependencyProperty HeaderProperty =
-			DependencyProperty.Register("Header", typeof(string), typeof(ReflexilHost), null);
-		private readonly IRegionManager regionManager;
-		private ReflexilWindow reflexilWindow;
-		public ReflexilHost()
-		{
-			InitializeComponent();
+    public partial class ReflexilHost
+    {
+        private ReflexilWindow reflexilWindow;
 
-			this.Loaded += OnLoaded;
+        public static readonly DependencyProperty HeaderProperty =
+        DependencyProperty.Register("Header", typeof(string), typeof(ReflexilHost), null);
 
-			this.CloseCommand = new DelegateCommand(OnCloseExecuted);
-		}
+        public ReflexilHost()
+        {
+            InitializeComponent();
 
-		public ReflexilHost(IRegionManager regionManager, ReflexilWindow reflexilWindow) : this()
-		{
-			this.regionManager = regionManager;
+            this.Loaded += OnLoaded;
+        }
 
-			this.reflexilWindow = reflexilWindow;
+        public ReflexilHost(Action onCloseExecuted, ReflexilWindow reflexilWindow)
+            : this()
+        {
+            this.CloseCommand = new DelegateCommand(onCloseExecuted);
 
-			var cecilStudioPackage = new JustDecompileCecilStudioPackage();
+            this.reflexilWindow = reflexilWindow;
 
-			this.Header = cecilStudioPackage.GetProductTitle();
-		}
+            var cecilStudioPackage = new JustDecompileCecilStudioPackage();
 
-		public ICommand CloseCommand { get; private set; }
-		public string Header
-		{
-			get
-			{
-				return (string)GetValue(HeaderProperty);
-			}
-			set
-			{
-				SetValue(HeaderProperty, value);
-			}
-		}
-		private void OnCloseExecuted()
-		{
-			regionManager.Regions["PluginRegion"].Remove(this);
-		}
+            this.Header = cecilStudioPackage.GetProductTitle();
+        }
 
-		private void OnLoaded(object sender, RoutedEventArgs e)
-		{
-			var hostPanel = new Panel { };
-			hostPanel.Controls.Add(reflexilWindow);
+        public ICommand CloseCommand { get; private set; }
 
-			var host = new WindowsFormsHost { };
-			host.Child = hostPanel;
+        public string Header
+        {
+            get { return (string)GetValue(HeaderProperty); }
+            set { SetValue(HeaderProperty, value); }
+        }
 
-			root.Children.Add(host);
-		}
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            var hostPanel = new Panel { };
+            hostPanel.Controls.Add(reflexilWindow);
 
-		private void RootSizeChanged(object sender, SizeChangedEventArgs e)
-		{
-			reflexilWindow.Width = (int)this.ActualWidth;
+            var host = new WindowsFormsHost { };
+            host.Child = hostPanel;
 
-			reflexilWindow.Height = (int)this.root.ActualHeight;
-		}
-	}
+            root.Children.Add(host);
+        }
+
+        private void RootSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            reflexilWindow.Width = (int)this.ActualWidth;
+
+            reflexilWindow.Height = (int)this.root.ActualHeight;
+        }
+    }
 }
