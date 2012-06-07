@@ -26,6 +26,8 @@ namespace Reflexil.JustDecompile
 {
 	internal class JustDecompileCecilStudioPackage : CecilStudioPackage
 	{
+        public static event EventHandler HandleItemRequest = delegate { };
+
         public JustDecompileCecilStudioPackage() { }
 
 		public override object ActiveItem
@@ -38,16 +40,22 @@ namespace Reflexil.JustDecompile
 		public ITreeViewItem SelectedTreeViewItem { get; set; }
 		public void Delete()
 		{
+            HandleItemRequest(this, EventArgs.Empty);
+
 			this.DeleteMember(this, EventArgs.Empty);
 		}
 
 		public void Rename()
 		{
+            HandleItemRequest(this, EventArgs.Empty);
+
 			this.RenameItem(this, EventArgs.Empty);
 		}
 
 		internal AssemblyDefinition GetCurrentAssemblyDefinition()
 		{
+            HandleItemRequest(this, EventArgs.Empty);
+
 			return base.GetCurrentAssemblyDefinition();
 		}
 
@@ -63,11 +71,15 @@ namespace Reflexil.JustDecompile
 
 		internal void Inject(EInjectType injectType)
 		{
+            HandleItemRequest(this, EventArgs.Empty);
+
 			base.Inject(injectType);
 		}
 
 		internal void ReloadAssembly()
 		{
+            HandleItemRequest(this, EventArgs.Empty);
+
 			this.ReloadAssembly(this, EventArgs.Empty);
 
             ////string originallocation = GetCurrentModuleOriginalLocation();

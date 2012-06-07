@@ -50,7 +50,10 @@ namespace Reflexil.JustDecompile
 		private ModuleDefinitionContextMenu moduleDefinitionNodeContextMenu;
 		#endregion
 
-        public ReflexilModule() { }
+        public ReflexilModule()
+        {
+            JustDecompileCecilStudioPackage.HandleItemRequest += JustDecompileCecilStudioPackageHandleItemRequest;
+        }
 
 		public IHandler ActiveHandler { get; set; }
 
@@ -91,6 +94,14 @@ namespace Reflexil.JustDecompile
 			this.eventAggregator.GetEvent<SelectedTreeViewItemChangedEvent>().Subscribe(SetReflexilHandler);
 			this.eventAggregator.GetEvent<TreeViewItemCollectionChangedEvent>().Subscribe(LoadAssembliesIntoPlugin);
 		}
+
+        private void JustDecompileCecilStudioPackageHandleItemRequest(object sender, EventArgs e)
+        {
+            if (this.selectedItem != null)
+            {
+                ActiveHandler = ReflexilWindow.HandleItem(this.selectedItem);
+            }
+        }
 
         private void OnClickExecuted()
         {
