@@ -36,7 +36,6 @@ namespace Reflexil.JustDecompile.MenuItems
 			this.Collection.Add(new MenuItem { Header = "Inject resource", Command = new DelegateCommand(OnResourceClass) });
 			this.Collection.Add(new MenuSeparator());
 			this.Collection.Add(new MenuItem { Header = "Save as...", Command = new DelegateCommand(OnSaveAs) });
-			this.Collection.Add(new MenuItem { Header = "Obfuscator search...", Command = new DelegateCommand(OnObfuscatorSearch) });
 			this.Collection.Add(new MenuItem { Header = "Reload", Command = new DelegateCommand(OnReaload) });
 			this.Collection.Add(new MenuItem { Header = "Rename", Command = new DelegateCommand(OnRename) });
 			this.Collection.Add(new MenuItem { Header = "Verify", Command = new DelegateCommand(OnVerify) });
@@ -64,16 +63,6 @@ namespace Reflexil.JustDecompile.MenuItems
 		private void OnAssemblyReferenceClass()
 		{
 			StudioPackage.Inject(EInjectType.AssemblyReference);
-		}
-
-		private void OnObfuscatorSearch()
-		{
-			string currentAssemblyPath = GetFilePath();
-
-			if (!string.IsNullOrEmpty(currentAssemblyPath))
-			{
-				AssemblyHelper.SearchObfuscator(currentAssemblyPath);
-			}
 		}
 
 		private void OnReaload()

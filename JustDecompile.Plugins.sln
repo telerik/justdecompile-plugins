@@ -30,9 +30,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSharpCode.SharpDevelop.Do
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSharpCode.TextEditor", "reflexil.1.5.src\Libs\Sources\ICSharpCode.TextEditor\ICSharpCode.TextEditor.csproj", "{2D18BE89-D210-49EB-A9DD-2246FBB3DF6D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "De4dot", "De4dot", "{D550A784-7A7E-403C-BFCC-FF5B3C6FD35C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "De4dot.JustDecompile", "De4dot.JustDecompile\De4dot.JustDecompile.csproj", "{EB1CF1F1-F3F1-438B-B645-F24C86574454}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 12
+		SccNumberOfProjects = 13
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://tfs:8082/defaultcollection
 		SccLocalPath0 = .
@@ -79,6 +83,10 @@ Global
 		SccProjectTopLevelParentUniqueName11 = JustDecompile.Plugins.sln
 		SccProjectName11 = reflexil.1.5.src/Libs/Sources/ICSharpCode.TextEditor
 		SccLocalPath11 = reflexil.1.5.src\\Libs\\Sources\\ICSharpCode.TextEditor
+		SccProjectUniqueName12 = De4dot.JustDecompile\\De4dot.JustDecompile.csproj
+		SccProjectTopLevelParentUniqueName12 = JustDecompile.Plugins.sln
+		SccProjectName12 = De4dot.JustDecompile
+		SccLocalPath12 = De4dot.JustDecompile
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = JustDecompile6.vsmdi
@@ -318,6 +326,26 @@ Global
 		{2D18BE89-D210-49EB-A9DD-2246FBB3DF6D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{2D18BE89-D210-49EB-A9DD-2246FBB3DF6D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{2D18BE89-D210-49EB-A9DD-2246FBB3DF6D}.Release|x86.ActiveCfg = Release|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.DebugServer|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.DebugServer|Any CPU.Build.0 = Debug|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.DebugServer|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.DebugServer|Mixed Platforms.Build.0 = Debug|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.DebugServer|x86.ActiveCfg = Debug|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.GenerateProject|Any CPU.ActiveCfg = Release|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.GenerateProject|Any CPU.Build.0 = Release|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.GenerateProject|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.GenerateProject|Mixed Platforms.Build.0 = Release|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.GenerateProject|x86.ActiveCfg = Release|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -334,5 +362,6 @@ Global
 		{A4F3E313-3DC9-4E7E-A008-21F954C5B12E} = {C86029CD-1084-42CD-9270-DF79D857B217}
 		{924EE450-603D-49C1-A8E5-4AFAA31CE6F3} = {C86029CD-1084-42CD-9270-DF79D857B217}
 		{2D18BE89-D210-49EB-A9DD-2246FBB3DF6D} = {C86029CD-1084-42CD-9270-DF79D857B217}
+		{EB1CF1F1-F3F1-438B-B645-F24C86574454} = {D550A784-7A7E-403C-BFCC-FF5B3C6FD35C}
 	EndGlobalSection
 EndGlobal
