@@ -61,7 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ContextMenuItem.cs" />
-    <Compile Include="De4dot.cs" />
+    <Compile Include="De4dotModule.cs" />
     <Compile Include="De4dotWrapper.cs" />
     <Compile Include="DeobfuscationProgressView.xaml.cs">
       <DependentUpon>DeobfuscationProgressView.xaml</DependentUpon>

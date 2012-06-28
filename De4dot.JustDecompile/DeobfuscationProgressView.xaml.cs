@@ -20,6 +20,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using de4dot.code;
 using de4dot.code.renamer;
+using Microsoft.Practices.Prism.Events;
+using JustDecompile.Core;
 
 namespace De4dot.JustDecompile
 {
@@ -27,8 +29,12 @@ namespace De4dot.JustDecompile
     {
         private IObfuscatedFile obfuscationfile;
 
-        public DeobfuscationProgressWindow(IObfuscatedFile obfuscationfile)
+        private readonly IEventAggregator eventAggregator;
+
+        public DeobfuscationProgressWindow(IObfuscatedFile obfuscationfile, IEventAggregator eventAggregator)
         {
+            this.eventAggregator = eventAggregator;
+
             this.obfuscationfile = obfuscationfile;
 
             InitializeComponent();
@@ -66,7 +72,6 @@ namespace De4dot.JustDecompile
                         obfuscationfile.deobfuscateEnd();
 
                         ReportProgress(60, "Renaming items");
-
                         var renamer = new Renamer(obfuscationfile.DeobfuscatorContext, new IObfuscatedFile[] { obfuscationfile });
                         renamer.rename();
 
@@ -80,7 +85,7 @@ namespace De4dot.JustDecompile
                 })
                 .ContinueWith(t =>
                 {
-                    ReportProgress(1000, "Done");
+                    ReportProgress(100, "Done");
 
                     if (t.Status == TaskStatus.Faulted)
                     {
@@ -88,7 +93,12 @@ namespace De4dot.JustDecompile
                     }
                     else if (t.Status == TaskStatus.RanToCompletion)
                     {
-                        MessageBox.Show("Assembly cleaned");
+                        ReportProgress(100, "Assembly cleaned");
+
+                        if (MessageBox.Show(Application.Current.MainWindow, "Do you want to load the assembly?", string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                        {
+                            this.eventAggregator.GetEvent<LoadAssemblyEvent>().Publish(newFileName);
+                        }
                     }
                     this.Close();
                 }, TaskScheduler.FromCurrentSynchronizationContext());

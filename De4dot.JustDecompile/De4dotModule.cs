@@ -28,8 +28,8 @@ using Microsoft.Win32;
 
 namespace De4dot.JustDecompile
 {
-    [ModuleExport(typeof(De4dot))]
-    public class De4dot : IModule, IPartImportsSatisfiedNotification
+    [ModuleExport(typeof(De4dotModule))]
+    public class De4dotModule : IModule, IPartImportsSatisfiedNotification
     {
         [Import]
         private IRegionManager regionManager;
@@ -41,7 +41,7 @@ namespace De4dot.JustDecompile
 
         private ContextMenuItem assemblyNodeContextMenu;
 
-        public De4dot() { }
+        public De4dotModule() { }
 
         public void Initialize()
         {
@@ -94,7 +94,7 @@ namespace De4dot.JustDecompile
                     saveFileDialog.FileName = Path.GetFileNameWithoutExtension(location) + ".Cleaned" + Path.GetExtension(location);
                     if (saveFileDialog.ShowDialog() == true)
                     {
-                        var progressWindpw = new DeobfuscationProgressWindow(obfuscationfile)
+                        var progressWindpw = new DeobfuscationProgressWindow(obfuscationfile, this.eventAggregator)
                         {
                             Title = saveFileDialog.FileName,
                             Width = 500,
