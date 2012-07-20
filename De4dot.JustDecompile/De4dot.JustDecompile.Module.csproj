@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>De4dot.JustDecompile</RootNamespace>
-    <AssemblyName>De4dot.JustDecompile</AssemblyName>
+    <AssemblyName>De4dot.JustDecompile.Module</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>

@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Reflexil.JustDecompile</RootNamespace>
-    <AssemblyName>Reflexil.JustDecompile</AssemblyName>
+    <AssemblyName>Reflexil.JustDecompile.Module</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
