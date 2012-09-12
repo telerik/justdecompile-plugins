@@ -36,7 +36,7 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <TargetFrameworkProfile />
-    <SccProjectName>%24/Behemoth/Trunk-ICEEditor/JustDecompile Plugins/reflexil.1.5.src/Libs/Sources/Mono.Cecil.Pdb</SccProjectName>
+    <SccProjectName>%24/Behemoth/Trunk/JustDecompile Plugins/reflexil.1.5.src/Libs/Sources/Mono.Cecil.Pdb</SccProjectName>
     <SccLocalPath>.</SccLocalPath>
     <SccAuxPath>http://tfs:8082/defaultcollection</SccAuxPath>
     <SccProvider>{4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}</SccProvider>
