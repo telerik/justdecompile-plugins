@@ -119,7 +119,12 @@ namespace Reflexil.JustDecompile
 
         private void OnCloseReflexilHostExecuted()
         {
-            regionManager.Regions["PluginRegion"].Remove(reflexilHost);
+            IRegion pluginRegion = regionManager.Regions["PluginRegion"];
+
+            if (pluginRegion.Views.Contains(reflexilHost))
+            {
+                pluginRegion.Remove(reflexilHost);
+            }
         }
 
 		private void SetReflexilHandler(ITreeViewItem selectedTreeItem)
