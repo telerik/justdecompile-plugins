@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reflexil", "Reflexil", "{2C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reflexil.JustDecompile.Module", "Reflexil.JustDecompile\Reflexil.JustDecompile.Module.csproj", "{190F98C9-DCF2-497E-9BF0-230D35A43879}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustDecompile.Core", "..\Source\Tools\JustDecompile.Core\JustDecompile.Core.csproj", "{8A549CC3-55AC-46F8-9BC9-83E0804D87B9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustDecompile.API", "..\Source\Tools\JustDecompile.Core\JustDecompile.API.csproj", "{8A549CC3-55AC-46F8-9BC9-83E0804D87B9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cecil.Decompiler.Gui.Services", "reflexil.1.5.src\Plugins\Cecil.Decompiler.Gui.Services\Cecil.Decompiler.Gui.Services.csproj", "{7FEC91D0-6FE4-4B91-B44A-8AF248BC88E0}"
 EndProject
@@ -40,7 +40,7 @@ Global
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://tfs:8082/defaultcollection
 		SccLocalPath0 = .
-		SccProjectUniqueName1 = ..\\Source\\Tools\\JustDecompile.Core\\JustDecompile.Core.csproj
+		SccProjectUniqueName1 = ..\\Source\\Tools\\JustDecompile.Core\\JustDecompile.API.csproj
 		SccProjectName1 = ../Source/Tools/JustDecompile.Core
 		SccLocalPath1 = ..\\Source\\Tools\\JustDecompile.Core
 		SccProjectUniqueName2 = reflexil.1.5.src\\Plugins\\Cecil.Decompiler.Gui.Services\\Cecil.Decompiler.Gui.Services.csproj

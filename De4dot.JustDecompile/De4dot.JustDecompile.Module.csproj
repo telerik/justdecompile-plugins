@@ -61,7 +61,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Tools\JustDecompile.Core\JustDecompile.Core.csproj">
+    <ProjectReference Include="..\..\Source\Tools\JustDecompile.Core\JustDecompile.API.csproj">
       <Project>{8A549CC3-55AC-46F8-9BC9-83E0804D87B9}</Project>
       <Name>JustDecompile.Core</Name>
       <Private>False</Private>
