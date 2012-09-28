@@ -352,11 +352,6 @@ namespace Reflexil.Plugins
             {
                 try
                 {
-                    // Check for obfuscators
-                    if (AutoDetectObfuscators)
-                    {
-                        AssemblyHelper.SearchObfuscator(location, true);
-                    }
                     AssemblyDefinition asmdef = LoadAssembly(location, BasePlugin.ShowSymbols);
                     IAssemblyContext context = new T();
                     context.AssemblyDefinition = asmdef;

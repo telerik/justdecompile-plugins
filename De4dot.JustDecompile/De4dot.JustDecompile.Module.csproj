@@ -35,8 +35,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="De4dot">
-      <HintPath>..\reflexil.1.5.src\Libs\Binaries\De4dot.dll</HintPath>
+    <Reference Include="De4dot, Version=1.8.1.3405, Culture=neutral, PublicKeyToken=b086ee4e8cc6c7d7, processorArchitecture=MSIL">
+      <HintPath>..\De4dot\De4dot.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -61,13 +61,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Tools\JustDecompile.Core\JustDecompile.API.csproj">
-      <Project>{8A549CC3-55AC-46F8-9BC9-83E0804D87B9}</Project>
-      <Name>JustDecompile.Core</Name>
-      <Private>False</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Page Include="DeobfuscationProgressView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -76,7 +69,12 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\Tools\JustDecompile.Core\JustDecompile.API.csproj">
+      <Project>{8A549CC3-55AC-46F8-9BC9-83E0804D87B9}</Project>
+      <Name>JustDecompile.API</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <None Include="LicenseAgreements\COPYING" />
   </ItemGroup>

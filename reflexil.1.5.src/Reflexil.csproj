@@ -336,18 +336,6 @@
     <Compile Include="Forms\ConfigureForm.Designer.cs">
       <DependentUpon>ConfigureForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\AssemblyCleanerForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\AssemblyCleanerForm.Designer.cs">
-      <DependentUpon>AssemblyCleanerForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ObfuscatorForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ObfuscatorForm.Designer.cs">
-      <DependentUpon>ObfuscatorForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\CreateCustomAttributeNamedArgumentForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -699,7 +687,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Utils\ByteHelper.cs" />
-    <Compile Include="Utils\De4dotHelper.cs" />
     <Compile Include="Utils\ReflexilAssemblyResolver.cs" />
     <Compile Include="Utils\RenameHelper.cs" />
     <Compile Include="Utils\DeleteHelper.cs" />
@@ -842,13 +829,6 @@
     <EmbeddedResource Include="Forms\ConfigureForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>ConfigureForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\AssemblyCleanerForm.resx">
-      <DependentUpon>AssemblyCleanerForm.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ObfuscatorForm.resx">
-      <DependentUpon>ObfuscatorForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\CreateCustomAttributeNamedArgumentForm.resx">
       <DependentUpon>CreateCustomAttributeNamedArgumentForm.cs</DependentUpon>
@@ -1104,11 +1084,6 @@
   <ItemGroup>
     <Reference Include="Be.Windows.Forms.HexBox">
       <HintPath>..\..\Binaries\Be.Windows.Forms.HexBox.dll</HintPath>
-    </Reference>
-    <Reference Include="De4dot, Version=1.6.0.3405, Culture=neutral, PublicKeyToken=b086ee4e8cc6c7d7, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Libs\Binaries\De4dot.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
