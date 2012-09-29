@@ -29,15 +29,12 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\Source\UI\ReleaseBuild\Plugins\De4dot\</OutputPath>
+    <OutputPath>..\..\Source\UI\DebugBuild\Plugins\De4dot\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="De4dot, Version=1.8.1.3405, Culture=neutral, PublicKeyToken=b086ee4e8cc6c7d7, processorArchitecture=MSIL">
-      <HintPath>..\De4dot\De4dot.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -73,6 +70,14 @@
     <ProjectReference Include="..\..\Source\Tools\JustDecompile.Core\JustDecompile.API.csproj">
       <Project>{8A549CC3-55AC-46F8-9BC9-83E0804D87B9}</Project>
       <Name>JustDecompile.API</Name>
+    </ProjectReference>
+    <ProjectReference Include="De4dot\sources\cecil\Mono.Cecil.csproj">
+      <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
+      <Name>Mono.Cecil</Name>
+    </ProjectReference>
+    <ProjectReference Include="De4dot\sources\de4dot.code\de4dot.code.csproj">
+      <Project>{4D10B9EB-3BF1-4D61-A389-CB019E8C9622}</Project>
+      <Name>de4dot.code</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
