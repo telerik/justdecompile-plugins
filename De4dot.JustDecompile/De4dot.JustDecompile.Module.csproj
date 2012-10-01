@@ -68,7 +68,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="JustDecompile.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=2b2cea67609c9510, processorArchitecture=MSIL">
-      <HintPath>..\bin\ReleaseInternal\JustDecompile.API.dll</HintPath>
+      <HintPath>..\References\JustDecompile.API.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
