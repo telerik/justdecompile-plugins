@@ -17,7 +17,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
-using System.Windows.Input;
 using Microsoft.Practices.Prism.Commands;
 using Reflexil.Forms;
 
@@ -26,9 +25,6 @@ namespace Reflexil.JustDecompile
     public partial class ReflexilHost
     {
         private ReflexilWindow reflexilWindow;
-
-        public static readonly DependencyProperty HeaderProperty =
-        DependencyProperty.Register("Header", typeof(string), typeof(ReflexilHost), null);
 
         public ReflexilHost()
         {
@@ -40,21 +36,13 @@ namespace Reflexil.JustDecompile
         public ReflexilHost(Action onCloseExecuted, ReflexilWindow reflexilWindow)
             : this()
         {
-            this.CloseCommand = new DelegateCommand(onCloseExecuted);
+            this.btnClose.Command = new DelegateCommand(onCloseExecuted);
 
             this.reflexilWindow = reflexilWindow;
 
             var cecilStudioPackage = new JustDecompileCecilStudioPackage();
 
-            this.Header = cecilStudioPackage.GetProductTitle();
-        }
-
-        public ICommand CloseCommand { get; private set; }
-
-        public string Header
-        {
-            get { return (string)GetValue(HeaderProperty); }
-            set { SetValue(HeaderProperty, value); }
+            this.header.Text = cecilStudioPackage.GetProductTitle();
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
