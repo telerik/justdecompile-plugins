@@ -46,7 +46,7 @@
     <DebugType>full</DebugType>
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
-    <OutputPath>..\..\..\bin\Debug\</OutputPath>
+    <OutputPath>..\bin\Debug\</OutputPath>
     <DocumentationFile>
     </DocumentationFile>
     <RunCodeAnalysis>false</RunCodeAnalysis>
@@ -59,7 +59,7 @@
     <DefineDebug>false</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\bin\Release\</OutputPath>
+    <OutputPath>..\bin\Release\</OutputPath>
     <DocumentationFile>
     </DocumentationFile>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
