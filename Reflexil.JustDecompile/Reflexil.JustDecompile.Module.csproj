@@ -73,6 +73,7 @@
   <ItemGroup>
     <Reference Include="JustDecompile.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=2b2cea67609c9510, processorArchitecture=MSIL">
       <HintPath>..\bin\ReleaseInternal\JustDecompile.API.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -166,6 +167,9 @@
       <Project>{DC7B5E39-FF49-4FE9-922B-3AE3DE36F2C6}</Project>
       <Name>Reflexil %28Reflexil\ReflexilLibs\Reflexil%29</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\gray_close_button.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
