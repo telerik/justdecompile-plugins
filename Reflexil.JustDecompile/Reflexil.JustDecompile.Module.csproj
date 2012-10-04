@@ -172,6 +172,11 @@
     <Resource Include="Images\gray_close_button.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup Condition = " '$(Configuration)' == 'DebugInternal' OR '$(Configuration)' == 'ReleaseInternal'">
+    <PreBuildEvent>
+		call $(MsbuildBinPath)\msbuild "$(SolutionDir)JustDecompileApi.sln" /p:Configuration=ReleaseInternal
+	</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
