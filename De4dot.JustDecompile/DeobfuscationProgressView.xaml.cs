@@ -21,7 +21,7 @@ using System.Windows;
 using de4dot.code;
 using de4dot.code.renamer;
 using Microsoft.Practices.Prism.Events;
-using JustDecompile.Core;
+using JustDecompile.API;
 
 namespace De4dot.JustDecompile
 {

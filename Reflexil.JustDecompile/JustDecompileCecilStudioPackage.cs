@@ -14,7 +14,7 @@
 // 
 using System;
 using System.Linq;
-using JustDecompile.Core;
+using JustDecompile.API;
 using Mono.Cecil;
 using Reflexil.Plugins.CecilStudio;
 using Reflexil.Utils;
