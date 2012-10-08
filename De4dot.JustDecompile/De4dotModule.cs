@@ -18,7 +18,8 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using JustDecompile.API;
+using JustDecompile.API.Core;
+using JustDecompile.API.CompositeEvents;
 using Microsoft.Practices.Prism.Commands;
 using Microsoft.Practices.Prism.Events;
 using Microsoft.Practices.Prism.MefExtensions.Modularity;
@@ -36,6 +37,9 @@ namespace De4dot.JustDecompile
 
         [Import]
         private IEventAggregator eventAggregator;
+
+        //[Import]
+        //private IAssemblyManagerService assemblyManagerService;
 
         private ITreeViewItem selectedItem;
 

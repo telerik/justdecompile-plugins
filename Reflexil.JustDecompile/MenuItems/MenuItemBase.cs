@@ -12,7 +12,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
-using JustDecompile.API;
+using JustDecompile.API.CompositeEvents;
+using JustDecompile.API.Core;
 using Microsoft.Practices.Prism.Commands;
 using Microsoft.Practices.Prism.Events;
 using Reflexil.Utils;
