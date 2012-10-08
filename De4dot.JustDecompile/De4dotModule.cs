@@ -20,6 +20,7 @@ using System.Linq;
 using System.Windows;
 using JustDecompile.API.Core;
 using JustDecompile.API.CompositeEvents;
+using JustDecompile.API.Core.Services;
 using Microsoft.Practices.Prism.Commands;
 using Microsoft.Practices.Prism.Events;
 using Microsoft.Practices.Prism.MefExtensions.Modularity;
@@ -38,8 +39,8 @@ namespace De4dot.JustDecompile
         [Import]
         private IEventAggregator eventAggregator;
 
-        //[Import]
-        //private IAssemblyManagerService assemblyManagerService;
+        [Import]
+        private IAssemblyManagerService assemblyManagerService;
 
         private ITreeViewItem selectedItem;
 
@@ -98,7 +99,7 @@ namespace De4dot.JustDecompile
                     saveFileDialog.FileName = Path.GetFileNameWithoutExtension(location) + ".Cleaned" + Path.GetExtension(location);
                     if (saveFileDialog.ShowDialog() == true)
                     {
-                        var progressWindpw = new DeobfuscationProgressWindow(obfuscationfile, this.eventAggregator)
+                        var progressWindpw = new DeobfuscationProgressWindow(obfuscationfile, this.assemblyManagerService)
                         {
                             Title = saveFileDialog.FileName,
                             Width = 500,

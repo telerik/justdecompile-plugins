@@ -18,7 +18,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
-using JustDecompile.API.CompositeEvents;
+using JustDecompile.API.Core.Services;
 using de4dot.code;
 using de4dot.code.renamer;
 using Microsoft.Practices.Prism.Events;
@@ -29,11 +29,12 @@ namespace De4dot.JustDecompile
     {
         private IObfuscatedFile obfuscationfile;
 
-        private readonly IEventAggregator eventAggregator;
+        //private readonly IEventAggregator eventAggregator;
+        private readonly IAssemblyManagerService assemblyManager;
 
-        public DeobfuscationProgressWindow(IObfuscatedFile obfuscationfile, IEventAggregator eventAggregator)
+        public DeobfuscationProgressWindow(IObfuscatedFile obfuscationfile, IAssemblyManagerService Assemblymanager)
         {
-            this.eventAggregator = eventAggregator;
+            this.assemblyManager = Assemblymanager;
 
             this.obfuscationfile = obfuscationfile;
 
@@ -97,7 +98,8 @@ namespace De4dot.JustDecompile
 
                         if (MessageBox.Show(Application.Current.MainWindow, "Would you like to load the cleaned assembly?", string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                         {
-                            this.eventAggregator.GetEvent<LoadAssemblyEvent>().Publish(newFileName);
+                        //this.eventAggregator.GetEvent<LoadAssemblyEvent>().Publish(newFileName);
+                        this.assemblyManager.LoadAssembly(newFileName);
                         }
                     }
                     this.Close();
