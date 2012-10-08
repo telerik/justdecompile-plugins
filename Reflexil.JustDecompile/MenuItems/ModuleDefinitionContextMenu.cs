@@ -14,7 +14,7 @@
 // 
 using System;
 using System.Linq;
-using JustDecompile.API;
+using JustDecompile.API.Core;
 using Microsoft.Practices.Prism.Commands;
 using Microsoft.Practices.Prism.Events;
 using Mono.Cecil;

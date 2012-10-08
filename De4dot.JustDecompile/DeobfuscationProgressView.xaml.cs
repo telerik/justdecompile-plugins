@@ -18,10 +18,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using JustDecompile.API.CompositeEvents;
 using de4dot.code;
 using de4dot.code.renamer;
 using Microsoft.Practices.Prism.Events;
-using JustDecompile.API;
 
 namespace De4dot.JustDecompile
 {
@@ -95,7 +95,7 @@ namespace De4dot.JustDecompile
                     {
                         ReportProgress(100, "Assembly cleaned");
 
-                        if (MessageBox.Show(Application.Current.MainWindow, "Do you want to load the assembly?", string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                        if (MessageBox.Show(Application.Current.MainWindow, "Would you like to load the cleaned assembly?", string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                         {
                             this.eventAggregator.GetEvent<LoadAssemblyEvent>().Publish(newFileName);
                         }

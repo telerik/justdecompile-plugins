@@ -17,7 +17,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using JustDecompile.API;
+using JustDecompile.API.Core;
 using Mono.Cecil;
 using Reflexil.Plugins;
 using Reflexil.Plugins.CecilStudio;
