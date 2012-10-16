@@ -25,10 +25,10 @@ namespace De4dot.JustDecompile
     {
         public ContextMenuItem()
         {
-            Collection = new List<IMenuItem>();
+            MenuItems = new List<IMenuItem>();
         }
 
-        public IList<IMenuItem> Collection { get; private set; }
+        public IList<IMenuItem> MenuItems { get; private set; }
 
         public ICommand Command { get; set; }
 
