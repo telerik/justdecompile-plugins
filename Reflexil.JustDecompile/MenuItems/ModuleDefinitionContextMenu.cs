@@ -32,13 +32,13 @@ namespace Reflexil.JustDecompile.MenuItems
 		{
 			base.AddMenuItems();
 
-			this.Collection.Add(new MenuItem { Header = "Inject assembly reference", Command = new DelegateCommand(OnAssemblyReferenceClass) });
-			this.Collection.Add(new MenuItem { Header = "Inject resource", Command = new DelegateCommand(OnResourceClass) });
-			this.Collection.Add(new MenuSeparator());
-			this.Collection.Add(new MenuItem { Header = "Save as...", Command = new DelegateCommand(OnSaveAs) });
-			this.Collection.Add(new MenuItem { Header = "Reload", Command = new DelegateCommand(OnReaload) });
-			this.Collection.Add(new MenuItem { Header = "Rename", Command = new DelegateCommand(OnRename) });
-			this.Collection.Add(new MenuItem { Header = "Verify", Command = new DelegateCommand(OnVerify) });
+			this.MenuItems.Add(new MenuItem { Header = "Inject assembly reference", Command = new DelegateCommand(OnAssemblyReferenceClass) });
+			this.MenuItems.Add(new MenuItem { Header = "Inject resource", Command = new DelegateCommand(OnResourceClass) });
+			this.MenuItems.Add(new MenuSeparator());
+			this.MenuItems.Add(new MenuItem { Header = "Save as...", Command = new DelegateCommand(OnSaveAs) });
+			this.MenuItems.Add(new MenuItem { Header = "Reload", Command = new DelegateCommand(OnReaload) });
+			this.MenuItems.Add(new MenuItem { Header = "Rename", Command = new DelegateCommand(OnRename) });
+			this.MenuItems.Add(new MenuItem { Header = "Verify", Command = new DelegateCommand(OnVerify) });
 		}
 
 		private string GetFilePath()

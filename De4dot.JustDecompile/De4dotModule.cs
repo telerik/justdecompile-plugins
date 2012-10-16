@@ -59,7 +59,7 @@ namespace De4dot.JustDecompile
         {
             this.assemblyNodeContextMenu = new ContextMenuItem { Header = "De4dot" };
 
-            this.assemblyNodeContextMenu.Collection.Add(new ContextMenuItem { Header = "Obfuscator search ...", Command = new DelegateCommand(OnContextMenuClick) });
+            this.assemblyNodeContextMenu.MenuItems.Add(new ContextMenuItem { Header = "Obfuscator search ...", Command = new DelegateCommand(OnContextMenuClick) });
 
             this.eventAggregator.GetEvent<SelectedTreeViewItemChangedEvent>().Subscribe(OnSelectedTreeViewItemChanged);
         }

@@ -30,13 +30,13 @@ namespace Reflexil.JustDecompile.MenuItems
 		{
 			base.AddMenuItems();
 
-			this.Collection.Add(new MenuSeparator());
-			this.Collection.Add(new MenuItem { Header = "Inject event", Command = new DelegateCommand(InjectEvent) });
-			this.Collection.Add(new MenuItem { Header = "Inject field", Command = new DelegateCommand(InjectField) });
-			this.Collection.Add(new MenuItem { Header = "Inject method", Command = new DelegateCommand(InjectMethod) });
-			this.Collection.Add(new MenuItem { Header = "Inject constructor", Command = new DelegateCommand(InjectConstructor) });
-			this.Collection.Add(new MenuItem { Header = "Inject property", Command = new DelegateCommand(InjectProperty) });
-			this.Collection.Add(new MenuSeparator());
+			this.MenuItems.Add(new MenuSeparator());
+			this.MenuItems.Add(new MenuItem { Header = "Inject event", Command = new DelegateCommand(InjectEvent) });
+			this.MenuItems.Add(new MenuItem { Header = "Inject field", Command = new DelegateCommand(InjectField) });
+			this.MenuItems.Add(new MenuItem { Header = "Inject method", Command = new DelegateCommand(InjectMethod) });
+			this.MenuItems.Add(new MenuItem { Header = "Inject constructor", Command = new DelegateCommand(InjectConstructor) });
+			this.MenuItems.Add(new MenuItem { Header = "Inject property", Command = new DelegateCommand(InjectProperty) });
+			this.MenuItems.Add(new MenuSeparator());
 
 			this.AddRenameDeleteNodes();
 		}

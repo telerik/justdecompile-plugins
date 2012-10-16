@@ -24,12 +24,12 @@ namespace Reflexil.JustDecompile
 	{
 		public MenuItem()
 		{
-            this.Collection = new List<IMenuItem>();
+            this.MenuItems = new List<IMenuItem>();
 
 			this.AddMenuItems();
 		}
 
-        public IList<IMenuItem> Collection { get; set; }
+        public IList<IMenuItem> MenuItems { get; set; }
 		public ICommand Command { get; set; }
 		public object Header { get; set; }
 		public object Icon { get; set; }

@@ -36,16 +36,16 @@ namespace Reflexil.JustDecompile
 
         public override void AddMenuItems()
         {
-            this.Collection.Add(new MenuItem { Header = "Inject class", Command = new DelegateCommand(OnInjectClass) });
-            this.Collection.Add(new MenuItem { Header = "Inject interface", Command = new DelegateCommand(OnInterfaceClass) });
-            this.Collection.Add(new MenuItem { Header = "Inject struct", Command = new DelegateCommand(OnStructClass) });
-            this.Collection.Add(new MenuItem { Header = "Inject enum", Command = new DelegateCommand(OnEnumClass) });
+            this.MenuItems.Add(new MenuItem { Header = "Inject class", Command = new DelegateCommand(OnInjectClass) });
+            this.MenuItems.Add(new MenuItem { Header = "Inject interface", Command = new DelegateCommand(OnInterfaceClass) });
+            this.MenuItems.Add(new MenuItem { Header = "Inject struct", Command = new DelegateCommand(OnStructClass) });
+            this.MenuItems.Add(new MenuItem { Header = "Inject enum", Command = new DelegateCommand(OnEnumClass) });
         }
 
         public void AddRenameDeleteNodes()
         {
-            this.Collection.Add(new MenuItem { Header = "Rename...", Command = new DelegateCommand(OnRename) });
-            this.Collection.Add(new MenuItem { Header = "Delete", Command = new DelegateCommand(OnDelete) });
+            this.MenuItems.Add(new MenuItem { Header = "Rename...", Command = new DelegateCommand(OnRename) });
+            this.MenuItems.Add(new MenuItem { Header = "Delete", Command = new DelegateCommand(OnDelete) });
         }
 
         private void OnDelete()
