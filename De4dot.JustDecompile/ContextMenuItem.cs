@@ -17,17 +17,18 @@ using System;
 using System.Linq;
 using System.Windows.Input;
 using System.Collections.Generic;
+using JustDecompile.API.Core;
 
 namespace De4dot.JustDecompile
 {
-    internal class ContextMenuItem
+    internal class ContextMenuItem : IMenuItem
     {
         public ContextMenuItem()
         {
-            Collection = new List<ContextMenuItem>();
+            Collection = new List<IMenuItem>();
         }
 
-        public IList<ContextMenuItem> Collection { get; private set; }
+        public IList<IMenuItem> Collection { get; private set; }
 
         public ICommand Command { get; set; }
 

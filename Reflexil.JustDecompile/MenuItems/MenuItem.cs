@@ -16,19 +16,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
+using JustDecompile.API.Core;
 
 namespace Reflexil.JustDecompile
 {
-	internal class MenuItem 
+    internal class MenuItem : IMenuItem
 	{
 		public MenuItem()
 		{
-			this.Collection = new List<MenuItem>();
+            this.Collection = new List<IMenuItem>();
 
 			this.AddMenuItems();
 		}
 
-		public List<MenuItem> Collection { get; set; }
+        public IList<IMenuItem> Collection { get; set; }
 		public ICommand Command { get; set; }
 		public object Header { get; set; }
 		public object Icon { get; set; }
