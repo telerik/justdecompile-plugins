@@ -28,9 +28,9 @@
 
 using System;
 
-using DeMono.Cecil.Metadata;
+using Mono.Cecil.Metadata;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	static partial class Mixin {
 

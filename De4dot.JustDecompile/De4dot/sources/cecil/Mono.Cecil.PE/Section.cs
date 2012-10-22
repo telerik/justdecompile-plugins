@@ -30,7 +30,7 @@ using System;
 
 using RVA = System.UInt32;
 
-namespace DeMono.Cecil.PE {
+namespace Mono.Cecil.PE {
 
 	public sealed class Section {
 		public string Name;

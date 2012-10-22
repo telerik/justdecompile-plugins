@@ -22,8 +22,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.CryptoObfuscator {
@@ -297,6 +297,18 @@ namespace de4dot.code.deobfuscators.CryptoObfuscator {
 		static MethodDefinition getDecrypterMethod(TypeDefinition type) {
 			foreach (var method in type.Methods) {
 				if (DotNetUtils.isMethod(method, "System.Byte[]", "(System.IO.Stream)"))
+					return method;
+				if (DotNetUtils.isMethod(method, "System.Byte[]", "(System.Int32,System.IO.Stream)"))
+					return method;
+				if (DotNetUtils.isMethod(method, "System.Byte[]", "(System.Int16,System.IO.Stream)"))
+					return method;
+				if (DotNetUtils.isMethod(method, "System.Byte[]", "(System.Byte,System.IO.Stream)"))
+					return method;
+				if (DotNetUtils.isMethod(method, "System.Byte[]", "(System.SByte,System.IO.Stream)"))
+					return method;
+				if (DotNetUtils.isMethod(method, "System.Byte[]", "(System.Byte,System.IO.Stream,System.Int32)"))
+					return method;
+				if (DotNetUtils.isMethod(method, "System.Byte[]", "(System.SByte,System.IO.Stream,System.UInt32)"))
 					return method;
 			}
 			return null;

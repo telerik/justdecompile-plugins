@@ -29,7 +29,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public class DefaultAssemblyResolver : BaseAssemblyResolver {
 

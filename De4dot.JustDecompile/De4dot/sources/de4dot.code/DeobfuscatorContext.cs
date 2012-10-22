@@ -19,7 +19,7 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil;
+using Mono.Cecil;
 using de4dot.blocks;
 
 namespace de4dot.code {
@@ -48,10 +48,19 @@ namespace de4dot.code {
 			dataDict.Remove(name);
 		}
 
+		static TypeReference getNonGenericTypeReference(TypeReference typeReference) {
+			if (typeReference == null)
+				return null;
+			if (!typeReference.IsGenericInstance)
+				return typeReference;
+			var type = (GenericInstanceType)typeReference;
+			return type.ElementType;
+		}
+
 		public TypeDefinition resolve(TypeReference type) {
 			if (type == null)
 				return null;
-			var typeDef = type as TypeDefinition;
+			var typeDef = getNonGenericTypeReference(type) as TypeDefinition;
 			if (typeDef != null)
 				return typeDef;
 

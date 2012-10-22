@@ -28,7 +28,7 @@
 
 using System;
 
-namespace DeMono.Cecil.Cil {
+namespace Mono.Cecil.Cil {
 
 	public enum DocumentType {
 		Other,

@@ -29,7 +29,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DeMono.Cecil.Rocks {
+namespace Mono.Cecil.Rocks {
 
 	static class Functional {
 

@@ -18,8 +18,8 @@
 */
 
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.Eazfuscator_NET {
@@ -87,24 +87,6 @@ namespace de4dot.code.deobfuscators.Eazfuscator_NET {
 
 				if (instr.OpCode.FlowControl != FlowControl.Next)
 					break;
-			}
-
-			return null;
-		}
-
-		public static MethodDefinition getResolveMethod(MethodDefinition method) {
-			if (method == null || method.Body == null)
-				return null;
-			foreach (var instr in method.Body.Instructions) {
-				if (instr.OpCode.Code != Code.Ldftn && instr.OpCode.Code != Code.Ldvirtftn)
-					continue;
-				var handler = instr.Operand as MethodDefinition;
-				if (handler == null)
-					continue;
-				if (!DotNetUtils.isMethod(handler, "System.Reflection.Assembly", "(System.Object,System.ResolveEventArgs)"))
-					continue;
-
-				return handler;
 			}
 
 			return null;

@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using SR = System.Reflection;
 
-using DeMono.Cecil;
+using Mono.Cecil;
 
-namespace DeMono.Cecil.Tests {
+namespace Mono.Cecil.Tests {
 
 	public static class Extensions {
 

@@ -17,7 +17,7 @@
     along with de4dot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using DeMono.Cecil;
+using Mono.Cecil;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {

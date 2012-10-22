@@ -19,9 +19,9 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
-using DeMono.MyStuff;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.MyStuff;
 using de4dot.blocks;
 using de4dot.blocks.cflow;
 using de4dot.PE;
@@ -95,11 +95,12 @@ namespace de4dot.code.deobfuscators {
 			get { return Operations.DecryptStrings != OpDecryptString.None && staticStringInliner.InlinedAllCalls; }
 		}
 
-		public virtual IMethodCallInliner MethodCallInliner {
+		public virtual IEnumerable<IBlocksDeobfuscator> BlocksDeobfuscators {
 			get {
+				var list = new List<IBlocksDeobfuscator>();
 				if (CanInlineMethods)
-					return new MethodCallInliner(false);
-				return new NoMethodInliner();
+					list.Add(new MethodCallInliner(false));
+				return list;
 			}
 		}
 
@@ -126,10 +127,6 @@ namespace de4dot.code.deobfuscators {
 			return optionsBase.ValidNameRegex.isMatch(name);
 		}
 
-		public virtual int earlyDetect() {
-			return 0;
-		}
-
 		public virtual int detect() {
 			scanForObfuscator();
 			return detectInternal();
@@ -138,7 +135,7 @@ namespace de4dot.code.deobfuscators {
 		protected abstract void scanForObfuscator();
 		protected abstract int detectInternal();
 
-		public virtual bool getDecryptedModule(ref byte[] newFileData, ref DumpedMethods dumpedMethods) {
+		public virtual bool getDecryptedModule(int count, ref byte[] newFileData, ref DumpedMethods dumpedMethods) {
 			return false;
 		}
 
@@ -354,6 +351,11 @@ namespace de4dot.code.deobfuscators {
 				fieldsToRemove.Add(new RemoveInfo<FieldDefinition>(field, reason));
 		}
 
+		protected void addAttributesToBeRemoved(IEnumerable<TypeDefinition> attrs, string reason) {
+			foreach (var attr in attrs)
+				addAttributeToBeRemoved(attr, reason);
+		}
+
 		protected void addAttributeToBeRemoved(TypeDefinition attr, string reason) {
 			if (attr == null)
 				return;
@@ -406,6 +408,8 @@ namespace de4dot.code.deobfuscators {
 			Log.indent();
 			foreach (var cctor in emptyCctorsToRemove) {
 				var type = cctor.DeclaringType;
+				if (type == null)
+					continue;
 				if (type.Methods.Remove(cctor))
 					Log.v("{0:X8}, type: {1} ({2:X8})",
 								cctor.MetadataToken.ToUInt32(),
@@ -449,6 +453,8 @@ namespace de4dot.code.deobfuscators {
 				if (field == null)
 					continue;
 				var type = field.DeclaringType;
+				if (type == null)
+					continue;
 				if (type.Fields.Remove(field))
 					Log.v("Removed field {0} ({1:X8}) (Type: {2}) (reason: {3})",
 								Utils.removeNewlines(field),
@@ -466,9 +472,10 @@ namespace de4dot.code.deobfuscators {
 
 			Log.v("Removing types");
 			Log.indent();
+			var moduleType = DotNetUtils.getModuleType(module);
 			foreach (var info in typesToRemove) {
 				var typeDef = info.obj;
-				if (typeDef == null)
+				if (typeDef == null || typeDef == moduleType)
 					continue;
 				bool removed;
 				if (typeDef.IsNested)
@@ -583,6 +590,40 @@ namespace de4dot.code.deobfuscators {
 			Log.deIndent();
 		}
 
+		protected void setInitLocals() {
+			foreach (var type in module.GetTypes()) {
+				foreach (var method in type.Methods) {
+					if (isFatHeader(method))
+						method.Body.InitLocals = true;
+				}
+			}
+		}
+
+		static bool isFatHeader(MethodDefinition method) {
+			if (method == null || method.Body == null)
+				return false;
+			var body = method.Body;
+			if (body.InitLocals || body.MaxStackSize > 8)
+				return true;
+			if (body.Variables.Count > 0)
+				return true;
+			if (body.ExceptionHandlers.Count > 0)
+				return true;
+			if (getCodeSize(method) > 63)
+				return true;
+
+			return false;
+		}
+
+		static int getCodeSize(MethodDefinition method) {
+			if (method == null || method.Body == null)
+				return 0;
+			int size = 0;
+			foreach (var instr in method.Body.Instructions)
+				size += instr.GetSize();
+			return size;
+		}
+
 		public override string ToString() {
 			return Name;
 		}
@@ -623,14 +664,22 @@ namespace de4dot.code.deobfuscators {
 			}
 		}
 
-		protected void removeProxyDelegates(ProxyDelegateFinderBase proxyDelegateFinder, bool removeCreators = true) {
-			if (proxyDelegateFinder.Errors != 0) {
+		protected bool removeProxyDelegates(ProxyCallFixerBase proxyCallFixer) {
+			return removeProxyDelegates(proxyCallFixer, true);
+		}
+
+		protected bool removeProxyDelegates(ProxyCallFixerBase proxyCallFixer, bool removeCreators) {
+			if (proxyCallFixer.Errors != 0) {
 				Log.v("Not removing proxy delegates and creator type since errors were detected.");
-				return;
+				return false;
 			}
-			addTypesToBeRemoved(proxyDelegateFinder.DelegateTypes, "Proxy delegate type");
-			if (removeCreators && proxyDelegateFinder.RemovedDelegateCreatorCalls > 0)
-				addTypesToBeRemoved(proxyDelegateFinder.DelegateCreatorTypes, "Proxy delegate creator type");
+			addTypesToBeRemoved(proxyCallFixer.DelegateTypes, "Proxy delegate type");
+			if (removeCreators && proxyCallFixer.RemovedDelegateCreatorCalls > 0) {
+				addTypesToBeRemoved(proxyCallFixer.DelegateCreatorTypes, "Proxy delegate creator type");
+				foreach (var tuple in proxyCallFixer.OtherMethods)
+					addMethodToBeRemoved(tuple.Item1, tuple.Item2);
+			}
+			return true;
 		}
 
 		protected Resource getResource(IEnumerable<string> strings) {
@@ -639,6 +688,11 @@ namespace de4dot.code.deobfuscators {
 
 		protected CustomAttribute getAssemblyAttribute(TypeReference attr) {
 			var list = new List<CustomAttribute>(DotNetUtils.findAttributes(module.Assembly, attr));
+			return list.Count == 0 ? null : list[0];
+		}
+
+		protected CustomAttribute getModuleAttribute(TypeReference attr) {
+			var list = new List<CustomAttribute>(DotNetUtils.findAttributes(module, attr));
 			return list.Count == 0 ? null : list[0];
 		}
 
@@ -702,6 +756,10 @@ namespace de4dot.code.deobfuscators {
 		}
 
 		public virtual bool isValidMethodArgName(string name) {
+			return name != null && checkValidName(name);
+		}
+
+		public virtual bool isValidResourceKeyName(string name) {
 			return name != null && checkValidName(name);
 		}
 

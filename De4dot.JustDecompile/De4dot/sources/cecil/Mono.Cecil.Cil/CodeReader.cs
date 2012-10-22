@@ -29,13 +29,13 @@
 using System;
 using System.Collections.Generic;
 
-using DeMono.Cecil.PE;
-using DeMono.Collections.Generic;
-using DeMono.MyStuff;
+using Mono.Cecil.PE;
+using Mono.Collections.Generic;
+using Mono.MyStuff;
 
 using RVA = System.UInt32;
 
-namespace DeMono.Cecil.Cil {
+namespace Mono.Cecil.Cil {
 
 	sealed class CodeReader : ByteBuffer {
 
@@ -53,7 +53,12 @@ namespace DeMono.Cecil.Cil {
 			get { return base.position - start; }
 		}
 
-		public CodeReader (Section section, MetadataReader reader, DumpedMethods dumpedMethods = null)
+		public CodeReader (Section section, MetadataReader reader)
+			: this (section, reader, null)
+		{
+		}
+
+		public CodeReader (Section section, MetadataReader reader, DumpedMethods dumpedMethods)
 			: base (section.Data)
 		{
 			this.code_section = section;
@@ -106,9 +111,7 @@ namespace DeMono.Cecil.Cil {
 			var flags = ReadByte ();
 			switch (flags & 0x3) {
 			case 0x2: // tiny
-				body.code_size = flags >> 2;
-				body.MaxStackSize = 8;
-				ReadCode ();
+				ReadTinyMethod (flags);
 				break;
 			case 0x3: // fat
 				base.position--;
@@ -124,6 +127,16 @@ namespace DeMono.Cecil.Cil {
 				var instructions = body.Instructions;
 				symbol_reader.Read (body, offset => GetInstruction (instructions, offset));
 			}
+		}
+
+		void ReadTinyMethod (byte flags)
+		{
+			body.code_size = flags >> 2;
+			body.MaxStackSize = 8;
+			ReadCode ();
+			var dm = getDumpedMethod ();
+			if (dm != null && (dm.mhFlags & 8) != 0)
+				ReadSections ();
 		}
 
 		void ReadFatMethod ()
@@ -171,6 +184,7 @@ namespace DeMono.Cecil.Cil {
 					body.local_var_token = new MetadataToken (dm.mhLocalVarSigTok);
 				if (body.local_var_token.RID != 0)
 					body.variables = ReadVariables (body.local_var_token);
+				body.init_locals = (dm.mhFlags & 0x10) != 0;
 
 				buffer = dm.code;
 				length = dm.code.Length;
@@ -191,8 +205,14 @@ namespace DeMono.Cecil.Cil {
 				var opcode = ReadOpCode ();
 				var current = new Instruction (offset, opcode);
 
-				if (opcode.OperandType != OperandType.InlineNone)
-					current.operand = ReadOperand (current, end);
+				if (opcode.OperandType != OperandType.InlineNone) {
+					try {
+						current.operand = ReadOperand (current, end);
+					}
+					catch {
+						current.operand = null;
+					}
+				}
 
 				instructions.Add (current);
 			}
@@ -271,7 +291,7 @@ namespace DeMono.Cecil.Cil {
 
 		public string GetString (MetadataToken token)
 		{
-			return reader.image.UserStringHeap.Read (token.RID);
+			return reader.image.GetUserString (token.ToUInt32 ());
 		}
 
 		public ParameterDefinition GetParameter (int index)

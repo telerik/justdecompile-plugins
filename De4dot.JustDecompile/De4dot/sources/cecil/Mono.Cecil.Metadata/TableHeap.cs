@@ -27,9 +27,9 @@
 //
 
 using System;
-using DeMono.Cecil.PE;
+using Mono.Cecil.PE;
 
-namespace DeMono.Cecil.Metadata {
+namespace Mono.Cecil.Metadata {
 
 	enum Table : byte {
 		Module = 0x00,

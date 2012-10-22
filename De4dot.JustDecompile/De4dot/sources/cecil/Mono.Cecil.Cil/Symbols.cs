@@ -31,9 +31,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using SR = System.Reflection;
 
-using DeMono.Collections.Generic;
+using Mono.Collections.Generic;
 
-namespace DeMono.Cecil.Cil {
+namespace Mono.Cecil.Cil {
 
 	[StructLayout (LayoutKind.Sequential)]
 	public struct ImageDebugDirectory {

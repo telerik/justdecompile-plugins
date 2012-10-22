@@ -18,7 +18,7 @@
 */
 
 using System;
-using DeMono.Cecil.Cil;
+using Mono.Cecil.Cil;
 using System.Collections.Generic;
 
 namespace de4dot.blocks {
@@ -109,6 +109,10 @@ namespace de4dot.blocks {
 
 		public int getLdcI4Value() {
 			return DotNetUtils.getLdcI4Value(instruction);
+		}
+
+		public bool isLdarg() {
+			return DotNetUtils.isLdarg(instruction);
 		}
 
 		public bool isStloc() {

@@ -2,9 +2,9 @@ using System.Linq;
 
 using NUnit.Framework;
 
-using DeMono.Cecil.Rocks;
+using Mono.Cecil.Rocks;
 
-namespace DeMono.Cecil.Tests {
+namespace Mono.Cecil.Tests {
 
 	[TestFixture]
 	public class MethodDefinitionRocksTests : BaseTestFixture {

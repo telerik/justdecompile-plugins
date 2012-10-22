@@ -29,9 +29,9 @@
 using System;
 using System.Text;
 
-using DeMono.Collections.Generic;
+using Mono.Collections.Generic;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public sealed class CallSite : IMethodSignature {
 

@@ -30,11 +30,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-using DeMono.Cecil.Metadata;
+using Mono.Cecil.Metadata;
 
 using RVA = System.UInt32;
 
-namespace DeMono.Cecil.PE {
+namespace Mono.Cecil.PE {
 
 	sealed class ImageReader : BinaryStreamReader {
 
@@ -101,14 +101,15 @@ namespace DeMono.Cecil.PE {
 			// Characteristics		2
 			ushort characteristics = ReadUInt16 ();
 
-			ushort subsystem;
-			ReadOptionalHeaders (out subsystem);
+			ushort subsystem, dll_characteristics;
+			ReadOptionalHeaders (out subsystem, out dll_characteristics);
 			ReadSections (sections);
 			ReadCLIHeader ();
 			ReadMetadata ();
 
 			image.Kind = GetModuleKind (characteristics, subsystem);
 			image.MetadataStreams = streams.ToArray ();
+			image.Characteristics = (ModuleCharacteristics) dll_characteristics;
 		}
 
 		TargetArchitecture ReadArchitecture ()
@@ -140,7 +141,7 @@ namespace DeMono.Cecil.PE {
 			return ModuleKind.Console;
 		}
 
-		void ReadOptionalHeaders (out ushort subsystem)
+		void ReadOptionalHeaders (out ushort subsystem, out ushort dll_characteristics)
 		{
 			// - PEOptionalHeader
 			//   - StandardFieldsHeader
@@ -180,6 +181,7 @@ namespace DeMono.Cecil.PE {
 			subsystem = ReadUInt16 ();
 
 			// DLLFlags				2
+			dll_characteristics = ReadUInt16 ();
 			// StackReserveSize		4 || 8
 			// StackCommitSize		4 || 8
 			// HeapReserveSize		4 || 8
@@ -196,7 +198,7 @@ namespace DeMono.Cecil.PE {
 			// CertificateTable		8
 			// BaseRelocationTable	8
 
-			Advance (pe64 ? 90 : 74);
+			Advance (pe64 ? 88 : 72);
 
 			// Debug				8
 			image.Debug = ReadDataDirectory ();
@@ -376,7 +378,7 @@ namespace DeMono.Cecil.PE {
 			// Size			4
 			uint size = ReadUInt32 ();
 
-			var name = ReadAlignedString (16);
+			var name = ReadAlignedString (32);
 
 			streams.Add (new MetadataStream (section, start, size, name));
 
@@ -604,6 +606,8 @@ namespace DeMono.Cecil.PE {
 						+ GetTableIndexSize (Table.Field);	// Field
 					break;
 				case Table.EncLog:
+					size = 8;
+					break;
 				case Table.EncMap:
 					size = 4;
 					break;

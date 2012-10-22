@@ -20,8 +20,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.Goliath_NET {

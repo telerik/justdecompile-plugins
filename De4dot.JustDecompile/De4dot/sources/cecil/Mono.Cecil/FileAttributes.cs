@@ -26,7 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	enum FileAttributes : uint {
 		ContainsMetaData	= 0x0000,	// This is not a resource file

@@ -19,7 +19,7 @@
 
 using System;
 
-namespace DeMono.MyStuff {
+namespace Mono.MyStuff {
 	[Serializable]
 	public class DumpedMethod {
 		public ushort mhFlags;			// method header Flags

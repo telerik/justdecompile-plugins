@@ -17,7 +17,7 @@
     along with de4dot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using DeMono.Cecil;
+using Mono.Cecil;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.CryptoObfuscator {
@@ -62,7 +62,12 @@ namespace de4dot.code.deobfuscators.CryptoObfuscator {
 				if (DotNetUtils.getPInvokeMethod(type, "kernel32", "GetProcAddress") == null)
 					continue;
 				deobfuscate(method);
-				if (!containsString(method, "debugger is active"))
+				if (!containsString(method, "debugger is activ") &&
+					!containsString(method, "debugger is running") &&
+					!containsString(method, "run under a debugger") &&
+					!containsString(method, "run under debugger") &&
+					!containsString(method, "Debugger detected") &&
+					!containsString(method, "Debugger was detected"))
 					continue;
 
 				antiDebuggerType = type;

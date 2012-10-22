@@ -29,7 +29,7 @@
 using System;
 using System.Text;
 
-namespace DeMono.Cecil.Cil {
+namespace Mono.Cecil.Cil {
 
 	public sealed class Instruction {
 

@@ -1,0 +1,44 @@
+﻿<Window x:Class="De4dot.JustDecompile.DeobfuscateDialog.DeobfuscateDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+		SizeToContent="WidthAndHeight"
+		Title="Deobfuscate assembly."
+		WindowStyle="ToolWindow"
+		ResizeMode="NoResize"
+		WindowStartupLocation="CenterScreen"
+		>
+	<Border Padding="10">
+		<StackPanel>
+			<TextBlock HorizontalAlignment="Center" Name="MessageArea" 
+					   Text="{Binding Path=Message}" VerticalAlignment="Top"/>			
+			<Border Padding="10">
+				<StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
+					<Button Content="Cancel" 
+							Height="23" 
+							Width="75"
+							Name="buttonCancel" 
+							Click="OnCloseHandler"
+							Margin="10"/>
+					<Button Content="OK" 
+							Height="23" 
+							Width="75"
+							Name="buttonOk" 
+							Click="OnCloseHandler"
+							Command="{Binding Path=DeobfuscateCommand}"
+							Margin="10"/>
+				</StackPanel>
+			</Border>
+			<Expander Header="Options"  HorizontalAlignment="Left" Name="expander1" VerticalAlignment="Top">
+				<StackPanel>
+					<CheckBox Content="Enable control flow deobfuscation." HorizontalAlignment="Left" Name="CFGCheckBox" VerticalAlignment="Top" 
+							  IsChecked="{Binding Path=EnableControlFlowDeobfuscation}"/>
+					<CheckBox Content="Keep obfuscator types." HorizontalAlignment="Left" Name="ObfuscatorTypesCheckBox" VerticalAlignment="Top"
+							  IsChecked="{Binding Path=KeepObfuscatorClasses}" />
+					<CheckBox Content="Rename types and type members." HorizontalAlignment="Left" Name="RenameTypesCheckbox" VerticalAlignment="Top" 
+							  IsChecked="{Binding Path=RenameClasses}"/>
+				</StackPanel>
+			</Expander>
+		</StackPanel>
+	</Border>
+</Window>

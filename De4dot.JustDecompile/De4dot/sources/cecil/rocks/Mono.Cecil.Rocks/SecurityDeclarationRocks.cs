@@ -32,7 +32,7 @@ using System;
 using System.Security;
 using SSP = System.Security.Permissions;
 
-namespace DeMono.Cecil.Rocks {
+namespace Mono.Cecil.Rocks {
 
 #if INSIDE_ROCKS
 	public

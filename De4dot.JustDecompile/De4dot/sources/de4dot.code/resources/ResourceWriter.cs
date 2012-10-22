@@ -23,7 +23,7 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using DeMono.Cecil;
+using Mono.Cecil;
 
 namespace de4dot.code.resources {
 	class ResourceWriter {

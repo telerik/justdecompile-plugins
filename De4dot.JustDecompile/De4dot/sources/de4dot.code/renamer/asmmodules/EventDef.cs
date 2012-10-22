@@ -18,7 +18,7 @@
 */
 
 using System.Collections.Generic;
-using DeMono.Cecil;
+using Mono.Cecil;
 
 namespace de4dot.code.renamer.asmmodules {
 	class EventDef : Ref {

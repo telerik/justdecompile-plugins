@@ -13,10 +13,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
 
-using System;
 using System.ComponentModel.Composition;
-using System.IO;
-using System.Linq;
 using System.Windows;
 using JustDecompile.API.Core;
 using JustDecompile.API.CompositeEvents;
@@ -26,114 +23,95 @@ using Microsoft.Practices.Prism.Events;
 using Microsoft.Practices.Prism.MefExtensions.Modularity;
 using Microsoft.Practices.Prism.Modularity;
 using Microsoft.Practices.Prism.Regions;
-using Microsoft.Win32;
+using de4dot.code;
 
 namespace De4dot.JustDecompile
 {
-    [ModuleExport(typeof(De4dotModule))]
-    public class De4dotModule : IModule, IPartImportsSatisfiedNotification
-    {
-        [Import]
-        private IRegionManager regionManager;
+	[ModuleExport(typeof(De4dotModule))]
+	public class De4dotModule : IModule, IPartImportsSatisfiedNotification
+	{
+		[Import]
+		private IRegionManager regionManager;
 
-        [Import]
-        private IEventAggregator eventAggregator;
+		[Import]
+		private IEventAggregator eventAggregator;
 
-        [Import]
-        private IAssemblyManagerService assemblyManagerService;
+		[Import]
+		private IAssemblyManagerService assemblyManagerService;
 
-        private ITreeViewItem selectedItem;
+		private ITreeViewItem selectedItem;
 
-        private ContextMenuItem assemblyNodeContextMenu;
+		private ContextMenuItem assemblyNodeContextMenu;
 
-        public De4dotModule() { }
+		public De4dotModule() { }
 
-        public void Initialize()
-        {
-            this.regionManager.AddToRegion("AssemblyTreeViewContextMenuRegion", assemblyNodeContextMenu);
+		public void Initialize()
+		{
+			this.regionManager.AddToRegion("AssemblyTreeViewContextMenuRegion", assemblyNodeContextMenu);
 
-            this.regionManager.AddToRegion("ModuleDefinitionTreeViewContextMenuRegion", assemblyNodeContextMenu);
-        }
+			this.regionManager.AddToRegion("ModuleDefinitionTreeViewContextMenuRegion", assemblyNodeContextMenu);
+		}
 
-        public void OnImportsSatisfied()
-        {
-            this.assemblyNodeContextMenu = new ContextMenuItem { Header = "De4dot" };
+		public void OnImportsSatisfied()
+		{
+			this.assemblyNodeContextMenu = new ContextMenuItem { Header = "De4dot" };
 
-            this.assemblyNodeContextMenu.MenuItems.Add(new ContextMenuItem { Header = "Obfuscator search ...", Command = new DelegateCommand(OnContextMenuClick) });
+			this.assemblyNodeContextMenu.MenuItems.Add(new ContextMenuItem { Header = "Obfuscator search ...", Command = new DelegateCommand(OnContextMenuClick) });
 
-            this.eventAggregator.GetEvent<SelectedTreeViewItemChangedEvent>().Subscribe(OnSelectedTreeViewItemChanged);
-        }
+			this.eventAggregator.GetEvent<SelectedTreeViewItemChangedEvent>().Subscribe(OnSelectedTreeViewItemChanged);
+		}
 
-        private void OnSelectedTreeViewItemChanged(ITreeViewItem obj)
-        {
-            this.selectedItem = obj;
-        }
+		private void OnSelectedTreeViewItemChanged(ITreeViewItem obj)
+		{
+			this.selectedItem = obj;
+		}
 
-        private void OnContextMenuClick()
-        {
-            if (this.selectedItem == null)
-            {
-                return;
-            }
-            string location = GetFilePath();
+		private void OnContextMenuClick()
+		{
 
-            if (string.IsNullOrWhiteSpace(location))
-            {
-                return;
-            }
-            var de4Dot = new De4dotWrapper();
 
-            var obfuscationfile = de4Dot.SearchDeobfuscator(location);
+			if (this.selectedItem == null)
+			{
+				return;
+			}
+			string location = GetFilePath();
 
-            if (!de4Dot.IsUnknownDeobfuscator(obfuscationfile))
-            {
-                string caption = "Assembly {0} is obfuscated with {1}. Clean the file ?";
+			if (string.IsNullOrWhiteSpace(location))
+			{
+				return;
+			}
+			De4dotWrapper de4Dot = new De4dotWrapper();
 
-                caption = string.Format(caption, Path.GetFileName(location), obfuscationfile.Deobfuscator.Name);
+			IObfuscatedFile obfuscationfile = de4Dot.SearchDeobfuscator(location);
 
-                if (MessageBox.Show(caption, "De4dot", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
-                {
-                    var saveFileDialog = new SaveFileDialog();
-                    saveFileDialog.Filter = "Assembly files (*.exe, *.dll)|*.exe;*.dll";
-                    saveFileDialog.InitialDirectory = Path.GetDirectoryName(location);
-                    saveFileDialog.FileName = Path.GetFileNameWithoutExtension(location) + ".Cleaned" + Path.GetExtension(location);
-                    if (saveFileDialog.ShowDialog() == true)
-                    {
-                        var progressWindpw = new DeobfuscationProgressWindow(obfuscationfile, this.assemblyManagerService)
-                        {
-                            Title = saveFileDialog.FileName,
-                            Width = 500,
-                            Height = 150,
-                            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                            Owner = Application.Current.MainWindow
-                        };
-                        progressWindpw.Start(saveFileDialog.FileName);
-                    }
-                }
-            }
-            else
-            {
-                MessageBox.Show("No obfuscator found (or unknown)");
-            }
-        }
+			if (!de4Dot.IsUnknownDeobfuscator(obfuscationfile))
+			{
+				DeobfuscateDialog.DeobfuscateDialog dialog = new DeobfuscateDialog.DeobfuscateDialog(selectedItem, assemblyManagerService);
+				dialog.ShowDialog();
+			}
+			else
+			{
+				MessageBox.Show("No obfuscator found (or unknown)");
+			}
+		}
 
-        private string GetFilePath()
-        {
-            if (this.selectedItem == null)
-            {
-                return string.Empty;
-            }
-            switch (this.selectedItem.TreeNodeType)
-            {
-                case TreeNodeType.AssemblyDefinition:
-                    return ((IAssemblyDefinitionTreeViewItem)this.selectedItem).AssemblyDefinition.MainModule.FilePath;
+		private string GetFilePath()
+		{
+			if (this.selectedItem == null)
+			{
+				return string.Empty;
+			}
+			switch (this.selectedItem.TreeNodeType)
+			{
+				case TreeNodeType.AssemblyDefinition:
+					return ((IAssemblyDefinitionTreeViewItem)this.selectedItem).AssemblyDefinition.MainModule.FilePath;
 
-                case TreeNodeType.AssemblyModuleDefinition:
-                    return ((IAssemblyModuleDefinitionTreeViewItem)this.selectedItem).ModuleDefinition.FilePath;
+				case TreeNodeType.AssemblyModuleDefinition:
+					return ((IAssemblyModuleDefinitionTreeViewItem)this.selectedItem).ModuleDefinition.FilePath;
 
-                default:
-                    return string.Empty;
-            }
-        }
-    }
+				default:
+					return string.Empty;
+			}
+		}
+	}
 }

@@ -19,8 +19,8 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 using de4dot.blocks;
 
 namespace de4dot.code.renamer.asmmodules {
@@ -355,7 +355,7 @@ namespace de4dot.code.renamer.asmmodules {
 			pushMember(attr.Constructor);
 
 			// Some obfuscators don't rename custom ctor arguments to the new name, causing
-			// DeMono.Cecil to use a null reference.
+			// Mono.Cecil to use a null reference.
 			try { access(() => addCustomAttributeArguments(attr.ConstructorArguments)); } catch (NullReferenceException) { }
 			try { access(() => addCustomAttributeNamedArguments(attr.Fields)); } catch (NullReferenceException) { }
 			try { access(() => addCustomAttributeNamedArguments(attr.Properties)); } catch (NullReferenceException) { }
@@ -570,6 +570,8 @@ namespace de4dot.code.renamer.asmmodules {
 			addTypeSpecification(st);
 		}
 		void addCallSite(CallSite cs) {
+			if (cs == null)
+				return;
 			pushMember(cs.signature);
 		}
 

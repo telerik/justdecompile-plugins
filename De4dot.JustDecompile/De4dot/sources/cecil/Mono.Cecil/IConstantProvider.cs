@@ -26,9 +26,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using DeMono.Cecil.Metadata;
+using Mono.Cecil.Metadata;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public interface IConstantProvider : IMetadataTokenProvider {
 

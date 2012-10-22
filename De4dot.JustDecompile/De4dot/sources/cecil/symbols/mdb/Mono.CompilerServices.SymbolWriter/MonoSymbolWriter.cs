@@ -1,5 +1,5 @@
 //
-// DeMono.CSharp.Debugger/MonoSymbolWriter.cs
+// Mono.CSharp.Debugger/MonoSymbolWriter.cs
 //
 // Author:
 //   Martin Baulig (martin@ximian.com)
@@ -36,14 +36,14 @@ using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.IO;
 
-namespace DeMono.CompilerServices.SymbolWriter
+namespace Mono.CompilerServices.SymbolWriter
 {
-	public class DeMonoSymbolWriter
+	public class MonoSymbolWriter
 	{
 		List<SourceMethodBuilder> methods;
 		List<SourceFileEntry> sources;
 		List<CompileUnitEntry> comp_units;
-		protected readonly DeMonoSymbolFile file;
+		protected readonly MonoSymbolFile file;
 		string filename;
 
 		private SourceMethodBuilder current_method;
@@ -53,17 +53,17 @@ namespace DeMono.CompilerServices.SymbolWriter
 		Stack<SourceMethodBuilder> current_method_stack = new Stack<SourceMethodBuilder> ();
 #endif
 
-		public DeMonoSymbolWriter (string filename)
+		public MonoSymbolWriter (string filename)
 		{
 			this.methods = new List<SourceMethodBuilder> ();
 			this.sources = new List<SourceFileEntry> ();
 			this.comp_units = new List<CompileUnitEntry> ();
-			this.file = new DeMonoSymbolFile ();
+			this.file = new MonoSymbolFile ();
 
 			this.filename = filename + ".mdb";
 		}
 
-		public DeMonoSymbolFile SymbolFile {
+		public MonoSymbolFile SymbolFile {
 			get { return file; }
 		}
 

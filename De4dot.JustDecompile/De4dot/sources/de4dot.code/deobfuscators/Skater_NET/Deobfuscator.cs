@@ -18,7 +18,7 @@
 */
 
 using System.Collections.Generic;
-using DeMono.Cecil;
+using Mono.Cecil;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.Skater_NET {
@@ -102,7 +102,7 @@ namespace de4dot.code.deobfuscators.Skater_NET {
 
 			enumClassFinder = new EnumClassFinder(module);
 
-			stringDecrypter.initialize();
+			stringDecrypter.initialize(DeobfuscatedFile);
 		}
 
 		public override void deobfuscateMethodEnd(Blocks blocks) {

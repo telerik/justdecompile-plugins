@@ -26,10 +26,10 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using DeMono.Cecil.Metadata;
-using DeMono.Collections.Generic;
+using Mono.Cecil.Metadata;
+using Mono.Collections.Generic;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public sealed class ParameterDefinition : ParameterReference, ICustomAttributeProvider, IConstantProvider, IMarshalInfoProvider {
 

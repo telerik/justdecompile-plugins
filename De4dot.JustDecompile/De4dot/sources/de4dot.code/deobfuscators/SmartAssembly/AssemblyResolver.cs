@@ -19,7 +19,7 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil;
+using Mono.Cecil;
 
 namespace de4dot.code.deobfuscators.SmartAssembly {
 	class AssemblyResolver {

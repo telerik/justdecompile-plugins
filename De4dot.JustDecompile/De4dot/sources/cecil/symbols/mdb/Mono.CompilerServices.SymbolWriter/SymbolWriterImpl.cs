@@ -36,7 +36,7 @@ using System.Collections;
 using System.IO;
 using System.Diagnostics.SymbolStore;
 
-namespace DeMono.CompilerServices.SymbolWriter
+namespace Mono.CompilerServices.SymbolWriter
 {
 	public class SymbolWriterImpl: ISymbolWriter
 	{
@@ -191,7 +191,7 @@ namespace DeMono.CompilerServices.SymbolWriter
 
 		public void Initialize (IntPtr emitter, string filename, bool fFullBuild)
 		{
-			msw = new DeMonoSymbolWriter (filename);
+			msw = new MonoSymbolWriter (filename);
 		}
 
 		public void OpenMethod (SymbolToken method)
@@ -232,7 +232,7 @@ namespace DeMono.CompilerServices.SymbolWriter
 
 		public void SetSymAttribute (SymbolToken parent, string name, byte[] data)
 		{
-			// This is a hack! but DeMonoSymbolWriter needs the method name
+			// This is a hack! but MonoSymbolWriter needs the method name
 			// and ISymbolWriter does not have any method for providing it
 			if (name == "__name")
 				methodName = System.Text.Encoding.UTF8.GetString (data);

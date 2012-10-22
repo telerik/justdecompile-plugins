@@ -19,8 +19,9 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Metadata;
 using de4dot.blocks;
 
 namespace de4dot.code {
@@ -143,9 +144,15 @@ namespace de4dot.code {
 	abstract class MethodReturnValueInliner {
 		protected List<CallResult> callResults;
 		List<Block> allBlocks;
-		Blocks blocks;
+		MethodDefinition theMethod;
 		VariableValues variableValues;
 		int errors = 0;
+		bool useUnknownArgs = false;
+
+		public bool UseUnknownArgs {
+			get { return useUnknownArgs; }
+			set { useUnknownArgs = value; }
+		}
 
 		protected class CallResult {
 			public Block block;
@@ -170,43 +177,56 @@ namespace de4dot.code {
 
 		public abstract bool HasHandlers { get; }
 
-		protected MethodDefinition Method {
-			get { return blocks.Method; }
+		public MethodDefinition Method {
+			get { return theMethod; }
 		}
 
 		protected abstract void inlineAllCalls();
 
 		// Returns null if method is not a method we should inline
-		protected abstract CallResult createCallResult(MethodReference method, Block block, int callInstrIndex);
+		protected abstract CallResult createCallResult(MethodReference method, GenericInstanceMethod gim, Block block, int callInstrIndex);
 
-		public int decrypt(Blocks theBlocks) {
+		public int decrypt(Blocks blocks) {
+			if (!HasHandlers)
+				return 0;
+			return decrypt(blocks.Method, blocks.MethodBlocks.getAllBlocks());
+		}
+
+		public int decrypt(MethodDefinition method, List<Block> allBlocks) {
 			if (!HasHandlers)
 				return 0;
 			try {
-				blocks = theBlocks;
+				theMethod = method;
 				callResults = new List<CallResult>();
-				allBlocks = new List<Block>(blocks.MethodBlocks.getAllBlocks());
+				this.allBlocks = allBlocks;
 
 				findAllCallResults();
 				inlineAllCalls();
 				inlineReturnValues();
 				return callResults.Count;
 			}
+			catch {
+				errors++;
+				throw;
+			}
 			finally {
-				blocks = null;
+				theMethod = null;
 				callResults = null;
-				allBlocks = null;
+				this.allBlocks = null;
 				variableValues = null;
 			}
 		}
 
-		void getLocalVariableValue(VariableDefinition variable, out object value) {
+		bool getLocalVariableValue(VariableDefinition variable, out object value) {
 			if (variableValues == null)
-				variableValues = new VariableValues(blocks.Locals, allBlocks);
+				variableValues = new VariableValues(theMethod.Body.Variables, allBlocks);
 			var val = variableValues.getValue(variable);
-			if (!val.isValid())
-				throw new ApplicationException("Could not get value of local variable");
+			if (!val.isValid()) {
+				value = null;
+				return false;
+			}
 			value = val.Value;
+			return true;
 		}
 
 		void findAllCallResults() {
@@ -223,7 +243,11 @@ namespace de4dot.code {
 				if (method == null)
 					continue;
 
-				var callResult = createCallResult(method, block, i);
+				MethodReference elementMethod = method;
+				var gim = method as GenericInstanceMethod;
+				if (gim != null)
+					elementMethod = gim.ElementMethod;
+				var callResult = createCallResult(elementMethod, gim, block, i);
 				if (callResult == null)
 					continue;
 
@@ -246,6 +270,8 @@ namespace de4dot.code {
 					return false;
 				if (arg is int)
 					arg = fixIntArg(methodArgs[i].ParameterType, (int)arg);
+				else if (arg is long)
+					arg = fixIntArg(methodArgs[i].ParameterType, (long)arg);
 				args[i] = arg;
 			}
 
@@ -254,18 +280,18 @@ namespace de4dot.code {
 			return true;
 		}
 
-		object fixIntArg(TypeReference type, int value) {
-			if (type.IsPrimitive) {
-				switch (type.FullName) {
-				case "System.Boolean":	return value != 0;
-				case "System.Char":		return (char)value;
-				case "System.Byte":		return (byte)value;
-				case "System.SByte":	return (sbyte)value;
-				case "System.Int16":	return (short)value;
-				case "System.UInt16":	return (ushort)value;
-				case "System.Int32":	return (int)value;
-				case "System.UInt32":	return (uint)value;
-				}
+		object fixIntArg(TypeReference type, long value) {
+			switch (type.EType) {
+			case ElementType.Boolean: return value != 0;
+			case ElementType.Char: return (char)value;
+			case ElementType.I1: return (sbyte)value;
+			case ElementType.U1: return (byte)value;
+			case ElementType.I2: return (short)value;
+			case ElementType.U2: return (ushort)value;
+			case ElementType.I4: return (int)value;
+			case ElementType.U4: return (uint)value;
+			case ElementType.I8: return (long)value;
+			case ElementType.U8: return (ulong)value;
 			}
 			throw new ApplicationException(string.Format("Wrong type {0}", type));
 		}
@@ -317,20 +343,32 @@ namespace de4dot.code {
 				case Code.Ldloc_1:
 				case Code.Ldloc_2:
 				case Code.Ldloc_3:
-					getLocalVariableValue(Instr.getLocalVar(blocks.Locals, instr), out arg);
+					getLocalVariableValue(Instr.getLocalVar(theMethod.Body.Variables, instr), out arg);
 					break;
 
+				case Code.Ldfld:
 				case Code.Ldsfld:
 					arg = instr.Operand;
 					break;
 
 				default:
-					Log.w("Could not find all arguments to method {0} ({1:X8}), instr: {2}",
-								Utils.removeNewlines(method),
-								method.MetadataToken.ToInt32(),
-								instr);
-					errors++;
-					return false;
+					int pushes, pops;
+					DotNetUtils.calculateStackUsage(instr.Instruction, false, out pushes, out pops);
+					if (!useUnknownArgs || pushes != 1) {
+						Log.w("Could not find all arguments to method {0} ({1:X8}), instr: {2}",
+									Utils.removeNewlines(method),
+									method.MetadataToken.ToInt32(),
+									instr);
+						errors++;
+						return false;
+					}
+
+					for (int i = 0; i < pops; i++) {
+						if (!getArg(method, block, ref arg, ref instrIndex))
+							return false;
+					}
+					arg = null;
+					break;
 				}
 				break;
 			}
@@ -339,6 +377,7 @@ namespace de4dot.code {
 		}
 
 		void inlineReturnValues() {
+			callResults = removeNulls(callResults);
 			callResults.Sort((a, b) => {
 				int i1 = allBlocks.FindIndex((x) => a.block == x);
 				int i2 = allBlocks.FindIndex((x) => b.block == x);
@@ -349,6 +388,15 @@ namespace de4dot.code {
 			});
 			callResults.Reverse();
 			inlineReturnValues(callResults);
+		}
+
+		static List<CallResult> removeNulls(List<CallResult> inList) {
+			var outList = new List<CallResult>(inList.Count);
+			foreach (var callResult in inList) {
+				if (callResult.returnValue != null)
+					outList.Add(callResult);
+			}
+			return outList;
 		}
 
 		protected abstract void inlineReturnValues(IList<CallResult> callResults);

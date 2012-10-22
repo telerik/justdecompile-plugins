@@ -1,6 +1,6 @@
-﻿using DeMono.Cecil.PE;
+﻿using Mono.Cecil.PE;
 
-namespace DeMono.Cecil.Metadata {
+namespace Mono.Cecil.Metadata {
 	public sealed class MetadataStream : Heap {
 
 		public string Name;

@@ -18,7 +18,7 @@
 */
 
 using System.Collections.Generic;
-using DeMono.Cecil;
+using Mono.Cecil;
 
 namespace de4dot.code.deobfuscators.Xenocode {
 	public class DeobfuscatorInfo : DeobfuscatorInfoBase {
@@ -89,6 +89,8 @@ namespace de4dot.code.deobfuscators.Xenocode {
 				switch (type.FullName) {
 				case "Xenocode.Client.Attributes.AssemblyAttributes.ProcessedByXenocode":
 				case "Xenocode.Client.Attributes.AssemblyAttributes.SuppressDisassembly":
+				case "XenoCode.User.Attributes.AssemblyAttributes.ProcessedByXenoCode":
+				case "XenoCode.User.Attributes.AssemblyAttributes.SuppressDisassembly":
 					addAttributeToBeRemoved(type, "Obfuscator attribute");
 					foundXenocodeAttribute = true;
 					break;
@@ -99,7 +101,7 @@ namespace de4dot.code.deobfuscators.Xenocode {
 		public override void deobfuscateBegin() {
 			base.deobfuscateBegin();
 
-			staticStringInliner.add(stringDecrypter.Method, (method, args) => stringDecrypter.decrypt((string)args[0], (int)args[1]));
+			staticStringInliner.add(stringDecrypter.Method, (method, gim, args) => stringDecrypter.decrypt((string)args[0], (int)args[1]));
 			DeobfuscatedFile.stringDecryptersAdded();
 		}
 

@@ -29,9 +29,9 @@
 using System;
 using System.Text;
 
-using DeMono.Cecil.Metadata;
+using Mono.Cecil.Metadata;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	class TypeParser {
 
@@ -272,7 +272,7 @@ namespace DeMono.Cecil {
 
 		public static TypeReference ParseType (ModuleDefinition module, string fullname)
 		{
-			if (fullname == null)
+			if (string.IsNullOrEmpty (fullname))
 				return null;
 
 			var parser = new TypeParser (fullname);

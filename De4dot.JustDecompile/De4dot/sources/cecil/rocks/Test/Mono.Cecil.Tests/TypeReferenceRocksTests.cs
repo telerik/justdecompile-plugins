@@ -1,10 +1,10 @@
 using System;
 
-using DeMono.Cecil.Rocks;
+using Mono.Cecil.Rocks;
 
 using NUnit.Framework;
 
-namespace DeMono.Cecil.Tests {
+namespace Mono.Cecil.Tests {
 
 	[TestFixture]
 	public class TypeReferenceRocksTests {

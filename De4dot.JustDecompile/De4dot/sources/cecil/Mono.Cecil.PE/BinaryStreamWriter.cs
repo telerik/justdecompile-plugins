@@ -31,7 +31,7 @@ using System.IO;
 
 #if !READ_ONLY
 
-namespace DeMono.Cecil.PE {
+namespace Mono.Cecil.PE {
 
 	class BinaryStreamWriter : BinaryWriter {
 

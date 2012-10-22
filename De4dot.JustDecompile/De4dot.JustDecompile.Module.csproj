@@ -88,12 +88,21 @@
     <Compile Include="ContextMenuItem.cs" />
     <Compile Include="De4dotModule.cs" />
     <Compile Include="De4dotWrapper.cs" />
+    <Compile Include="DeobfuscateDialog\DeobfuscateDialog.xaml.cs">
+      <DependentUpon>DeobfuscateDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DeobfuscateDialog\DeobfuscateDialogViewModel.cs" />
+    <Compile Include="DeobfuscateDialog\SelectedOptions.cs" />
     <Compile Include="DeobfuscationProgressView.xaml.cs">
       <DependentUpon>DeobfuscationProgressView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="DeobfuscateDialog\DeobfuscateDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="DeobfuscationProgressView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -120,7 +129,7 @@
     <Content Include="LicenseAgreements\ThirdParty\Mono.Cecil\LICENSE.Mono.Cecil.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup Condition = " '$(Configuration)' == 'DebugInternal' OR '$(Configuration)' == 'ReleaseInternal'">
+  <PropertyGroup Condition=" '$(Configuration)' == 'DebugInternal' OR '$(Configuration)' == 'ReleaseInternal'">
     <PreBuildEvent>
 		call $(MsbuildBinPath)\msbuild "$(SolutionDir)JustDecompileApi.sln" /p:Configuration=ReleaseInternal
 	</PreBuildEvent>

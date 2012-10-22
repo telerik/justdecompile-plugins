@@ -19,9 +19,9 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
-using DeMono.Cecil.Metadata;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Metadata;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators {
@@ -71,7 +71,11 @@ namespace de4dot.code.deobfuscators {
 				this.arg = arg;
 			}
 
-			public void add(TypeReference type, bool wasNewobj = false) {
+			public void add(TypeReference type) {
+				add(type, false);
+			}
+
+			public void add(TypeReference type, bool wasNewobj) {
 				if (wasNewobj) {
 					if (!newobjTypes)
 						clear();

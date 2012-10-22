@@ -19,13 +19,14 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
-using DeMono.Cecil.Metadata;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Metadata;
 
 namespace de4dot.blocks.cflow {
 	public class InstructionEmulator {
 		ValueStack valueStack = new ValueStack();
+		Dictionary<Value, bool> protectedStackValues = new Dictionary<Value, bool>();
 		IList<ParameterDefinition> parameterDefinitions;
 		IList<VariableDefinition> variableDefinitions;
 		List<Value> args = new List<Value>();
@@ -52,6 +53,7 @@ namespace de4dot.blocks.cflow {
 			this.parameterDefinitions = method.Parameters;
 			this.variableDefinitions = method.Body.Variables;
 			valueStack.init();
+			protectedStackValues.Clear();
 
 			if (method != prev_method) {
 				prev_method = method;
@@ -77,6 +79,10 @@ namespace de4dot.blocks.cflow {
 			locals.AddRange(cached_locals);
 		}
 
+		public void setProtected(Value value) {
+			protectedStackValues[value] = true;
+		}
+
 		static Value getUnknownValue(TypeReference typeReference) {
 			if (typeReference == null)
 				return new UnknownValue();
@@ -94,8 +100,10 @@ namespace de4dot.blocks.cflow {
 			return new UnknownValue();
 		}
 
-		static Value truncateValue(Value value, TypeReference typeReference) {
+		Value truncateValue(Value value, TypeReference typeReference) {
 			if (typeReference == null)
+				return value;
+			if (protectedStackValues.ContainsKey(value))
 				return value;
 
 			switch (typeReference.EType) {
@@ -135,6 +143,16 @@ namespace de4dot.blocks.cflow {
 				if (value.isInt64())
 					return value;
 				return Int64Value.createUnknown();
+
+			case ElementType.R4:
+				if (value.isReal8())
+					return new Real8Value((float)((Real8Value)value).value);
+				return new UnknownValue();
+
+			case ElementType.R8:
+				if (value.isReal8())
+					return value;
+				return new UnknownValue();
 			}
 			return value;
 		}
@@ -206,6 +224,10 @@ namespace de4dot.blocks.cflow {
 			if (0 <= index && index < variableDefinitions.Count)
 				return getUnknownValue(variableDefinitions[index].VariableType);
 			return new UnknownValue();
+		}
+
+		public int stackSize() {
+			return valueStack.Size;
 		}
 
 		public void push(Value value) {
@@ -363,6 +385,12 @@ namespace de4dot.blocks.cflow {
 			case Code.Ldfld:	emulate_Ldfld(instr); break;
 			case Code.Ldsfld:	emulate_Ldsfld(instr); break;
 
+			case Code.Ldftn:	valueStack.push(new ObjectValue(instr.Operand)); break;
+			case Code.Ldsflda:	valueStack.push(new ObjectValue(instr.Operand)); break;
+			case Code.Ldtoken:	valueStack.push(new ObjectValue(instr.Operand)); break;
+			case Code.Ldvirtftn:valueStack.pop(); valueStack.push(new ObjectValue()); break;
+			case Code.Ldflda:	valueStack.pop(); valueStack.push(new ObjectValue()); break;
+
 			case Code.Unbox:
 
 			case Code.Conv_R_Un:
@@ -418,16 +446,11 @@ namespace de4dot.blocks.cflow {
 			case Code.Ldelem_R4:
 			case Code.Ldelem_R8:
 			case Code.Ldelem_Ref:
-			case Code.Ldflda:
-			case Code.Ldftn:
 			case Code.Ldind_I:
 			case Code.Ldind_R4:
 			case Code.Ldind_R8:
 			case Code.Ldind_Ref:
 			case Code.Ldobj:
-			case Code.Ldsflda:
-			case Code.Ldtoken:
-			case Code.Ldvirtftn:
 			case Code.Leave:
 			case Code.Leave_S:
 			case Code.Localloc:

@@ -28,9 +28,9 @@
 
 using System;
 
-using MD = DeMono.Cecil.Metadata;
+using MD = Mono.Cecil.Metadata;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public sealed class PointerType : TypeSpecification {
 

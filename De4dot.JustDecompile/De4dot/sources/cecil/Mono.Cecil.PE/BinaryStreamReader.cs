@@ -29,7 +29,7 @@
 using System;
 using System.IO;
 
-namespace DeMono.Cecil.PE {
+namespace Mono.Cecil.PE {
 
 	class BinaryStreamReader : BinaryReader {
 

@@ -26,9 +26,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using DeMono.Collections.Generic;
+using Mono.Collections.Generic;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public sealed class EventDefinition : EventReference, IMemberDefinition {
 

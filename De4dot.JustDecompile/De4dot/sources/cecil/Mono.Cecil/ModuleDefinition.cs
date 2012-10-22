@@ -31,13 +31,13 @@ using System.Collections.Generic;
 using System.IO;
 using SR = System.Reflection;
 
-using DeMono.Cecil.Cil;
-using DeMono.Cecil.Metadata;
-using DeMono.Cecil.PE;
-using DeMono.Collections.Generic;
-using DeMono.MyStuff;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Metadata;
+using Mono.Cecil.PE;
+using Mono.Collections.Generic;
+using Mono.MyStuff;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public enum ReadingMode {
 		Immediate = 1,
@@ -227,6 +227,7 @@ namespace DeMono.Cecil {
 		TargetRuntime runtime;
 		TargetArchitecture architecture;
 		ModuleAttributes attributes;
+		ModuleCharacteristics characteristics;
 		Guid mvid;
 
 		internal AssemblyDefinition assembly;
@@ -238,6 +239,7 @@ namespace DeMono.Cecil {
 		Collection<CustomAttribute> custom_attributes;
 		Collection<AssemblyNameReference> references;
 		Collection<ModuleReference> modules;
+		Collection<ModuleReference> orig_modules;
 		Collection<Resource> resources;
 		Collection<ExportedType> exported_types;
 		TypeDefinitionCollection types;
@@ -264,6 +266,11 @@ namespace DeMono.Cecil {
 		public ModuleAttributes Attributes {
 			get { return attributes; }
 			set { attributes = value; }
+		}
+
+		public ModuleCharacteristics Characteristics {
+			get { return characteristics; }
+			set { characteristics = value; }
 		}
 
 		public string FullyQualifiedName {
@@ -294,6 +301,7 @@ namespace DeMono.Cecil {
 
 		public AssemblyDefinition Assembly {
 			get { return assembly; }
+			set { assembly = value; }
 		}
 
 #if !READ_ONLY
@@ -353,6 +361,18 @@ namespace DeMono.Cecil {
 					return modules = Read (this, (_, reader) => reader.ReadModuleReferences ());
 
 				return modules = new Collection<ModuleReference> ();
+			}
+		}
+
+		public Collection<ModuleReference> OrigModuleReferences {
+			get {
+				if (orig_modules != null)
+					return orig_modules;
+
+				if (HasImage)
+					return orig_modules = Read (this, (_, reader) => reader.ReadModuleReferences ());
+
+				return orig_modules = new Collection<ModuleReference> ();
 			}
 		}
 
@@ -458,24 +478,42 @@ namespace DeMono.Cecil {
 			this.token = new MetadataToken (TokenType.Module, 1);
 		}
 
-		internal ModuleDefinition (Image image, DumpedMethods dumpedMethods = null)
+		internal ModuleDefinition (Image image)
+			: this (image, null)
+		{
+		}
+
+		internal ModuleDefinition (Image image, DumpedMethods dumpedMethods)
 			: this ()
 		{
 			this.Image = image;
+			this.Image.DumpedMethods = dumpedMethods;
 			this.kind = image.Kind;
 			this.runtime = image.Runtime;
 			this.architecture = image.Architecture;
 			this.attributes = image.Attributes;
+			this.characteristics = image.Characteristics;
 			this.fq_name = image.FileName;
 
 			this.reader = new MetadataReader (this, dumpedMethods);
 		}
 
-		public string GetUserString (uint offset)
+		public string GetUserString (uint token)
 		{
-			if (Image.UserStringHeap == null)
-				return string.Empty;
-			return Image.UserStringHeap.Read (offset);
+			return Image.GetUserString (token);
+		}
+
+		public byte [] GetSignatureBlob (uint token)
+		{
+			uint table = token >> 24;
+			if (table == 0x11)
+				return Read (token, (t, reader) => reader.ReadStandAloneSignatureBlob (new MetadataToken (token)));
+			return null;
+		}
+
+		public byte [] GetSignatureBlob (FieldDefinition field)
+		{
+			return Read (field, (f, reader) => reader.ReadBlob (f.signature));
 		}
 
 		public bool HasTypeReference (string fullName)
@@ -824,6 +862,11 @@ namespace DeMono.Cecil {
 			return Read (token, (t, reader) => reader.LookupToken (t));
 		}
 
+		public CallSite ReadCallSite (MetadataToken token)
+		{
+			return Read (token, (t, reader) => reader.ReadCallSite (t));
+		}
+
 		internal TRet Read<TItem, TRet> (TItem item, Func<TItem, MetadataReader, TRet> read)
 		{
 			var position = reader.position;
@@ -880,6 +923,7 @@ namespace DeMono.Cecil {
 				architecture = parameters.Architecture,
 				mvid = Guid.NewGuid (),
 				Attributes = ModuleAttributes.ILOnly,
+				Characteristics = (ModuleCharacteristics) 0x8540,
 			};
 
 			if (parameters.AssemblyResolver != null)
@@ -942,7 +986,12 @@ namespace DeMono.Cecil {
 			return ReadModule (stream, new ReaderParameters (ReadingMode.Deferred));
 		}
 
-		public static ModuleDefinition ReadModule (string fileName, ReaderParameters parameters, DumpedMethods dumpedMethods = null)
+		public static ModuleDefinition ReadModule (string fileName, ReaderParameters parameters)
+		{
+			return ReadModule (fileName, parameters, null);
+		}
+
+		public static ModuleDefinition ReadModule (string fileName, ReaderParameters parameters, DumpedMethods dumpedMethods)
 		{
 			using (var stream = GetFileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.Read)) {
 				return ReadModule (stream, parameters, dumpedMethods);
@@ -955,7 +1004,12 @@ namespace DeMono.Cecil {
 				throw new ArgumentNullException ("stream");
 		}
 
-		public static ModuleDefinition ReadModule (Stream stream, ReaderParameters parameters, DumpedMethods dumpedMethods = null)
+		public static ModuleDefinition ReadModule (Stream stream, ReaderParameters parameters)
+		{
+			return ReadModule (stream, parameters, null);
+		}
+
+		public static ModuleDefinition ReadModule (Stream stream, ReaderParameters parameters, DumpedMethods dumpedMethods)
 		{
 			CheckStream (stream);
 			if (!stream.CanRead || !stream.CanSeek)

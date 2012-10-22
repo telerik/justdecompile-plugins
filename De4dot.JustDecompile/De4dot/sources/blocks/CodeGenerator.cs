@@ -19,8 +19,8 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 namespace de4dot.blocks {
 	class CodeGenerator {

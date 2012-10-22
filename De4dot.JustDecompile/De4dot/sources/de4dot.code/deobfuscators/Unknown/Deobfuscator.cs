@@ -19,6 +19,7 @@
 
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.Unknown {
 	public class DeobfuscatorInfo : DeobfuscatorInfoBase {
@@ -72,20 +73,7 @@ namespace de4dot.code.deobfuscators.Unknown {
 
 		void setName(string name) {
 			if (obfuscatorName == null && name != null)
-				obfuscatorName = name;
-		}
-
-		public override int earlyDetect() {
-			setName(earlyScanTypes());
-			return obfuscatorName != null ? 1 : 0;
-		}
-
-		string earlyScanTypes() {
-			foreach (var type in module.Types) {
-				if (type.FullName == "ConfusedByAttribute")
-					return "Confuser";
-			}
-			return null;
+				obfuscatorName = string.Format("{0} (not supported)", name);
 		}
 
 		protected override int detectInternal() {
@@ -98,8 +86,8 @@ namespace de4dot.code.deobfuscators.Unknown {
 
 		string scanTypes() {
 			foreach (var type in module.Types) {
-				if (type.Namespace == "___codefort")
-					return "CodeFort";
+				if (type.FullName == "ConfusedByAttribute")
+					return "Confuser";
 				if (type.FullName == "ZYXDNGuarder")
 					return "DNGuard HVM";
 				if (type.Name.Contains("();\t"))

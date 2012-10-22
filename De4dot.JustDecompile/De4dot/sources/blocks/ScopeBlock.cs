@@ -19,7 +19,7 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil.Cil;
+using Mono.Cecil.Cil;
 
 namespace de4dot.blocks {
 	// A normal branch may not transfer out of a protected block (try block), filter handler,
@@ -39,24 +39,24 @@ namespace de4dot.blocks {
 			}
 		}
 
-		public IList<BaseBlock> getAllBaseBlocks() {
+		public List<BaseBlock> getAllBaseBlocks() {
 			return getTheBlocks(new List<BaseBlock>());
 		}
 
-		public IList<Block> getAllBlocks() {
+		public List<Block> getAllBlocks() {
 			return getTheBlocks(new List<Block>());
 		}
 
-		public IList<Block> getAllBlocks(IList<Block> allBlocks) {
+		public List<Block> getAllBlocks(List<Block> allBlocks) {
 			allBlocks.Clear();
 			return getTheBlocks(allBlocks);
 		}
 
-		public IList<ScopeBlock> getAllScopeBlocks() {
+		public List<ScopeBlock> getAllScopeBlocks() {
 			return getTheBlocks(new List<ScopeBlock>());
 		}
 
-		public IList<T> getTheBlocks<T>(IList<T> list) where T : BaseBlock {
+		public List<T> getTheBlocks<T>(List<T> list) where T : BaseBlock {
 			addBlocks(list, this);
 			return list;
 		}
@@ -71,7 +71,11 @@ namespace de4dot.blocks {
 			}
 		}
 
-		List<Block> findBlocks(Func<Block, bool> blockChecker = null) {
+		List<Block> findBlocks() {
+			return findBlocks(null);
+		}
+
+		List<Block> findBlocks(Func<Block, bool> blockChecker) {
 			var blocks = new List<Block>();
 			foreach (var bb in getBaseBlocks()) {
 				Block block = bb as Block;
@@ -285,6 +289,13 @@ namespace de4dot.blocks {
 			if (!baseBlocks.Remove(block))
 				throw new ApplicationException("Could not remove dead block");
 			block.removeGuaranteedDeadBlock();
+		}
+
+		public void add(Block block) {
+			if (block.Parent != null)
+				throw new ApplicationException("Block already has a parent");
+			baseBlocks.Add(block);
+			block.Parent = this;
 		}
 	}
 }

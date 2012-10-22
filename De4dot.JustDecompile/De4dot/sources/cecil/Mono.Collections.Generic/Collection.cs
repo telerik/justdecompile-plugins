@@ -30,7 +30,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace DeMono.Collections.Generic {
+namespace Mono.Collections.Generic {
 
 	public class Collection<T> : IList<T>, IList {
 

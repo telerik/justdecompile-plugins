@@ -28,9 +28,9 @@
 
 using System.Text;
 
-using DeMono.Collections.Generic;
+using Mono.Collections.Generic;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public interface IGenericInstance : IMetadataTokenProvider {
 

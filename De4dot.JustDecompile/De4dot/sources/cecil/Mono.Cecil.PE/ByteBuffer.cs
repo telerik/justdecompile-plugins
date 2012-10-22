@@ -28,7 +28,7 @@
 
 using System;
 
-namespace DeMono.Cecil.PE {
+namespace Mono.Cecil.PE {
 
 	public class ByteBuffer {
 

@@ -30,7 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DeMono.Cecil.Rocks {
+namespace Mono.Cecil.Rocks {
 
 #if INSIDE_ROCKS
 	public

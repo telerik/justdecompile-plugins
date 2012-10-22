@@ -23,8 +23,8 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.Skater_NET {
@@ -110,10 +110,11 @@ namespace de4dot.code.deobfuscators.Skater_NET {
 			}
 		}
 
-		public void initialize() {
+		public void initialize(ISimpleDeobfuscator deobfuscator) {
 			if (decrypterCctor == null)
 				return;
 
+			deobfuscator.deobfuscate(decrypterCctor);
 			var instrs = decrypterCctor.Body.Instructions;
 			for (int i = 0; i < instrs.Count - 4; i++) {
 				var ldstr = instrs[i];

@@ -18,7 +18,7 @@
 */
 
 namespace de4dot_x64 {
-	class Program {
+	public class Program {
 		static int Main(string[] args) {
 			return de4dot.cui.Program.main(args);
 		}

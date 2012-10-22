@@ -28,10 +28,10 @@
 
 using System;
 using System.Text;
-using DeMono.Collections.Generic;
-using MD = DeMono.Cecil.Metadata;
+using Mono.Collections.Generic;
+using MD = Mono.Cecil.Metadata;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public struct ArrayDimension {
 

@@ -5,9 +5,9 @@ using System.Reflection;
 using NUnit.Core;
 using NUnit.Core.Extensibility;
 
-using DeMono.Cecil.Cil;
+using Mono.Cecil.Cil;
 
-namespace DeMono.Cecil.Tests {
+namespace Mono.Cecil.Tests {
 
 	public abstract class TestCecilAttribute : Attribute {
 

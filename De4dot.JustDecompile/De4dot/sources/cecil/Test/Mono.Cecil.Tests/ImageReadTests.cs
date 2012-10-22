@@ -1,13 +1,13 @@
 using System;
 using System.IO;
 
-using DeMono.Cecil;
-using DeMono.Cecil.PE;
-using DeMono.Cecil.Metadata;
+using Mono.Cecil;
+using Mono.Cecil.PE;
+using Mono.Cecil.Metadata;
 
 using NUnit.Framework;
 
-namespace DeMono.Cecil.Tests {
+namespace Mono.Cecil.Tests {
 
 	[TestFixture]
 	public class ImageReadTests : BaseTestFixture {
@@ -119,9 +119,26 @@ namespace DeMono.Cecil.Tests {
 		[TestModule ("delay-signed.dll")]
 		public void DelaySignedAssembly (ModuleDefinition module)
 		{
+			Assert.IsNotNull (module.Assembly.Name.PublicKey);
+			Assert.AreNotEqual (0, module.Assembly.Name.PublicKey.Length);
 			Assert.AreNotEqual (ModuleAttributes.StrongNameSigned, module.Attributes & ModuleAttributes.StrongNameSigned);
 			Assert.AreNotEqual (0, module.Image.StrongName.VirtualAddress);
 			Assert.AreNotEqual (0, module.Image.StrongName.Size);
+		}
+
+		[TestModule ("wp7.dll", Verify = false)]
+		public void WindowsPhoneNonSignedAssembly (ModuleDefinition module)
+		{
+			Assert.AreEqual (0, module.Assembly.Name.PublicKey.Length);
+			Assert.AreNotEqual (ModuleAttributes.StrongNameSigned, module.Attributes & ModuleAttributes.StrongNameSigned);
+			Assert.AreEqual (0, module.Image.StrongName.VirtualAddress);
+			Assert.AreEqual (0, module.Image.StrongName.Size);
+		}
+
+		[TestModule ("metro.exe", Verify = false)]
+		public void MetroAssembly (ModuleDefinition module)
+		{
+			Assert.AreEqual (ModuleCharacteristics.AppContainer, module.Characteristics & ModuleCharacteristics.AppContainer);
 		}
 	}
 }

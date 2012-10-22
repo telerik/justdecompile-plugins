@@ -29,11 +29,11 @@
 using System;
 using System.Text;
 
-using DeMono.Collections.Generic;
+using Mono.Collections.Generic;
 
-using MD = DeMono.Cecil.Metadata;
+using MD = Mono.Cecil.Metadata;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public sealed class GenericInstanceType : TypeSpecification, IGenericInstance, IGenericContext {
 

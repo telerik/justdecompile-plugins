@@ -30,11 +30,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-using DeMono.Cecil.Cil;
-using DeMono.Collections.Generic;
-using DeMono.CompilerServices.SymbolWriter;
+using Mono.Cecil.Cil;
+using Mono.Collections.Generic;
+using Mono.CompilerServices.SymbolWriter;
 
-namespace DeMono.Cecil.Mdb {
+namespace Mono.Cecil.Mdb {
 
 	public class MdbReaderProvider : ISymbolReaderProvider {
 
@@ -51,7 +51,7 @@ namespace DeMono.Cecil.Mdb {
 
 	public class MdbReader : ISymbolReader {
 
-		readonly DeMonoSymbolFile symbol_file;
+		readonly MonoSymbolFile symbol_file;
 		readonly Dictionary<string, Document> documents;
 
 		public MdbReader (MonoSymbolFile symFile)

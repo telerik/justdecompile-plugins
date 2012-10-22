@@ -30,7 +30,7 @@ using System;
 using System.Collections;
 using System .Collections.Generic;
 
-namespace DeMono.Collections.Generic {
+namespace Mono.Collections.Generic {
 
 	public sealed class ReadOnlyCollection<T> : Collection<T>, ICollection<T>, IList {
 

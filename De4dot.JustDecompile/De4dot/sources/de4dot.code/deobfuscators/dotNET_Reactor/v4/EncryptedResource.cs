@@ -21,8 +21,8 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
@@ -69,7 +69,11 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 			return DeobUtils.lookup(module, def, errorMessage);
 		}
 
-		public bool couldBeResourceDecrypter(MethodDefinition method, IEnumerable<string> additionalTypes, bool checkResource = true) {
+		public bool couldBeResourceDecrypter(MethodDefinition method, IEnumerable<string> additionalTypes) {
+			return couldBeResourceDecrypter(method, additionalTypes, true);
+		}
+
+		public bool couldBeResourceDecrypter(MethodDefinition method, IEnumerable<string> additionalTypes, bool checkResource) {
 			if (!method.IsStatic)
 				return false;
 			if (method.Body == null)

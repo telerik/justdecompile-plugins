@@ -29,7 +29,7 @@
 using System;
 using System.IO;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public sealed class EmbeddedResource : Resource {
 
@@ -38,6 +38,10 @@ namespace DeMono.Cecil {
 		uint? offset;
 		byte [] data;
 		Stream stream;
+
+		public uint? Offset {
+			get { return offset; }
+		}
 
 		public override ResourceType ResourceType {
 			get { return ResourceType.Embedded; }
@@ -100,6 +104,34 @@ namespace DeMono.Cecil {
 				offset += read;
 
 			return data;
+		}
+
+		public bool _Equals (object obj)
+		{
+			var other = obj as EmbeddedResource;
+			if (other == null)
+				return false;
+			if ((offset == null && other.offset != null) ||
+				(offset != null && other.offset == null))
+				return false;
+			if (data != other.data)
+				return false;
+			if (stream != other.stream)
+				return false;
+
+			return true;
+		}
+
+		public int _GetHashCode ()
+		{
+			int hash = 0;
+			if (offset != null)
+				hash ^= offset.GetHashCode ();
+			if (data != null)
+				hash ^= data.GetHashCode ();
+			if (stream != null)
+				hash ^= stream.GetHashCode ();
+			return hash;
 		}
 	}
 }
