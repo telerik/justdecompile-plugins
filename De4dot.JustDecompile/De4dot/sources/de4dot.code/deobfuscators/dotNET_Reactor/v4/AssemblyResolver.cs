@@ -20,7 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DeMono.Cecil;
+using Mono.Cecil;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
@@ -197,7 +197,7 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 				return resourceModule.Assembly.Name.FullName;
 			}
 			catch {
-				return string.Format("unknown_name_{0}", unknownNameCounter);
+				return string.Format("unknown_name_{0}", unknownNameCounter++);
 			}
 		}
 	}

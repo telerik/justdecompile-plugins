@@ -28,7 +28,7 @@
 
 using System;
 
-namespace DeMono.Cecil.Rocks {
+namespace Mono.Cecil.Rocks {
 
 #if INSIDE_ROCKS
 	public

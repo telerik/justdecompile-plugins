@@ -18,7 +18,7 @@
 */
 
 using System.Collections.Generic;
-using DeMono.Cecil;
+using Mono.Cecil;
 using de4dot.blocks;
 using de4dot.blocks.cflow;
 
@@ -100,11 +100,12 @@ namespace de4dot.code.deobfuscators.Spices_Net {
 			get { return startedDeobfuscating ? options.InlineMethods : true; }
 		}
 
-		public override IMethodCallInliner MethodCallInliner {
+		public override IEnumerable<IBlocksDeobfuscator> BlocksDeobfuscators {
 			get {
+				var list = new List<IBlocksDeobfuscator>();
 				if (CanInlineMethods)
-					return methodCallInliner;
-				return new NoMethodInliner();
+					list.Add(methodCallInliner);
+				return list;
 			}
 		}
 
@@ -162,7 +163,7 @@ namespace de4dot.code.deobfuscators.Spices_Net {
 
 			stringDecrypter.initialize();
 			foreach (var info in stringDecrypter.DecrypterInfos) {
-				staticStringInliner.add(info.method, (method2, args) => {
+				staticStringInliner.add(info.method, (method2, gim, args) => {
 					return stringDecrypter.decrypt(method2);
 				});
 			}

@@ -19,12 +19,29 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil;
+using Mono.Cecil;
 
-namespace DeMono.MyStuff {
+namespace Mono.MyStuff {
+	public interface IStringDecrypter {
+		string decrypt(uint token);
+	}
+
 	[Serializable]
 	public class DumpedMethods {
 		Dictionary<uint, DumpedMethod> methods = new Dictionary<uint, DumpedMethod>();
+		IStringDecrypter stringDecrypter = new NoStringDecrypter();
+
+		[Serializable]
+		class NoStringDecrypter : IStringDecrypter {
+			public string decrypt(uint token) {
+				return null;
+			}
+		}
+
+		public IStringDecrypter StringDecrypter {
+			get { return stringDecrypter; }
+			set { stringDecrypter = value; }
+		}
 
 		public void add(uint token, DumpedMethod info) {
 			methods[token] = info;

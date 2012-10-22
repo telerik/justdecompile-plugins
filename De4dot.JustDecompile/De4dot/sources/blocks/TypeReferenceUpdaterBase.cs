@@ -18,7 +18,7 @@
 */
 
 using System;
-using DeMono.Cecil;
+using Mono.Cecil;
 
 namespace de4dot.blocks {
 	public abstract class TypeReferenceUpdaterBase {

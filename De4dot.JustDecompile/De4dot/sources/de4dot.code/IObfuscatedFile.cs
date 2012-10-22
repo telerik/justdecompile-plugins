@@ -19,7 +19,7 @@
 
 using System.Collections.Generic;
 using de4dot.code.deobfuscators;
-using DeMono.Cecil;
+using Mono.Cecil;
 using de4dot.code.renamer;
 
 namespace de4dot.code {
@@ -32,6 +32,7 @@ namespace de4dot.code {
 		INameChecker NameChecker { get; }
 		bool RenameResourcesInCode { get; }
 		bool RemoveNamespaceWithOneType { get; }
+		bool RenameResourceKeys { get; }
 
 		void deobfuscateBegin();
 		void deobfuscate();

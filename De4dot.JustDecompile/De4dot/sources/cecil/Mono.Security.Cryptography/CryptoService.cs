@@ -35,12 +35,12 @@ using System.Security.Cryptography;
 
 #if !SILVERLIGHT && !CF
 using System.Runtime.Serialization;
-using DeMono.Security.Cryptography;
+using Mono.Security.Cryptography;
 #endif
 
-using DeMono.Cecil.PE;
+using Mono.Cecil.PE;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	// Most of this code has been adapted
 	// from Jeroen Frijters' fantastic work

@@ -18,7 +18,7 @@
 */
 
 using System.Collections.Generic;
-using DeMono.Cecil;
+using Mono.Cecil;
 using de4dot.blocks;
 using de4dot.blocks.cflow;
 

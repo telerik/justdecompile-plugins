@@ -24,15 +24,17 @@ using System.Windows;
 
 namespace De4dot.JustDecompile
 {
-    public class De4dotWrapper
-    {
+	public class De4dotWrapper
+	{
         private static IList<IDeobfuscatorInfo> CreateDeobfuscatorInfos()
         {
             return new List<IDeobfuscatorInfo> {
 				new de4dot.code.deobfuscators.Unknown.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.Babel_NET.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.CliSecure.DeobfuscatorInfo(),
+				new de4dot.code.deobfuscators.CodeFort.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.CodeVeil.DeobfuscatorInfo(),
+				new de4dot.code.deobfuscators.CodeWall.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.CryptoObfuscator.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.DeepSea.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.Dotfuscator.DeobfuscatorInfo(),
@@ -40,11 +42,14 @@ namespace De4dot.JustDecompile
 				new de4dot.code.deobfuscators.dotNET_Reactor.v4.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.Eazfuscator_NET.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.Goliath_NET.DeobfuscatorInfo(),
+				new de4dot.code.deobfuscators.ILProtector.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.MaxtoCode.DeobfuscatorInfo(),
+				new de4dot.code.deobfuscators.MPRESS.DeobfuscatorInfo(),
+				new de4dot.code.deobfuscators.Rummage.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.Skater_NET.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.SmartAssembly.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.Spices_Net.DeobfuscatorInfo(),
-				new de4dot.code.deobfuscators.Xenocode.DeobfuscatorInfo(),			
+				new de4dot.code.deobfuscators.Xenocode.DeobfuscatorInfo(),	
 			};
         }
 
@@ -53,25 +58,30 @@ namespace De4dot.JustDecompile
             return (file == null || file.Deobfuscator == null || file.Deobfuscator.Name == "Unknown Obfuscator");
         }
 
-        public IObfuscatedFile SearchDeobfuscator(string filename)
-        {
+		public IObfuscatedFile SearchDeobfuscator(string filename)
+		{
             AssemblyResolver.Instance.clearAll();
 
-            var fileOptions = new ObfuscatedFile.Options { Filename = filename };
-            var ofile = new ObfuscatedFile(fileOptions, new NewAppDomainAssemblyClientFactory());
-            ofile.DeobfuscatorContext = new DeobfuscatorContext();
+			ObfuscatedFile.Options fileOptions = new ObfuscatedFile.Options { Filename = filename };
+			ObfuscatedFile ofile = CreateObfuscationFile(fileOptions);
+			return ofile;
+		}
+  
+		public ObfuscatedFile CreateObfuscationFile(ObfuscatedFile.Options fileOptions)
+		{
+			ObfuscatedFile ofile = new ObfuscatedFile(fileOptions, new NewAppDomainAssemblyClientFactory());
+			ofile.DeobfuscatorContext = new DeobfuscatorContext();
 
-            try
-            {
-                ofile.load(CreateDeobfuscatorInfos().Select(di => di.createDeobfuscator()).ToList());
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-
-                return null;
-            }
-            return ofile;
-        }
-    }
+			try
+			{
+				ofile.load(CreateDeobfuscatorInfos().Select(di => di.createDeobfuscator()).ToList());
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+				return null;
+			}
+			return ofile;
+		}
+	}
 }

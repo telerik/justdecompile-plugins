@@ -20,8 +20,8 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.MyStuff;
+using Mono.Cecil;
+using Mono.MyStuff;
 using de4dot.blocks;
 
 namespace de4dot.code {

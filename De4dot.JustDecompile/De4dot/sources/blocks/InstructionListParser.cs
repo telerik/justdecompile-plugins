@@ -19,7 +19,7 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil.Cil;
+using Mono.Cecil.Cil;
 
 namespace de4dot.blocks {
 	class InstructionListParser {

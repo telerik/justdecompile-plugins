@@ -1,13 +1,13 @@
 using System;
 using System.Linq;
 
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
-using DeMono.Cecil.Metadata;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Metadata;
 
 using NUnit.Framework;
 
-namespace DeMono.Cecil.Tests {
+namespace Mono.Cecil.Tests {
 
 	[TestFixture]
 	public class TypeTests : BaseTestFixture {

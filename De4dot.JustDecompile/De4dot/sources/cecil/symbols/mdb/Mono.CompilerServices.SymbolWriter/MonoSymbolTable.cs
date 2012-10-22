@@ -1,5 +1,5 @@
 //
-// DeMono.CSharp.Debugger/MonoSymbolTable.cs
+// Mono.CSharp.Debugger/MonoSymbolTable.cs
 //
 // Author:
 //   Martin Baulig (martin@ximian.com)
@@ -68,7 +68,7 @@ using System.IO;
 // changing the file format.
 //
 
-namespace DeMono.CompilerServices.SymbolWriter
+namespace Mono.CompilerServices.SymbolWriter
 {
 	public class OffsetTable
 	{
@@ -931,7 +931,7 @@ namespace DeMono.CompilerServices.SymbolWriter
 						   (opcode <= DW_LNE_MONO__extensions_end)) {
 						; // reserved for future extensions
 					} else {
-						throw new DeMonoSymbolFileException (
+						throw new MonoSymbolFileException (
 							"Unknown extended opcode {0:x} in LNT ({1})",
 							opcode, file.FileName);
 					}
@@ -962,7 +962,7 @@ namespace DeMono.CompilerServices.SymbolWriter
 						modified = true;
 						break;
 					default:
-						throw new DeMonoSymbolFileException (
+						throw new MonoSymbolFileException (
 							"Unknown standard opcode {0:x} in LNT",
 							opcode);
 					}
@@ -1025,7 +1025,7 @@ namespace DeMono.CompilerServices.SymbolWriter
 		LineNumberTable lnt;
 		string real_name;
 
-		public readonly DeMonoSymbolFile SymbolFile;
+		public readonly MonoSymbolFile SymbolFile;
 
 		public int Index {
 			get { return index; }
@@ -1135,10 +1135,10 @@ namespace DeMono.CompilerServices.SymbolWriter
 				LineNumberEntry line = line_numbers [i];
 
 				if (line.Equals (LineNumberEntry.Null))
-					throw new DeMonoSymbolFileException ();
+					throw new MonoSymbolFileException ();
 
 				if (line.Offset < last_offset)
-					throw new DeMonoSymbolFileException ();
+					throw new MonoSymbolFileException ();
 
 				if (line.Offset > last_offset) {
 					last_row = line.Row;

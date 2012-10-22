@@ -29,9 +29,9 @@
 using System;
 using System.IO;
 
-using DeMono.Collections.Generic;
+using Mono.Collections.Generic;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public sealed class AssemblyDefinition : ICustomAttributeProvider, ISecurityDeclarationProvider {
 
@@ -70,6 +70,7 @@ namespace DeMono.Cecil {
 
 		public ModuleDefinition MainModule {
 			get { return main_module; }
+			set { main_module = value; }
 		}
 
 		public MethodDefinition EntryPoint {
@@ -103,7 +104,7 @@ namespace DeMono.Cecil {
 			get { return security_declarations ?? (security_declarations = this.GetSecurityDeclarations (main_module)); }
 		}
 
-		internal AssemblyDefinition ()
+		public AssemblyDefinition ()
 		{
 		}
 

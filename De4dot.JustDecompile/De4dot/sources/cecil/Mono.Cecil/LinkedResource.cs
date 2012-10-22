@@ -26,7 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public sealed class LinkedResource : Resource {
 

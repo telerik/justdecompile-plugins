@@ -28,7 +28,7 @@
 
 using System.Collections.Generic;
 
-namespace DeMono.Cecil.Metadata {
+namespace Mono.Cecil.Metadata {
 
 	struct Row<T1, T2> {
 		internal T1 Col1;

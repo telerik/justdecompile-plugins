@@ -1,10 +1,10 @@
 using System;
 
-using DeMono.Cecil;
+using Mono.Cecil;
 
 using NUnit.Framework;
 
-namespace DeMono.Cecil.Tests {
+namespace Mono.Cecil.Tests {
 
 	[TestFixture]
 	public class NestedTypesTests : BaseTestFixture {

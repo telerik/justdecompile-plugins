@@ -5,11 +5,11 @@ using System.Linq;
 using SR = System.Reflection;
 using System.Runtime.CompilerServices;
 
-using DeMono.Cecil.Cil;
+using Mono.Cecil.Cil;
 
 using NUnit.Framework;
 
-namespace DeMono.Cecil.Tests {
+namespace Mono.Cecil.Tests {
 
 	[TestFixture]
 	public class ImportCecilTests : BaseTestFixture {
@@ -217,7 +217,7 @@ namespace DeMono.Cecil.Tests {
 
 			var method = module.Import (generic.GetMethod ("Method"));
 
-			Assert.AreEqual ("T DeMono.Cecil.Tests.ImportCecilTests/Generic`1::Method(T)", method.FullName);
+			Assert.AreEqual ("T Mono.Cecil.Tests.ImportCecilTests/Generic`1::Method(T)", method.FullName);
 		}
 
 		delegate void Emitter (ModuleDefinition module, MethodBody body);

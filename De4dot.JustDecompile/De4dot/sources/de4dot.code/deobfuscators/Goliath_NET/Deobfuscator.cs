@@ -18,7 +18,7 @@
 */
 
 using System.Collections.Generic;
-using DeMono.Cecil;
+using Mono.Cecil;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.Goliath_NET {
@@ -80,7 +80,7 @@ namespace de4dot.code.deobfuscators.Goliath_NET {
 		Options options;
 		string obfuscatorName = DeobfuscatorInfo.THE_NAME;
 
-		ProxyDelegateFinder proxyDelegateFinder;
+		ProxyCallFixer proxyCallFixer;
 		LocalsRestorer localsRestorer;
 		LogicalExpressionFixer logicalExpressionFixer;
 		StringDecrypter stringDecrypter;
@@ -177,8 +177,8 @@ namespace de4dot.code.deobfuscators.Goliath_NET {
 		public override void deobfuscateBegin() {
 			base.deobfuscateBegin();
 
-			proxyDelegateFinder = new ProxyDelegateFinder(module);
-			proxyDelegateFinder.find();
+			proxyCallFixer = new ProxyCallFixer(module);
+			proxyCallFixer.find();
 			localsRestorer = new LocalsRestorer(module);
 			if (options.RestoreLocals)
 				localsRestorer.find();
@@ -191,7 +191,7 @@ namespace de4dot.code.deobfuscators.Goliath_NET {
 			if (options.DecryptIntegers) {
 				int32ValueInliner = new Int32ValueInliner();
 				foreach (var method in integerDecrypter.getMethods()) {
-					int32ValueInliner.add(method, (method2, args) => {
+					int32ValueInliner.add(method, (method2, gim, args) => {
 						return integerDecrypter.decrypt(method2);
 					});
 				}
@@ -200,14 +200,14 @@ namespace de4dot.code.deobfuscators.Goliath_NET {
 			if (options.DecryptArrays) {
 				arrayValueInliner = new ArrayValueInliner(module, initializedDataCreator);
 				foreach (var method in arrayDecrypter.getMethods()) {
-					arrayValueInliner.add(method, (method2, args) => {
+					arrayValueInliner.add(method, (method2, gim, args) => {
 						return arrayDecrypter.decrypt(method2);
 					});
 				}
 			}
 
 			foreach (var method in stringDecrypter.getMethods()) {
-				staticStringInliner.add(method, (method2, args) => {
+				staticStringInliner.add(method, (method2, gim, args) => {
 					return stringDecrypter.decrypt(method2);
 				});
 				DeobfuscatedFile.stringDecryptersAdded();
@@ -220,7 +220,7 @@ namespace de4dot.code.deobfuscators.Goliath_NET {
 		}
 
 		public override void deobfuscateMethodBegin(Blocks blocks) {
-			proxyDelegateFinder.deobfuscate(blocks);
+			proxyCallFixer.deobfuscate(blocks);
 			base.deobfuscateMethodBegin(blocks);
 		}
 
@@ -239,7 +239,7 @@ namespace de4dot.code.deobfuscators.Goliath_NET {
 		}
 
 		public override void deobfuscateEnd() {
-			removeProxyDelegates(proxyDelegateFinder);
+			removeProxyDelegates(proxyCallFixer);
 			removeInlinedMethods();
 			addTypesToBeRemoved(localsRestorer.Types, "Method locals obfuscation type");
 

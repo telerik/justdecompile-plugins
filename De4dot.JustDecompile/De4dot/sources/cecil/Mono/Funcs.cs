@@ -28,7 +28,7 @@
 
 #if !NET_3_5 && !NET_4_0
 
-namespace DeMono {
+namespace Mono {
 	delegate TResult Func<TResult> ();
 	delegate TResult Func<T, TResult> (T arg1);
 	delegate TResult Func<T1, T2, TResult> (T1 arg1, T2 arg2);

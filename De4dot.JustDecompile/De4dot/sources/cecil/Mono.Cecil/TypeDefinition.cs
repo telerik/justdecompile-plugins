@@ -29,10 +29,10 @@
 using System;
 using System.Collections.Generic;
 
-using DeMono.Cecil.Metadata;
-using DeMono.Collections.Generic;
+using Mono.Cecil.Metadata;
+using Mono.Collections.Generic;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public sealed class TypeDefinition : TypeReference, IMemberDefinition, ISecurityDeclarationProvider {
 

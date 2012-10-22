@@ -5,11 +5,11 @@ using System.IO;
 using SR = System.Reflection;
 using System.Runtime.CompilerServices;
 
-using DeMono.Cecil.Cil;
+using Mono.Cecil.Cil;
 
 using NUnit.Framework;
 
-namespace DeMono.Cecil.Tests {
+namespace Mono.Cecil.Tests {
 
 	[TestFixture]
 	public class ImportReflectionTests : BaseTestFixture {
@@ -275,7 +275,7 @@ namespace DeMono.Cecil.Tests {
 
 			var generic_field = module.Import (generic_list_foo_open_field, foo_def);
 
-			Assert.AreEqual ("TFoo DeMono.Cecil.Tests.ImportReflectionTests/Generic`1<System.Collections.Generic.List`1<TFoo>>::Field",
+			Assert.AreEqual ("TFoo Mono.Cecil.Tests.ImportReflectionTests/Generic`1<System.Collections.Generic.List`1<TFoo>>::Field",
 				generic_field.FullName);
 		}
 
@@ -291,7 +291,7 @@ namespace DeMono.Cecil.Tests {
 
 			var generic_method = module.Import (generic_list_foo_open_method, foo_def);
 
-			Assert.AreEqual ("TFoo DeMono.Cecil.Tests.ImportReflectionTests/Generic`1<System.Collections.Generic.List`1<TFoo>>::Method(TFoo)",
+			Assert.AreEqual ("TFoo Mono.Cecil.Tests.ImportReflectionTests/Generic`1<System.Collections.Generic.List`1<TFoo>>::Method(TFoo)",
 				generic_method.FullName);
 		}
 
@@ -302,7 +302,7 @@ namespace DeMono.Cecil.Tests {
 
 			var method = module.Import (typeof (Generic<>).GetMethod ("Method"));
 
-			Assert.AreEqual ("T DeMono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::Method(T)", method.FullName);
+			Assert.AreEqual ("T Mono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::Method(T)", method.FullName);
 		}
 
 		[Test]
@@ -312,11 +312,11 @@ namespace DeMono.Cecil.Tests {
 
 			var generic_method = module.Import (typeof (Generic<>).GetMethod ("GenericMethod"));
 
-			Assert.AreEqual ("TS DeMono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::GenericMethod(T,TS)", generic_method.FullName);
+			Assert.AreEqual ("TS Mono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::GenericMethod(T,TS)", generic_method.FullName);
 
 			generic_method = module.Import (typeof (Generic<>).GetMethod ("GenericMethod"), generic_method);
 
-			Assert.AreEqual ("TS DeMono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::GenericMethod<TS>(T,TS)", generic_method.FullName);
+			Assert.AreEqual ("TS Mono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::GenericMethod<TS>(T,TS)", generic_method.FullName);
 		}
 
 		delegate void Emitter (ModuleDefinition module, MethodBody body);

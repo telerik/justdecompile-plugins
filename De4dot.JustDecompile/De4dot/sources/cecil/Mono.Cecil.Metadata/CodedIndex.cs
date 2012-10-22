@@ -26,7 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-namespace DeMono.Cecil.Metadata {
+namespace Mono.Cecil.Metadata {
 
 	enum CodedIndex {
 		TypeDefOrRef,

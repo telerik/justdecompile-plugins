@@ -20,8 +20,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 using de4dot.code.renamer.asmmodules;
 using de4dot.blocks;
 
@@ -405,7 +405,11 @@ namespace de4dot.code.renamer {
 			return true;
 		}
 
-		void prepareRenameGenericParams(IEnumerable<GenericParamDef> genericParams, INameChecker checker, IEnumerable<GenericParamDef> otherGenericParams = null) {
+		void prepareRenameGenericParams(IEnumerable<GenericParamDef> genericParams, INameChecker checker) {
+			prepareRenameGenericParams(genericParams, checker, null);
+		}
+
+		void prepareRenameGenericParams(IEnumerable<GenericParamDef> genericParams, INameChecker checker, IEnumerable<GenericParamDef> otherGenericParams) {
 			var usedNames = new Dictionary<string, bool>(StringComparer.Ordinal);
 			var nameCreator = new GenericParamNameCreator();
 

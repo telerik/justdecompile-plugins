@@ -4,13 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-using DeMono.Cecil;
-using DeMono.Cecil.Metadata;
-using DeMono.Cecil.PE;
+using Mono.Cecil;
+using Mono.Cecil.Metadata;
+using Mono.Cecil.PE;
 
 using NUnit.Framework;
 
-namespace DeMono.Cecil.Tests {
+namespace Mono.Cecil.Tests {
 
 	[TestFixture]
 	public class CustomAttributesTests : BaseTestFixture {

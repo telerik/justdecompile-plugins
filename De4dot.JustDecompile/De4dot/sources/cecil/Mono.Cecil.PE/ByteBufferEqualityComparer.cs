@@ -29,7 +29,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DeMono.Cecil.PE {
+namespace Mono.Cecil.PE {
 
 	sealed class ByteBufferEqualityComparer : IEqualityComparer<ByteBuffer> {
 

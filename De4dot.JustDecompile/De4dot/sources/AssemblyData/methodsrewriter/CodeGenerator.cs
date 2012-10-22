@@ -22,13 +22,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 using de4dot.blocks;
 
-using OpCode = DeMono.Cecil.Cil.OpCode;
-using OpCodes = DeMono.Cecil.Cil.OpCodes;
-using OperandType = DeMono.Cecil.Cil.OperandType;
+using OpCode = Mono.Cecil.Cil.OpCode;
+using OpCodes = Mono.Cecil.Cil.OpCodes;
+using OperandType = Mono.Cecil.Cil.OperandType;
 using ROpCode = System.Reflection.Emit.OpCode;
 using ROpCodes = System.Reflection.Emit.OpCodes;
 

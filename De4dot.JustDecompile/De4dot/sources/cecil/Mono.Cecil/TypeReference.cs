@@ -28,10 +28,10 @@
 
 using System;
 
-using DeMono.Cecil.Metadata;
-using DeMono.Collections.Generic;
+using Mono.Cecil.Metadata;
+using Mono.Collections.Generic;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public enum MetadataType : byte {
 		Void = ElementType.Void,
@@ -146,6 +146,15 @@ namespace DeMono.Cecil {
 					return declaring_type.Scope;
 
 				return scope;
+			}
+			set {
+				var declaring_type = this.DeclaringType;
+				if (declaring_type != null) {
+					declaring_type.Scope = value;
+					return;
+				}
+
+				scope = value;
 			}
 		}
 

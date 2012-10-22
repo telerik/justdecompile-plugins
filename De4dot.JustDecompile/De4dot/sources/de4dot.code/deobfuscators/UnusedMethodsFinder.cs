@@ -18,8 +18,8 @@
 */
 
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators {
@@ -79,7 +79,7 @@ namespace de4dot.code.deobfuscators {
 					continue;
 				}
 
-				var calledMethod = DotNetUtils.getMethod(module, instr.Operand as MethodReference);
+				var calledMethod = DotNetUtils.getMethod2(module, instr.Operand as MethodReference);
 				if (calledMethod == null)
 					continue;
 				if (possiblyUnusedMethods.ContainsKey(calledMethod))

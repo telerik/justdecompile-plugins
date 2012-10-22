@@ -28,19 +28,21 @@
 
 using System;
 
-using DeMono;
-using DeMono.Cecil.Cil;
-using DeMono.Cecil.Metadata;
+using Mono;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Metadata;
+using Mono.MyStuff;
 
 using RVA = System.UInt32;
 
-namespace DeMono.Cecil.PE {
+namespace Mono.Cecil.PE {
 
 	sealed class Image {
 
 		public ModuleKind Kind;
 		public TargetRuntime Runtime;
 		public TargetArchitecture Architecture;
+		public ModuleCharacteristics Characteristics;
 		public string FileName;
 
 		public Section [] Sections;
@@ -61,13 +63,33 @@ namespace DeMono.Cecil.PE {
 		public TableHeap TableHeap;
 		public MetadataStream[] MetadataStreams;
 
+		DumpedMethods dumpedMethods;
+
 		readonly int [] coded_index_sizes = new int [13];
 
 		readonly Func<Table, int> counter;
 
+		public DumpedMethods DumpedMethods {
+			get { return dumpedMethods; }
+			set { dumpedMethods = value; }
+		}
+
 		public Image ()
 		{
 			counter = GetTableLength;
+		}
+
+		public string GetUserString (uint token)
+		{
+			if (dumpedMethods != null)
+			{
+				string s = dumpedMethods.StringDecrypter.decrypt (token);
+				if (s != null)
+					return s;
+			}
+			if (UserStringHeap == null)
+				return string.Empty;
+			return UserStringHeap.Read (token & 0x00FFFFFF);
 		}
 
 		public bool HasTable (Table table)

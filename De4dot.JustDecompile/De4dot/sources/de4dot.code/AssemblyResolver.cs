@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
-using DeMono.Cecil;
+using Mono.Cecil;
 
 namespace de4dot.code {
 	public class AssemblyResolver : DefaultAssemblyResolver {

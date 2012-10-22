@@ -28,11 +28,11 @@
 
 using System;
 
-using DeMono.Collections.Generic;
+using Mono.Collections.Generic;
 
-using DeMono.Cecil.Metadata;
+using Mono.Cecil.Metadata;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public sealed class GenericParameter : TypeReference, ICustomAttributeProvider {
 
@@ -107,6 +107,7 @@ namespace DeMono.Cecil {
 					? ((MethodReference) owner).DeclaringType.Scope
 					: ((TypeReference) owner).Scope;
 			}
+			set { throw new InvalidOperationException (); }
 		}
 
 		public override ModuleDefinition Module {

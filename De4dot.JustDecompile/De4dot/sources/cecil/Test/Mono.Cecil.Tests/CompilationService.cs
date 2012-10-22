@@ -7,7 +7,7 @@ using System.Text;
 
 using NUnit.Framework;
 
-namespace DeMono.Cecil.Tests {
+namespace Mono.Cecil.Tests {
 
 	struct CompilationResult {
 		internal DateTime source_write_time;

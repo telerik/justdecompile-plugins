@@ -13,13 +13,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "de4dot.code", "De4dot.JustD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "de4dot.mdecrypt", "De4dot.JustDecompile\De4dot\sources\de4dot.mdecrypt\de4dot.mdecrypt.csproj", "{5C93C5E2-196F-4877-BF65-96FEBFCEFCA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSharpCode.SharpZLib", "De4dot.JustDecompile\De4dot\sources\SharpZipLib\ICSharpCode.SharpZLib.csproj", "{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil", "De4dot.JustDecompile\De4dot\sources\cecil\Mono.Cecil.csproj", "{D68133BD-1E63-496E-9EDE-4FBDBF77B486}"
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 6
+		SccNumberOfProjects = 5
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://tfs:8082/defaultcollection
 		SccProjectUniqueName0 = De4dot.JustDecompile\\De4dot.JustDecompile.Module.csproj
@@ -45,18 +43,12 @@ Global
 		SccAuxPath3 = http://tfs:8082/defaultcollection
 		SccLocalPath3 = De4dot.JustDecompile\\De4dot\\sources\\de4dot.code
 		SccProvider3 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccProjectUniqueName4 = De4dot.JustDecompile\\De4dot\\sources\\SharpZipLib\\ICSharpCode.SharpZLib.csproj
+		SccProjectUniqueName4 = De4dot.JustDecompile\\De4dot\\sources\\cecil\\Mono.Cecil.csproj
 		SccProjectTopLevelParentUniqueName4 = JustDecompile.De4dotPlugin.sln
-		SccProjectName4 = De4dot.JustDecompile/De4dot/sources/SharpZipLib
+		SccProjectName4 = De4dot.JustDecompile/De4dot/sources/cecil
 		SccAuxPath4 = http://tfs:8082/defaultcollection
-		SccLocalPath4 = De4dot.JustDecompile\\De4dot\\sources\\SharpZipLib
+		SccLocalPath4 = De4dot.JustDecompile\\De4dot\\sources\\cecil
 		SccProvider4 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccProjectUniqueName5 = De4dot.JustDecompile\\De4dot\\sources\\cecil\\Mono.Cecil.csproj
-		SccProjectTopLevelParentUniqueName5 = JustDecompile.De4dotPlugin.sln
-		SccProjectName5 = De4dot.JustDecompile/De4dot/sources/cecil
-		SccAuxPath5 = http://tfs:8082/defaultcollection
-		SccLocalPath5 = De4dot.JustDecompile\\De4dot\\sources\\cecil
-		SccProvider5 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -341,56 +333,6 @@ Global
 		{5C93C5E2-196F-4877-BF65-96FEBFCEFCA1}.ReleaseInternal|Mixed Platforms.ActiveCfg = ReleaseInternal|Any CPU
 		{5C93C5E2-196F-4877-BF65-96FEBFCEFCA1}.ReleaseInternal|Mixed Platforms.Build.0 = ReleaseInternal|Any CPU
 		{5C93C5E2-196F-4877-BF65-96FEBFCEFCA1}.ReleaseInternal|x86.ActiveCfg = ReleaseInternal|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.DebugInternal|Any CPU.ActiveCfg = DebugInternal|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.DebugInternal|Any CPU.Build.0 = DebugInternal|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.DebugInternal|Mixed Platforms.ActiveCfg = DebugInternal|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.DebugInternal|Mixed Platforms.Build.0 = DebugInternal|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.DebugInternal|x86.ActiveCfg = DebugInternal|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_2_0_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_2_0_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_2_0_Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_2_0_Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_2_0_Debug|x86.ActiveCfg = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_2_0_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_2_0_Release|Any CPU.Build.0 = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_2_0_Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_2_0_Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_2_0_Release|x86.ActiveCfg = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_3_5_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_3_5_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_3_5_Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_3_5_Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_3_5_Debug|x86.ActiveCfg = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_3_5_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_3_5_Release|Any CPU.Build.0 = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_3_5_Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_3_5_Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_3_5_Release|x86.ActiveCfg = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_4_0_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_4_0_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_4_0_Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_4_0_Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_4_0_Debug|x86.ActiveCfg = Debug|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_4_0_Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_4_0_Release|Any CPU.Build.0 = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_4_0_Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_4_0_Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.net_4_0_Release|x86.ActiveCfg = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.Release|x86.ActiveCfg = Release|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.ReleaseInternal|Any CPU.ActiveCfg = ReleaseInternal|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.ReleaseInternal|Any CPU.Build.0 = ReleaseInternal|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.ReleaseInternal|Mixed Platforms.ActiveCfg = ReleaseInternal|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.ReleaseInternal|Mixed Platforms.Build.0 = ReleaseInternal|Any CPU
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}.ReleaseInternal|x86.ActiveCfg = ReleaseInternal|Any CPU
 		{D68133BD-1E63-496E-9EDE-4FBDBF77B486}.Debug|Any CPU.ActiveCfg = net_4_0_Debug|Any CPU
 		{D68133BD-1E63-496E-9EDE-4FBDBF77B486}.Debug|Any CPU.Build.0 = net_4_0_Debug|Any CPU
 		{D68133BD-1E63-496E-9EDE-4FBDBF77B486}.Debug|Mixed Platforms.ActiveCfg = net_4_0_Release|Any CPU
@@ -450,7 +392,6 @@ Global
 		{045B96F2-AF80-4C4C-8D27-E38635AC705E} = {0E5DF3E9-0034-49FC-88A1-C675B8CEFFDC}
 		{4D10B9EB-3BF1-4D61-A389-CB019E8C9622} = {0E5DF3E9-0034-49FC-88A1-C675B8CEFFDC}
 		{5C93C5E2-196F-4877-BF65-96FEBFCEFCA1} = {0E5DF3E9-0034-49FC-88A1-C675B8CEFFDC}
-		{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD} = {0E5DF3E9-0034-49FC-88A1-C675B8CEFFDC}
 		{D68133BD-1E63-496E-9EDE-4FBDBF77B486} = {0E5DF3E9-0034-49FC-88A1-C675B8CEFFDC}
 	EndGlobalSection
 EndGlobal

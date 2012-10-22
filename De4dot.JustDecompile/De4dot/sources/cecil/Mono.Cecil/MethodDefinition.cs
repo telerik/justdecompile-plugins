@@ -26,12 +26,12 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using DeMono.Cecil.Cil;
-using DeMono.Collections.Generic;
+using Mono.Cecil.Cil;
+using Mono.Collections.Generic;
 
 using RVA = System.UInt32;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public sealed class MethodDefinition : MethodReference, IMemberDefinition, ISecurityDeclarationProvider {
 

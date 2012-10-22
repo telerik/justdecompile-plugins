@@ -4,9 +4,9 @@ using System.Reflection;
 
 using NUnit.Framework;
 
-using DeMono.Cecil.PE;
+using Mono.Cecil.PE;
 
-namespace DeMono.Cecil.Tests {
+namespace Mono.Cecil.Tests {
 
 	public abstract class BaseTestFixture {
 

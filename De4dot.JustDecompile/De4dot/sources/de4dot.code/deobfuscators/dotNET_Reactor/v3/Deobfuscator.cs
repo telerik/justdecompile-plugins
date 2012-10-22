@@ -21,9 +21,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
-using DeMono.MyStuff;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.MyStuff;
 using de4dot.blocks;
 using de4dot.PE;
 
@@ -141,8 +141,8 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v3 {
 			return decrypterType.LinkedResource != null || nativeLibSaver.Resource != null;
 		}
 
-		public override bool getDecryptedModule(ref byte[] newFileData, ref DumpedMethods dumpedMethods) {
-			if (!needsPatching())
+		public override bool getDecryptedModule(int count, ref byte[] newFileData, ref DumpedMethods dumpedMethods) {
+			if (count != 0 || !needsPatching())
 				return false;
 
 			var fileData = ModuleBytes ?? DeobUtils.readModule(module);
@@ -218,6 +218,10 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v3 {
 			return name != null && checkValidName(name, isRandomNameMembers);
 		}
 
+		public override bool isValidResourceKeyName(string name) {
+			return name != null && checkValidName(name, isRandomNameMembers);
+		}
+
 		protected override int detectInternal() {
 			int val = 0;
 
@@ -249,10 +253,10 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v3 {
 
 			antiStrongName = new AntiStrongName();
 
-			staticStringInliner.add(decrypterType.StringDecrypter1, (method2, args) => {
+			staticStringInliner.add(decrypterType.StringDecrypter1, (method2, gim, args) => {
 				return decrypterType.decrypt1((string)args[0]);
 			});
-			staticStringInliner.add(decrypterType.StringDecrypter2, (method2, args) => {
+			staticStringInliner.add(decrypterType.StringDecrypter2, (method2, gim, args) => {
 				return decrypterType.decrypt2((string)args[0]);
 			});
 			DeobfuscatedFile.stringDecryptersAdded();

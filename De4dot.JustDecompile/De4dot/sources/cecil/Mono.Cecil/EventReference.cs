@@ -28,7 +28,7 @@
 
 using System;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public abstract class EventReference : MemberReference {
 

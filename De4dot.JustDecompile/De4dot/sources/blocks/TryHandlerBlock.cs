@@ -17,8 +17,8 @@
     along with de4dot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 namespace de4dot.blocks {
 	// Contains the filter handler block and the catch handler block.

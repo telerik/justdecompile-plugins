@@ -28,10 +28,10 @@
 
 using System;
 using System.Text;
-using DeMono.Collections.Generic;
-using MD = DeMono.Cecil.Metadata;
+using Mono.Collections.Generic;
+using MD = Mono.Cecil.Metadata;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public sealed class FunctionPointerType : TypeSpecification, IMethodSignature {
 
@@ -85,6 +85,7 @@ namespace DeMono.Cecil {
 
 		public override IMetadataScope Scope {
 			get { return function.ReturnType.Scope; }
+			set { throw new InvalidOperationException (); }
 		}
 
 		public override bool IsFunctionPointer {

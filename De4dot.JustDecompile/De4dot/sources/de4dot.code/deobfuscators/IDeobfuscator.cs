@@ -19,8 +19,8 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.MyStuff;
+using Mono.Cecil;
+using Mono.MyStuff;
 using de4dot.blocks;
 using de4dot.blocks.cflow;
 using de4dot.code.renamer;
@@ -50,6 +50,7 @@ namespace de4dot.code.deobfuscators {
 	[Flags]
 	public enum RenamingOptions {
 		RemoveNamespaceIfOneType = 1,
+		RenameResourceKeys = 2,
 	}
 
 	public interface IDeobfuscator : INameChecker {
@@ -61,7 +62,7 @@ namespace de4dot.code.deobfuscators {
 		StringFeatures StringFeatures { get; }
 		RenamingOptions RenamingOptions { get; }
 		DecrypterType DefaultDecrypterType { get; }
-		IMethodCallInliner MethodCallInliner { get; }
+		IEnumerable<IBlocksDeobfuscator> BlocksDeobfuscators { get; }
 
 		// This is non-null only in detect() and deobfuscateBegin().
 		IDeobfuscatedFile DeobfuscatedFile { get; set; }
@@ -71,18 +72,13 @@ namespace de4dot.code.deobfuscators {
 
 		void init(ModuleDefinition module);
 
-		// Same as detect() but may be used by deobfuscators to detect obfuscator that decrypt
-		// metadata at runtime. Code in detect() assume they can access everything. 0 should be
-		// returned if not detected.
-		int earlyDetect();
-
 		// Returns 0 if it's not detected, or > 0 if detected (higher value => more likely true).
 		// This method is always called.
 		int detect();
 
 		// If the obfuscator has encrypted parts of the file, then this method should return the
 		// decrypted file. true is returned if args have been initialized, false otherwise.
-		bool getDecryptedModule(ref byte[] newFileData, ref DumpedMethods dumpedMethods);
+		bool getDecryptedModule(int count, ref byte[] newFileData, ref DumpedMethods dumpedMethods);
 
 		// This is only called if getDecryptedModule() != null, and after the module has been
 		// reloaded. Should return a new IDeobfuscator with the same options and the new module.
@@ -106,7 +102,7 @@ namespace de4dot.code.deobfuscators {
 		// Called after all deobfuscation methods
 		void deobfuscateEnd();
 
-		// Called to get method token / pattern of string decrypters
+		// Returns all string decrypter method tokens
 		IEnumerable<int> getStringDecrypterMethods();
 	}
 }

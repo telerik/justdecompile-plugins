@@ -20,7 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DeMono.Cecil;
+using Mono.Cecil;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.CliSecure.vm {

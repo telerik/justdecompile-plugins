@@ -30,11 +30,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-using DeMono.Cecil.Cil;
-using DeMono.Collections.Generic;
-using DeMono.CompilerServices.SymbolWriter;
+using Mono.Cecil.Cil;
+using Mono.Collections.Generic;
+using Mono.CompilerServices.SymbolWriter;
 
-namespace DeMono.Cecil.Mdb {
+namespace Mono.Cecil.Mdb {
 
 #if !READ_ONLY
 	public class MdbWriterProvider : ISymbolWriterProvider {
@@ -53,13 +53,13 @@ namespace DeMono.Cecil.Mdb {
 	public class MdbWriter : ISymbolWriter {
 
 		readonly Guid mvid;
-		readonly DeMonoSymbolWriter writer;
+		readonly MonoSymbolWriter writer;
 		readonly Dictionary<string, SourceFile> source_files;
 
 		public MdbWriter (Guid mvid, string assembly)
 		{
 			this.mvid = mvid;
-			this.writer = new DeMonoSymbolWriter (assembly);
+			this.writer = new MonoSymbolWriter (assembly);
 			this.source_files = new Dictionary<string, SourceFile> ();
 		}
 

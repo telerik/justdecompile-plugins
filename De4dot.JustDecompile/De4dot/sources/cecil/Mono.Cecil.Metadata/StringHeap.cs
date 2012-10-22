@@ -30,9 +30,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-using DeMono.Cecil.PE;
+using Mono.Cecil.PE;
 
-namespace DeMono.Cecil.Metadata {
+namespace Mono.Cecil.Metadata {
 
 	class StringHeap : Heap {
 

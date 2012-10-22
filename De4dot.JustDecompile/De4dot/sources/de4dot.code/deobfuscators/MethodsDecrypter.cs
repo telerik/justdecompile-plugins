@@ -17,7 +17,7 @@
     along with de4dot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using DeMono.MyStuff;
+using Mono.MyStuff;
 using de4dot.code.AssemblyClient;
 using de4dot.mdecrypt;
 

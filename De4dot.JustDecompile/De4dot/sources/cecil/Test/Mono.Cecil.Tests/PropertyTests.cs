@@ -2,7 +2,7 @@ using System.Linq;
 
 using NUnit.Framework;
 
-namespace DeMono.Cecil.Tests {
+namespace Mono.Cecil.Tests {
 
 	[TestFixture]
 	public class PropertyTests : BaseTestFixture {

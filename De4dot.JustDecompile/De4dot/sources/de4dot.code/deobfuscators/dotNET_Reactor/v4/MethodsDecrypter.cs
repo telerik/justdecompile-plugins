@@ -20,9 +20,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
-using DeMono.MyStuff;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.MyStuff;
 using de4dot.blocks;
 using de4dot.PE;
 

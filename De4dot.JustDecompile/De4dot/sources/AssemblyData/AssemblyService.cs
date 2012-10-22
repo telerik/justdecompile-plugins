@@ -21,7 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
-using DeMono.MyStuff;
+using Mono.MyStuff;
 using de4dot.mdecrypt;
 
 namespace AssemblyData {

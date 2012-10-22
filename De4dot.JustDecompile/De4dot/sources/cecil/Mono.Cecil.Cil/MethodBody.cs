@@ -28,9 +28,9 @@
 
 using System;
 
-using DeMono.Collections.Generic;
+using Mono.Collections.Generic;
 
-namespace DeMono.Cecil.Cil {
+namespace Mono.Cecil.Cil {
 
 	public sealed class MethodBody : IVariableDefinitionProvider {
 

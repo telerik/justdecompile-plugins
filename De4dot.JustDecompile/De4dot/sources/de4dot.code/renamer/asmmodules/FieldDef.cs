@@ -17,7 +17,7 @@
     along with de4dot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using DeMono.Cecil;
+using Mono.Cecil;
 
 namespace de4dot.code.renamer.asmmodules {
 	class FieldDef : Ref {

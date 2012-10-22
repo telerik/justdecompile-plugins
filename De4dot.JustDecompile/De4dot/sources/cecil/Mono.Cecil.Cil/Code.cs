@@ -26,7 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-namespace DeMono.Cecil.Cil {
+namespace Mono.Cecil.Cil {
 
 	public enum Code {
 		Nop,

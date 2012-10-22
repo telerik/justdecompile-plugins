@@ -28,10 +28,10 @@
 
 using System;
 
-using DeMono.Cecil.Cil;
-using DeMono.Collections.Generic;
+using Mono.Cecil.Cil;
+using Mono.Collections.Generic;
 
-namespace DeMono.Cecil.Rocks {
+namespace Mono.Cecil.Rocks {
 
 #if INSIDE_ROCKS
 	public

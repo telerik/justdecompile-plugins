@@ -30,9 +30,9 @@ using System;
 using System.Collections.Generic;
 using SR = System.Reflection;
 
-using DeMono.Cecil.Metadata;
+using Mono.Cecil.Metadata;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	enum ImportGenericKind {
 		Definition,

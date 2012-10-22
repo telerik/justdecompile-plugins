@@ -26,9 +26,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using DeMono.Collections.Generic;
+using Mono.Collections.Generic;
 
-namespace DeMono {
+namespace Mono {
 
 	static class Empty<T> {
 
@@ -36,7 +36,7 @@ namespace DeMono {
 	}
 }
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	static partial class Mixin {
 

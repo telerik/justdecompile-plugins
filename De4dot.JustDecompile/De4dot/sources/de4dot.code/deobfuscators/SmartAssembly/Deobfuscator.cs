@@ -21,8 +21,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 using de4dot.blocks;
 
 // SmartAssembly can add so much junk that it's very difficult to find and remove all of it.
@@ -88,7 +88,7 @@ namespace de4dot.code.deobfuscators.SmartAssembly {
 		ResourceResolver resourceResolver;
 		MemoryManagerInfo memoryManagerInfo;
 
-		ProxyDelegateFinder proxyDelegateFinder;
+		ProxyCallFixer proxyCallFixer;
 		AutomatedErrorReportingFinder automatedErrorReportingFinder;
 		TamperProtectionRemover tamperProtectionRemover;
 
@@ -142,8 +142,8 @@ namespace de4dot.code.deobfuscators.SmartAssembly {
 			findSmartAssemblyAttributes();
 			memoryManagerInfo = new MemoryManagerInfo(module);
 			memoryManagerInfo.find();
-			proxyDelegateFinder = new ProxyDelegateFinder(module, DeobfuscatedFile);
-			proxyDelegateFinder.findDelegateCreator(module);
+			proxyCallFixer = new ProxyCallFixer(module, DeobfuscatedFile);
+			proxyCallFixer.findDelegateCreator(module);
 
 			if (!foundVersion)
 				guessVersion();
@@ -187,7 +187,7 @@ namespace de4dot.code.deobfuscators.SmartAssembly {
 			if (poweredByAttributeString == "Powered by {smartassembly}") {
 				// It's SA 1.x - 4.x
 
-				if (proxyDelegateFinder.Detected || hasEmptyClassesInEveryNamespace()) {
+				if (proxyCallFixer.Detected || hasEmptyClassesInEveryNamespace()) {
 					ObfuscatorName = "SmartAssembly 4.x";
 					approxVersion = new Version(4, 0, 0, 0);
 					return;
@@ -303,7 +303,7 @@ namespace de4dot.code.deobfuscators.SmartAssembly {
 			}
 
 			initDecrypters();
-			proxyDelegateFinder.find();
+			proxyCallFixer.find();
 		}
 
 		void initDecrypters() {
@@ -336,7 +336,7 @@ namespace de4dot.code.deobfuscators.SmartAssembly {
 		void dumpEmbeddedAssemblies() {
 			assemblyResolver.resolveResources();
 			foreach (var tuple in assemblyResolver.getDecryptedResources()) {
-				DeobfuscatedFile.createAssemblyFile(tuple.Item2, tuple.Item1.simpleName);
+				DeobfuscatedFile.createAssemblyFile(tuple.Item2, tuple.Item1.simpleName, null);
 				addResourceToBeRemoved(tuple.Item1.resource, string.Format("Embedded assembly: {0}", tuple.Item1.assemblyName));
 			}
 		}
@@ -417,11 +417,11 @@ namespace de4dot.code.deobfuscators.SmartAssembly {
 			Log.v("Adding string decrypter. Resource: {0}", Utils.toCsharpString(info.StringsResource.Name));
 			var decrypter = new StringDecrypter(info);
 			if (decrypter.CanDecrypt) {
-				staticStringInliner.add(DotNetUtils.getMethod(info.GetStringDelegate, "Invoke"), (method, args) => {
+				staticStringInliner.add(DotNetUtils.getMethod(info.GetStringDelegate, "Invoke"), (method, gim, args) => {
 					var fieldDefinition = DotNetUtils.getField(module, (FieldReference)args[0]);
 					return decrypter.decrypt(fieldDefinition.MetadataToken.ToInt32(), (int)args[1]);
 				});
-				staticStringInliner.add(info.StringDecrypterMethod, (method, args) => {
+				staticStringInliner.add(info.StringDecrypterMethod, (method, gim, args) => {
 					return decrypter.decrypt(0, (int)args[0]);
 				});
 			}
@@ -430,7 +430,7 @@ namespace de4dot.code.deobfuscators.SmartAssembly {
 		}
 
 		public override void deobfuscateMethodEnd(Blocks blocks) {
-			proxyDelegateFinder.deobfuscate(blocks);
+			proxyCallFixer.deobfuscate(blocks);
 			removeAutomatedErrorReportingCode(blocks);
 			removeTamperProtection(blocks);
 			removeStringsInitCode(blocks);
@@ -439,7 +439,7 @@ namespace de4dot.code.deobfuscators.SmartAssembly {
 
 		public override void deobfuscateEnd() {
 			canRemoveTypes = findBigType() == null;
-			removeProxyDelegates(proxyDelegateFinder, canRemoveTypes);
+			removeProxyDelegates(proxyCallFixer, canRemoveTypes);
 			removeMemoryManagerStuff();
 			removeTamperProtectionStuff();
 			removeStringDecryptionStuff();

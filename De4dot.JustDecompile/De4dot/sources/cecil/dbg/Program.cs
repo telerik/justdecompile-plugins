@@ -3,9 +3,9 @@ using System.IO;
 using System.Diagnostics;
 using System.Linq;
 
-using DeMono.Cecil.Mdb;
+using Mono.Cecil.Mdb;
 
-namespace DeMono.Cecil.Debug {
+namespace Mono.Cecil.Debug {
 
 	interface IFoo { }
 	interface IBar : IFoo { }

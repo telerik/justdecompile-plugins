@@ -20,9 +20,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
-using DeMono.Cecil.Metadata;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Metadata;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.Spices_Net {

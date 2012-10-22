@@ -19,8 +19,8 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.Cecil.Metadata;
+using Mono.Cecil;
+using Mono.Cecil.Metadata;
 
 namespace de4dot.blocks {
 	public enum CecilType {
@@ -815,7 +815,11 @@ namespace de4dot.blocks {
 			throw new ApplicationException(string.Format("Unknown MemberReference type: {0}", type));
 		}
 
-		public static bool verifyType(TypeReference typeReference, string assembly, string type, string extra = "") {
+		public static bool verifyType(TypeReference typeReference, string assembly, string type) {
+			return verifyType(typeReference, assembly, type, "");
+		}
+
+		public static bool verifyType(TypeReference typeReference, string assembly, string type, string extra) {
 			return typeReference != null &&
 				MemberReferenceHelper.getCanonicalizedTypeRefName(typeReference.GetElementType()) == "[" + assembly + "]" + type &&
 				typeReference.FullName == type + extra;

@@ -18,8 +18,8 @@
 */
 
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.SmartAssembly {
@@ -87,6 +87,8 @@ namespace de4dot.code.deobfuscators.SmartAssembly {
 				return false;
 
 			foreach (var method in DotNetUtils.getCalledMethods(module, attachAppMethod)) {
+				if (attachAppMethod == method)
+					continue;
 				if (method.Name == ".cctor" || method.Name == ".ctor")
 					continue;
 				if (!method.IsStatic || !DotNetUtils.isMethod(method, "System.Void", "()"))

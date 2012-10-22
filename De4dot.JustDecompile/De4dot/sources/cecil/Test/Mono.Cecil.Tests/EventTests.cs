@@ -1,11 +1,11 @@
 using System;
 
-using DeMono.Cecil;
-using DeMono.Cecil.Metadata;
+using Mono.Cecil;
+using Mono.Cecil.Metadata;
 
 using NUnit.Framework;
 
-namespace DeMono.Cecil.Tests {
+namespace Mono.Cecil.Tests {
 
 	[TestFixture]
 	public class EventTests : BaseTestFixture {

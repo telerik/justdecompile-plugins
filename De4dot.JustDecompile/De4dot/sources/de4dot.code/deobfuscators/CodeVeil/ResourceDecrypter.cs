@@ -19,9 +19,9 @@
 
 using System;
 using System.IO;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
-using DeMono.Cecil.Metadata;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Metadata;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.CodeVeil {
@@ -36,7 +36,7 @@ namespace de4dot.code.deobfuscators.CodeVeil {
 		MethodDefinition resTypeCtor;
 		TypeDefinition resourceFlagsType;
 		TypeDefinition resourceEnumeratorType;
-		GetManifestResourceRestorerBase getManifestResourceRestorer;
+		MethodCallRestorerBase methodsRestorer;
 
 		public bool CanRemoveTypes {
 			get {
@@ -78,7 +78,7 @@ namespace de4dot.code.deobfuscators.CodeVeil {
 		}
 
 		public void initialize() {
-			getManifestResourceRestorer = new GetManifestResourceRestorerBase(module);
+			methodsRestorer = new MethodCallRestorerBase(module);
 			findEncryptedResourceStreamType();
 			findEncryptedResourceSet();
 			findEncryptedResourceReader();
@@ -264,8 +264,8 @@ namespace de4dot.code.deobfuscators.CodeVeil {
 				if (!findManifestResourceStreamMethods(type, out getManifestResourceStreamMethodTmp1, out getManifestResourceStreamMethodTmp2))
 					continue;
 
-				getManifestResourceRestorer.GetStream1Method = getManifestResourceStreamMethodTmp1;
-				getManifestResourceRestorer.GetStream2Method = getManifestResourceStreamMethodTmp2;
+				methodsRestorer.createGetManifestResourceStream1(getManifestResourceStreamMethodTmp1);
+				methodsRestorer.createGetManifestResourceStream2(getManifestResourceStreamMethodTmp2);
 				encryptedResourceStreamType = type;
 				return;
 			}
@@ -355,7 +355,7 @@ namespace de4dot.code.deobfuscators.CodeVeil {
 			if (encryptedResourceStreamType == null)
 				return;
 
-			getManifestResourceRestorer.deobfuscate(blocks);
+			methodsRestorer.deobfuscate(blocks);
 		}
 	}
 }

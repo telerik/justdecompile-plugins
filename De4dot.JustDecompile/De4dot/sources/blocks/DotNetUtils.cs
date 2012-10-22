@@ -19,9 +19,9 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
-using DeMono.Cecil.Metadata;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Metadata;
 
 namespace de4dot.blocks {
 	public enum FrameworkType {
@@ -200,6 +200,21 @@ namespace de4dot.blocks {
 			}
 		}
 
+		// Returns true if it's one of the ldarg instructions
+		public static bool isLdarg(Instruction instr) {
+			switch (instr.OpCode.Code) {
+			case Code.Ldarg:
+			case Code.Ldarg_S:
+			case Code.Ldarg_0:
+			case Code.Ldarg_1:
+			case Code.Ldarg_2:
+			case Code.Ldarg_3:
+				return true;
+			default:
+				return false;
+			}
+		}
+
 		// Return true if it's one of the stloc instructions
 		public static bool isStloc(Instruction instr) {
 			switch (instr.OpCode.Code) {
@@ -347,7 +362,11 @@ namespace de4dot.blocks {
 			return null;
 		}
 
-		public static IEnumerable<MethodDefinition> findMethods(IEnumerable<MethodDefinition> methods, string returnType, string[] argsTypes, bool isStatic = true) {
+		public static IEnumerable<MethodDefinition> findMethods(IEnumerable<MethodDefinition> methods, string returnType, string[] argsTypes) {
+			return findMethods(methods, returnType, argsTypes, true);
+		}
+
+		public static IEnumerable<MethodDefinition> findMethods(IEnumerable<MethodDefinition> methods, string returnType, string[] argsTypes, bool isStatic) {
 			foreach (var method in methods) {
 				if (!method.HasBody || method.CallingConvention != MethodCallingConvention.Default)
 					continue;
@@ -380,6 +399,22 @@ namespace de4dot.blocks {
 
 		public static bool isMethod(MethodReference method, string returnType, string parameters) {
 			return method != null && method.FullName == returnType + " " + method.DeclaringType.FullName + "::" + method.Name + parameters;
+		}
+
+		public static bool hasPinvokeMethod(TypeDefinition type, string methodName) {
+			return getPInvokeMethod(type, methodName) != null;
+		}
+
+		public static MethodDefinition getPInvokeMethod(TypeDefinition type, string methodName) {
+			if (type == null)
+				return null;
+			foreach (var method in type.Methods) {
+				if (method.PInvokeInfo == null)
+					continue;
+				if (method.PInvokeInfo.EntryPoint == methodName)
+					return method;
+			}
+			return null;
 		}
 
 		public static MethodDefinition getPInvokeMethod(TypeDefinition type, string dll, string funcName) {
@@ -429,9 +464,21 @@ namespace de4dot.blocks {
 		public static MethodDefinition getMethod(ModuleDefinition module, MethodReference method) {
 			if (method == null)
 				return null;
+			return getMethod(module, method, method.DeclaringType);
+		}
+
+		public static MethodDefinition getMethod2(ModuleDefinition module, MethodReference method) {
+			if (method == null)
+				return null;
+			return getMethod(module, method, method.DeclaringType.GetElementType());
+		}
+
+		static MethodDefinition getMethod(ModuleDefinition module, MethodReference method, TypeReference declaringType) {
+			if (method == null)
+				return null;
 			if (method is MethodDefinition)
 				return (MethodDefinition)method;
-			return getMethod(getType(module, method.DeclaringType), method);
+			return getMethod(getType(module, declaringType), method);
 		}
 
 		public static MethodDefinition getMethod(TypeDefinition type, string returnType, string parameters) {
@@ -549,7 +596,8 @@ namespace de4dot.blocks {
 				return null;
 
 			var resources = module.Resources;
-			foreach (var resourceName in strings) {
+			foreach (var tmp in strings) {
+				var resourceName = removeFromNullChar(tmp);
 				if (resourceName == null)
 					continue;
 				foreach (var resource in resources) {
@@ -559,6 +607,32 @@ namespace de4dot.blocks {
 			}
 
 			return null;
+		}
+
+		static string removeFromNullChar(string s) {
+			int index = s.IndexOf((char)0);
+			if (index < 0)
+				return s;
+			return s.Substring(0, index);
+		}
+
+		// Copies most things but not everything
+		public static MethodDefinition clone(MethodDefinition method) {
+			var newMethod = new MethodDefinition(method.Name, method.Attributes, method.MethodReturnType.ReturnType);
+			newMethod.MetadataToken = method.MetadataToken;
+			newMethod.Attributes = method.Attributes;
+			newMethod.ImplAttributes = method.ImplAttributes;
+			newMethod.HasThis = method.HasThis;
+			newMethod.ExplicitThis = method.ExplicitThis;
+			newMethod.CallingConvention = method.CallingConvention;
+			newMethod.SemanticsAttributes = method.SemanticsAttributes;
+			newMethod.DeclaringType = method.DeclaringType;
+			foreach (var arg in method.Parameters)
+				newMethod.Parameters.Add(new ParameterDefinition(arg.Name, arg.Attributes, arg.ParameterType));
+			foreach (var gp in method.GenericParameters)
+				newMethod.GenericParameters.Add(new GenericParameter(gp.Name, newMethod) { Attributes = gp.Attributes });
+			copyBodyFromTo(method, newMethod);
+			return newMethod;
 		}
 
 		public static Instruction clone(Instruction instr) {
@@ -680,11 +754,11 @@ namespace de4dot.blocks {
 			}
 		}
 
-		public static IEnumerable<CustomAttribute> findAttributes(AssemblyDefinition asm, TypeReference attr) {
+		public static IEnumerable<CustomAttribute> findAttributes(ICustomAttributeProvider custAttrProvider, TypeReference attr) {
 			var list = new List<CustomAttribute>();
-			if (asm == null)
+			if (custAttrProvider == null)
 				return list;
-			foreach (var cattr in asm.CustomAttributes) {
+			foreach (var cattr in custAttrProvider.CustomAttributes) {
 				if (MemberReferenceHelper.compareTypes(attr, cattr.AttributeType))
 					list.Add(cattr);
 			}
@@ -1133,7 +1207,7 @@ namespace de4dot.blocks {
 				return false;
 
 			foreach (var instr in method.Body.Instructions) {
-				if (instr.OpCode.Code != Code.Call && instr.OpCode.Code != Code.Callvirt)
+				if (instr.OpCode.Code != Code.Call && instr.OpCode.Code != Code.Callvirt && instr.OpCode.Code != Code.Newobj)
 					continue;
 				var calledMethod = instr.Operand as MethodReference;
 				if (calledMethod == null)
@@ -1150,13 +1224,80 @@ namespace de4dot.blocks {
 				return false;
 
 			foreach (var instr in method.Body.Instructions) {
-				if (instr.OpCode.Code != Code.Call && instr.OpCode.Code != Code.Callvirt)
+				if (instr.OpCode.Code != Code.Call && instr.OpCode.Code != Code.Callvirt && instr.OpCode.Code != Code.Newobj)
 					continue;
 				if (isMethod(instr.Operand as MethodReference, returnType, parameters))
 					return true;
 			}
 
 			return false;
+		}
+
+		public static IList<Instruction> getArgPushes(IList<Instruction> instrs, int index) {
+			return getArgPushes(instrs, ref index);
+		}
+
+		public static IList<Instruction> getArgPushes(IList<Instruction> instrs, ref int index) {
+			if (index < 0 || index >= instrs.Count)
+				return null;
+			var startInstr = instrs[index];
+			int pushes, pops;
+			calculateStackUsage(startInstr, false, out pushes, out pops);
+
+			index--;
+			int numArgs = pops;
+			var args = new List<Instruction>(numArgs);
+			int stackSize = numArgs;
+			while (index >= 0 && args.Count != numArgs) {
+				var instr = instrs[index--];
+				calculateStackUsage(instr, false, out pushes, out pops);
+				if (instr.OpCode.Code == Code.Dup) {
+					args.Add(instr);
+					stackSize--;
+				}
+				else {
+					if (pushes == 1)
+						args.Add(instr);
+					else if (pushes > 1)
+						throw new NotImplementedException();
+					stackSize -= pushes;
+
+					if (pops != 0) {
+						index++;
+						if (getArgPushes(instrs, ref index) == null)
+							return null;
+					}
+				}
+
+				if (stackSize < 0)
+					return null;
+			}
+			if (args.Count != numArgs)
+				return null;
+			args.Reverse();
+			return args;
+		}
+
+		public static AssemblyNameReference addAssemblyReference(ModuleDefinition module, AssemblyNameReference asmRef) {
+			foreach (var modAsmRef in module.AssemblyReferences) {
+				if (modAsmRef.FullName == asmRef.FullName)
+					return modAsmRef;
+			}
+
+			var newAsmRef = AssemblyNameReference.Parse(asmRef.FullName);
+			module.AssemblyReferences.Add(newAsmRef);
+			return newAsmRef;
+		}
+
+		public static ModuleReference addModuleReference(ModuleDefinition module, ModuleReference modRef) {
+			foreach (var modModRef in module.ModuleReferences) {
+				if (modModRef.Name == modRef.Name)
+					return modModRef;
+			}
+
+			var newModRef = new ModuleReference(modRef.Name);
+			module.ModuleReferences.Add(newModRef);
+			return newModRef;
 		}
 	}
 }

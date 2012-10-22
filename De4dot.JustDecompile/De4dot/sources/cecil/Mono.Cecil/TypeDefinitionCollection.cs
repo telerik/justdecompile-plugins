@@ -29,11 +29,11 @@
 using System;
 using System.Collections.Generic;
 
-using DeMono.Cecil.Metadata;
+using Mono.Cecil.Metadata;
 
-using DeMono.Collections.Generic;
+using Mono.Collections.Generic;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	using Slot = Row<string, string>;
 

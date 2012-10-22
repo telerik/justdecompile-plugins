@@ -26,10 +26,10 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using DeMono.Cecil.Metadata;
-using DeMono.Collections.Generic;
+using Mono.Cecil.Metadata;
+using Mono.Collections.Generic;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	public sealed class FieldDefinition : FieldReference, IMemberDefinition, IConstantProvider, IMarshalInfoProvider {
 
@@ -45,6 +45,8 @@ namespace DeMono.Cecil {
 		ElementType element_type;
 
 		MarshalInfo marshal_info;
+
+		internal uint signature;
 
 		void ResolveLayout ()
 		{

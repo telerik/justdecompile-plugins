@@ -19,7 +19,7 @@
 
 using System;
 using System.Reflection;
-using DeMono.Cecil;
+using Mono.Cecil;
 
 namespace AssemblyData.methodsrewriter {
 	interface IMethodsRewriter {

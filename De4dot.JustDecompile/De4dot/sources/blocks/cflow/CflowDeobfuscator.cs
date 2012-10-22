@@ -18,15 +18,18 @@
 */
 
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 namespace de4dot.blocks.cflow {
 	public class CflowDeobfuscator : ICflowDeobfuscator {
 		BlocksCflowDeobfuscator cflowDeobfuscator = new BlocksCflowDeobfuscator();
 
-		public CflowDeobfuscator(IMethodCallInliner methodCallInliner) {
-			cflowDeobfuscator.MethodCallInliner = methodCallInliner;
+		public CflowDeobfuscator() {
+		}
+
+		public CflowDeobfuscator(IBlocksDeobfuscator blocksDeobfuscator) {
+			cflowDeobfuscator.add(blocksDeobfuscator);
 		}
 
 		public void deobfuscate(MethodDefinition method) {

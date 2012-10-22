@@ -28,9 +28,9 @@
 
 using System;
 
-using DeMono.Cecil.PE;
+using Mono.Cecil.PE;
 
-namespace DeMono.Cecil.Metadata {
+namespace Mono.Cecil.Metadata {
 
 	sealed class UserStringHeap : StringHeap {
 

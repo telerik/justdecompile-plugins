@@ -19,8 +19,8 @@
 
 using System;
 using System.Collections.Generic;
-using DeMono.Cecil;
-using DeMono.Cecil.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 namespace de4dot.code.deobfuscators {
 	class StringCounts {
@@ -41,6 +41,8 @@ namespace de4dot.code.deobfuscators {
 		}
 
 		public bool exists(string s) {
+			if (s == null)
+				return false;
 			return strings.ContainsKey(s);
 		}
 

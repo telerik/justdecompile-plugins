@@ -32,7 +32,7 @@ using System.Security.Cryptography;
 
 #if !(SILVERLIGHT || READ_ONLY)
 
-namespace DeMono.Security.Cryptography {
+namespace Mono.Security.Cryptography {
 
 	static class CryptoConvert {
 

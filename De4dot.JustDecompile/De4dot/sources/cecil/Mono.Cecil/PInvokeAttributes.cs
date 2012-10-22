@@ -28,7 +28,7 @@
 
 using System;
 
-namespace DeMono.Cecil {
+namespace Mono.Cecil {
 
 	[Flags]
 	public enum PInvokeAttributes : ushort {
