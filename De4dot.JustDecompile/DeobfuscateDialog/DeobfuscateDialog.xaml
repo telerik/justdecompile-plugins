@@ -8,37 +8,85 @@
 		ResizeMode="NoResize"
 		WindowStartupLocation="CenterScreen"
 		>
+	<Window.Resources>
+		<Style x:Key="GroupBoxStyle" TargetType="{x:Type GroupBox}">
+			<Setter Property="BorderBrush" Value="#FFBAC9DB" />
+			<Setter Property="Foreground" Value="#FF4C607A" />
+		</Style>
+
+	</Window.Resources>
 	<Border Padding="10">
-		<StackPanel>
-			<TextBlock HorizontalAlignment="Center" Name="MessageArea" 
-					   Text="{Binding Path=Message}" VerticalAlignment="Top"/>			
-			<Border Padding="10">
-				<StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
-					<Button Content="Cancel" 
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
+			<TextBlock Grid.Row="0"
+					   Name="MessageArea" 
+					   Text="{Binding Path=Message}"/>
+			<Border Grid.Row="1" 
+					Padding="10">
+				<Grid Margin="5">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="Auto"/>
+						<ColumnDefinition Width="Auto"/>
+					</Grid.ColumnDefinitions>
+					<Button Grid.Column="2"
+							Content="Cancel" 
 							Height="23" 
 							Width="75"
 							Name="buttonCancel" 
 							Click="OnCloseHandler"
-							Margin="10"/>
-					<Button Content="OK" 
+							Margin="5"/>
+					<Button Grid.Column="1" 
+							Content="OK" 
 							Height="23" 
 							Width="75"
 							Name="buttonOk" 
 							Click="OnCloseHandler"
 							Command="{Binding Path=DeobfuscateCommand}"
-							Margin="10"/>
-				</StackPanel>
+							Margin="5"/>
+				</Grid>
 			</Border>
-			<Expander Header="Options"  HorizontalAlignment="Left" Name="expander1" VerticalAlignment="Top">
-				<StackPanel>
-					<CheckBox Content="Enable control flow deobfuscation." HorizontalAlignment="Left" Name="CFGCheckBox" VerticalAlignment="Top" 
-							  IsChecked="{Binding Path=EnableControlFlowDeobfuscation}"/>
-					<CheckBox Content="Keep obfuscator types." HorizontalAlignment="Left" Name="ObfuscatorTypesCheckBox" VerticalAlignment="Top"
-							  IsChecked="{Binding Path=KeepObfuscatorClasses}" />
-					<CheckBox Content="Rename types and type members." HorizontalAlignment="Left" Name="RenameTypesCheckbox" VerticalAlignment="Top" 
-							  IsChecked="{Binding Path=RenameClasses}"/>
-				</StackPanel>
+			<Expander Grid.Row="2" 
+					  Header="Options">
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="*"/>
+					</Grid.RowDefinitions>
+					<GroupBox Grid.Row="0"
+							  Margin="5"
+							  Style="{StaticResource GroupBoxStyle}"
+							  Header="Deobfuscation options">
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+
+							<CheckBox Grid.Row="0"
+							  Content="Enable control flow deobfuscation." 
+							  Name="CFGCheckBox" 
+							  IsChecked="{Binding Path=EnableControlFlowDeobfuscation}" 
+							  Margin="0,1"/>
+							<CheckBox Grid.Row="1"
+							  Content="Keep obfuscator types." 
+							  Name="ObfuscatorTypesCheckBox" 
+							  IsChecked="{Binding Path=KeepObfuscatorClasses}" 
+							  Margin="0,1"/>
+							<CheckBox Grid.Row="2" 
+							  Content="Rename types and type members." 
+							  Name="RenameTypesCheckbox" 
+							  IsChecked="{Binding Path=RenameClasses}"
+							  Margin="0,1"/>
+						</Grid>
+					</GroupBox>
+				</Grid>
 			</Expander>
-		</StackPanel>
+		</Grid>
 	</Border>
 </Window>
