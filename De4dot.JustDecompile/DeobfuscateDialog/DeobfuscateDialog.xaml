@@ -60,7 +60,7 @@
 					<GroupBox Grid.Row="0"
 							  Margin="5"
 							  Style="{StaticResource GroupBoxStyle}"
-							  Header="Deobfuscation options">
+							  Header="Deobfuscation settings">
 						<Grid>
 							<Grid.RowDefinitions>
 								<RowDefinition Height="Auto" />
