@@ -127,6 +127,10 @@
   <ItemGroup>
     <Content Include="LicenseAgreements\LICENSE.de4dot.txt" />
     <Content Include="LicenseAgreements\ThirdParty\Mono.Cecil\LICENSE.Mono.Cecil.txt" />
+    <None Include="PluginConfig.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition=" '$(Configuration)' == 'DebugInternal' OR '$(Configuration)' == 'ReleaseInternal'">
