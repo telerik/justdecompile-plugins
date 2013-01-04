@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PluginConfig>
+  <Name>Assembly Editor Plugin</Name>
+  <Author>Sébastien LEBRETON</Author>
+  <Description>This Reflector plugin provides users with the option to manipulate .NET assemblies loaded in JustDecompile.
+Edit/Add members in C#/VB.NET with IntelliSense. Easily update embedded, linked or assembly linked resources.
+Create, update or delete IL instructions with all supported operands like type, field or method references.
+Remove assembly strong name and update referencing assemblies.</Description>
+  <Version>2012.2.1121.0</Version>
+  <SupportedJDversion>2012.2.1121.0</SupportedJDversion>
+  <Guid>8C63CC62-D636-4A34-B92D-512F8B4F0EDB</Guid>
+</PluginConfig>
