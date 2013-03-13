@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -20,9 +20,12 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.Writer;
 using de4dot.code;
 using de4dot.code.deobfuscators;
 using de4dot.code.AssemblyClient;
+using de4dot.code.renamer;
 
 namespace de4dot.cui {
 	class CommandLineParser {
@@ -114,13 +117,33 @@ namespace de4dot.cui {
 				filesOptions.DetectObfuscators = true;
 			}));
 			miscOptions.Add(new OneArgOption(null, "asm-path", "Add an assembly search path", "path", (val) => {
-				AssemblyResolver.Instance.addSearchDirectory(val);
+				TheAssemblyResolver.Instance.addSearchDirectory(val);
 			}));
 			miscOptions.Add(new NoArgOption(null, "dont-rename", "Don't rename classes, methods, etc.", () => {
 				filesOptions.RenameSymbols = false;
+				filesOptions.RenamerFlags = 0;
+			}));
+			miscOptions.Add(new OneArgOption(null, "keep-names", "Don't rename n(amespaces), t(ypes), p(rops), e(vents), f(ields), m(ethods), a(rgs), g(enericparams), d(elegate fields). Can be combined, eg. efm", "flags", (val) => {
+				foreach (var c in val) {
+					switch (c) {
+					case 'n': filesOptions.RenamerFlags &= ~RenamerFlags.RenameNamespaces; break;
+					case 't': filesOptions.RenamerFlags &= ~RenamerFlags.RenameTypes; break;
+					case 'p': filesOptions.RenamerFlags &= ~RenamerFlags.RenameProperties; break;
+					case 'e': filesOptions.RenamerFlags &= ~RenamerFlags.RenameEvents; break;
+					case 'f': filesOptions.RenamerFlags &= ~RenamerFlags.RenameFields; break;
+					case 'm': filesOptions.RenamerFlags &= ~RenamerFlags.RenameMethods; break;
+					case 'a': filesOptions.RenamerFlags &= ~RenamerFlags.RenameMethodArgs; break;
+					case 'g': filesOptions.RenamerFlags &= ~RenamerFlags.RenameGenericParams; break;
+					case 'd': filesOptions.RenamerFlags |= RenamerFlags.DontRenameDelegateFields; break;
+					default: throw new UserException(string.Format("Unrecognized --keep-names char: '{0}'", c));
+					}
+				}
+			}));
+			miscOptions.Add(new NoArgOption(null, "dont-create-params", "Don't create method params when renaming", () => {
+				filesOptions.RenamerFlags |= RenamerFlags.DontCreateNewParamDefs;
 			}));
 			miscOptions.Add(new NoArgOption(null, "dont-restore-props", "Don't restore properties/events", () => {
-				filesOptions.RestorePropsEvents = false;
+				filesOptions.RenamerFlags &= ~(RenamerFlags.RestorePropertiesFromNames | RenamerFlags.RestoreEventsFromNames);
 			}));
 			miscOptions.Add(new OneArgOption(null, "default-strtyp", "Default string decrypter type", "type", (val) => {
 				object decrypterType;
@@ -140,14 +163,65 @@ namespace de4dot.cui {
 			miscOptions.Add(new NoArgOption(null, "keep-types", "Keep obfuscator types, fields, methods", () => {
 				filesOptions.KeepObfuscatorTypes = true;
 			}));
+			miscOptions.Add(new NoArgOption(null, "preserve-tokens", "Preserve important tokens, #US, #Blob, extra sig data", () => {
+				filesOptions.MetaDataFlags |= MetaDataFlags.PreserveRids |
+						MetaDataFlags.PreserveUSOffsets |
+						MetaDataFlags.PreserveBlobOffsets |
+						MetaDataFlags.PreserveExtraSignatureData;
+			}));
+			miscOptions.Add(new OneArgOption(null, "preserve-table", "Preserve rids in table: tr (TypeRef), td (TypeDef), fd (Field), md (Method), pd (Param), mr (MemberRef), s (StandAloneSig), ed (Event), pr (Property), ts (TypeSpec), ms (MethodSpec), all (all previous tables). Use - to disable (eg. all,-pd). Can be combined: ed,fd,md", "flags", (val) => {
+				foreach (var t in val.Split(',')) {
+					var s = t.Trim();
+					if (s.Length == 0)
+						continue;
+					bool clear = s[0] == '-';
+					if (clear)
+						s = s.Substring(1);
+					MetaDataFlags flag;
+					switch (s.Trim()) {
+					case "": flag = 0; break;
+					case "all": flag = MetaDataFlags.PreserveRids; break;
+					case "tr": flag = MetaDataFlags.PreserveTypeRefRids; break;
+					case "td": flag = MetaDataFlags.PreserveTypeDefRids; break;
+					case "fd": flag = MetaDataFlags.PreserveFieldRids; break;
+					case "md": flag = MetaDataFlags.PreserveMethodRids; break;
+					case "pd": flag = MetaDataFlags.PreserveParamRids; break;
+					case "mr": flag = MetaDataFlags.PreserveMemberRefRids; break;
+					case "s": flag = MetaDataFlags.PreserveStandAloneSigRids; break;
+					case "ed": flag = MetaDataFlags.PreserveEventRids; break;
+					case "pr": flag = MetaDataFlags.PreservePropertyRids; break;
+					case "ts": flag = MetaDataFlags.PreserveTypeSpecRids; break;
+					case "ms": flag = MetaDataFlags.PreserveMethodSpecRids; break;
+					default: throw new UserException(string.Format("Invalid --preserve-table option: {0}", s));
+					}
+					if (clear)
+						filesOptions.MetaDataFlags &= ~flag;
+					else
+						filesOptions.MetaDataFlags |= flag;
+				}
+			}));
+			miscOptions.Add(new NoArgOption(null, "preserve-strings", "Preserve #Strings heap offsets", () => {
+				filesOptions.MetaDataFlags |= MetaDataFlags.PreserveStringsOffsets;
+			}));
+			miscOptions.Add(new NoArgOption(null, "preserve-us", "Preserve #US heap offsets", () => {
+				filesOptions.MetaDataFlags |= MetaDataFlags.PreserveUSOffsets;
+			}));
+			miscOptions.Add(new NoArgOption(null, "preserve-blob", "Preserve #Blob heap offsets", () => {
+				filesOptions.MetaDataFlags |= MetaDataFlags.PreserveBlobOffsets;
+			}));
+			miscOptions.Add(new NoArgOption(null, "preserve-sig-data", "Preserve extra data at the end of signatures", () => {
+				filesOptions.MetaDataFlags |= MetaDataFlags.PreserveExtraSignatureData;
+			}));
 			miscOptions.Add(new NoArgOption(null, "one-file", "Deobfuscate one file at a time", () => {
 				filesOptions.OneFileAtATime = true;
 			}));
 			miscOptions.Add(new NoArgOption("v", null, "Verbose", () => {
-				Log.logLevel = Log.LogLevel.verbose;
+				Logger.Instance.MaxLoggerEvent = LoggerEvent.Verbose;
+				Logger.Instance.CanIgnoreMessages = false;
 			}));
 			miscOptions.Add(new NoArgOption("vv", null, "Very verbose", () => {
-				Log.logLevel = Log.LogLevel.veryverbose;
+				Logger.Instance.MaxLoggerEvent = LoggerEvent.VeryVerbose;
+				Logger.Instance.CanIgnoreMessages = false;
 			}));
 			miscOptions.Add(new NoArgOption("h", "help", "Show this help message", () => {
 				usage();
@@ -162,6 +236,8 @@ namespace de4dot.cui {
 					Filename = val,
 					ControlFlowDeobfuscation = filesOptions.ControlFlowDeobfuscation,
 					KeepObfuscatorTypes = filesOptions.KeepObfuscatorTypes,
+					MetaDataFlags = filesOptions.MetaDataFlags,
+					RenamerFlags = filesOptions.RenamerFlags,
 				};
 				if (defaultStringDecrypterType != null)
 					newFileOptions.StringDecrypterType = defaultStringDecrypterType.Value;
@@ -254,7 +330,7 @@ namespace de4dot.cui {
 		void addFile() {
 			if (newFileOptions == null)
 				return;
-			files.Add(new ObfuscatedFile(newFileOptions, filesOptions.AssemblyClientFactory));
+			files.Add(new ObfuscatedFile(newFileOptions, filesOptions.ModuleContext, filesOptions.AssemblyClientFactory));
 			newFileOptions = null;
 		}
 
@@ -275,7 +351,7 @@ namespace de4dot.cui {
 
 		void exitError(string msg) {
 			usage();
-			Log.e("\n\nERROR: {0}\n", msg);
+			Logger.Instance.LogErrorDontIgnore("\n\nERROR: {0}\n", msg);
 			exit(2);
 		}
 
@@ -285,35 +361,35 @@ namespace de4dot.cui {
 
 		void usage() {
 			string progName = getProgramBaseName();
-			Log.n("Some of the advanced options may be incompatible, causing a nice exception.");
-			Log.n("With great power comes great responsibility.");
-			Log.n("");
-			Log.n("{0} <options> <file options>", progName);
-			Log.n("Options:");
+			Logger.n("Some of the advanced options may be incompatible, causing a nice exception.");
+			Logger.n("With great power comes great responsibility.");
+			Logger.n("");
+			Logger.n("{0} <options> <file options>", progName);
+			Logger.n("Options:");
 			foreach (var option in miscOptions)
 				printOption(option);
-			Log.n("");
-			Log.n("File options:");
+			Logger.n("");
+			Logger.n("File options:");
 			foreach (var option in fileOptions)
 				printOption(option);
-			Log.n("");
-			Log.n("Deobfuscator options:");
+			Logger.n("");
+			Logger.n("Deobfuscator options:");
 			foreach (var info in deobfuscatorInfos) {
-				Log.n("Type {0} ({1})", info.Type, info.Name);
+				Logger.n("Type {0} ({1})", info.Type, info.Name);
 				foreach (var option in info.getOptions())
 					printOption(option);
-				Log.n("");
+				Logger.n("");
 			}
 			printInfos("String decrypter types", stringDecrypterTypes);
-			Log.n("");
-			Log.n("Multiple regexes can be used if separated by '{0}'.", NameRegexes.regexSeparatorChar);
-			Log.n("Use '{0}' if you want to invert the regex. Example: {0}^[a-z\\d]{{1,2}}${1}{0}^[A-Z]_\\d+${1}^[\\w.]+$", NameRegex.invertChar, NameRegexes.regexSeparatorChar);
-			Log.n("");
-			Log.n("Examples:");
-			Log.n("{0} -r c:\\my\\files -ro c:\\my\\output", progName);
-			Log.n("{0} file1 file2 file3", progName);
-			Log.n("{0} file1 -f file2 -o file2.out -f file3 -o file3.out", progName);
-			Log.n("{0} file1 --strtyp delegate --strtok 06000123", progName);
+			Logger.n("");
+			Logger.n("Multiple regexes can be used if separated by '{0}'.", NameRegexes.regexSeparatorChar);
+			Logger.n("Use '{0}' if you want to invert the regex. Example: {0}^[a-z\\d]{{1,2}}${1}{0}^[A-Z]_\\d+${1}^[\\w.]+$", NameRegex.invertChar, NameRegexes.regexSeparatorChar);
+			Logger.n("");
+			Logger.n("Examples:");
+			Logger.n("{0} -r c:\\my\\files -ro c:\\my\\output", progName);
+			Logger.n("{0} file1 file2 file3", progName);
+			Logger.n("{0} file1 -f file2 -o file2.out -f file3 -o file3.out", progName);
+			Logger.n("{0} file1 --strtyp delegate --strtok 06000123", progName);
 		}
 
 		string getProgramBaseName() {
@@ -321,7 +397,7 @@ namespace de4dot.cui {
 		}
 
 		void printInfos(string desc, Infos infos) {
-			Log.n("{0}", desc);
+			Logger.n("{0}", desc);
 			foreach (var info in infos.getInfos())
 				printOptionAndExplanation(info.name, info.desc);
 		}
@@ -342,11 +418,11 @@ namespace de4dot.cui {
 			const string prefix = "  ";
 			string left = string.Format(string.Format("{{0,-{0}}}", maxCols), option);
 			if (option.Length > maxCols) {
-				Log.n("{0}{1}", prefix, left);
-				Log.n("{0}{1} {2}", prefix, new string(' ', maxCols), explanation);
+				Logger.n("{0}{1}", prefix, left);
+				Logger.n("{0}{1} {2}", prefix, new string(' ', maxCols), explanation);
 			}
 			else
-				Log.n("{0}{1} {2}", prefix, left, explanation);
+				Logger.n("{0}{1} {2}", prefix, left, explanation);
 		}
 
 		string getOptionAndArgName(Option option, string optionName) {

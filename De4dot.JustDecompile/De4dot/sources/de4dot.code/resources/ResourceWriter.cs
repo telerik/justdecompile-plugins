@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -23,24 +23,24 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using Mono.Cecil;
+using dnlib.DotNet;
 
 namespace de4dot.code.resources {
 	class ResourceWriter {
-		ModuleDefinition module;
+		ModuleDefMD module;
 		BinaryWriter writer;
 		ResourceElementSet resources;
 		ResourceDataCreator typeCreator;
 		Dictionary<UserResourceData, UserResourceType> dataToNewType = new Dictionary<UserResourceData, UserResourceType>();
 
-		ResourceWriter(ModuleDefinition module, Stream stream, ResourceElementSet resources) {
+		ResourceWriter(ModuleDefMD module, Stream stream, ResourceElementSet resources) {
 			this.module = module;
 			this.typeCreator = new ResourceDataCreator(module);
 			this.writer = new BinaryWriter(stream);
 			this.resources = resources;
 		}
 
-		public static void write(ModuleDefinition module, Stream stream, ResourceElementSet resources) {
+		public static void write(ModuleDefMD module, Stream stream, ResourceElementSet resources) {
 			new ResourceWriter(module, stream, resources).write();
 		}
 
@@ -138,13 +138,7 @@ namespace de4dot.code.resources {
 		}
 
 		string getMscorlibFullname() {
-			AssemblyNameReference mscorlibRef = null;
-			foreach (var asmRef in module.AssemblyReferences) {
-				if (asmRef.Name != "mscorlib")
-					continue;
-				if (mscorlibRef == null || mscorlibRef.Version == null || (asmRef.Version != null && asmRef.Version >= mscorlibRef.Version))
-					mscorlibRef = asmRef;
-			}
+			var mscorlibRef = module.GetAssemblyRef("mscorlib");
 			if (mscorlibRef != null)
 				return mscorlibRef.FullName;
 

@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -22,10 +22,9 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Reflection;
-using Mono.MyStuff;
-using Mono.Cecil;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 using de4dot.blocks;
-using de4dot.PE;
 
 namespace de4dot.mdecrypt {
 	public class DynamicMethodsDecrypter {
@@ -70,7 +69,7 @@ namespace de4dot.mdecrypt {
 
 		class DecryptContext {
 			public DumpedMethod dm;
-			public MethodDefinition method;
+			public MethodDef method;
 		}
 
 		FuncPtrInfo<CompileMethod> ourCompileMethodInfo = new FuncPtrInfo<CompileMethod>();
@@ -91,10 +90,10 @@ namespace de4dot.mdecrypt {
 		bool compileMethodIsThisCall;
 		IntPtr ourCodeAddr;
 
-		de4dot.PE.MetadataType methodDefTable;
+		MDTable methodDefTable;
 		IntPtr methodDefTablePtr;
-		ModuleDefinition monoModule;
-		MethodDefinition moduleCctor;
+		ModuleDefMD dnlibModule;
+		MethodDef moduleCctor;
 		uint moduleCctorCodeRva;
 		IntPtr moduleToDecryptScope;
 
@@ -108,13 +107,16 @@ namespace de4dot.mdecrypt {
 			}
 		}
 
-		static Version VersionNet45 = new Version(4, 0, 30319, 17020);
+		static Version VersionNet45DevPreview = new Version(4, 0, 30319, 17020);
+		static Version VersionNet45Rtm = new Version(4, 0, 30319, 17929);
 		DynamicMethodsDecrypter() {
 			if (UIntPtr.Size != 4)
 				throw new ApplicationException("Only 32-bit dynamic methods decryption is supported");
 
-			// .NET 4.5's compileMethod has thiscall calling convention
-			compileMethodIsThisCall = Environment.Version >= VersionNet45;
+			// .NET 4.5 beta/preview/RC compileMethod has thiscall calling convention, but they
+			// switched back to stdcall in .NET 4.5 RTM
+			compileMethodIsThisCall = Environment.Version >= VersionNet45DevPreview &&
+				Environment.Version < VersionNet45Rtm;
 		}
 
 		[DllImport("kernel32", CharSet = CharSet.Ansi)]
@@ -149,11 +151,11 @@ namespace de4dot.mdecrypt {
 				hInstModule = Marshal.GetHINSTANCE(moduleToDecrypt);
 				moduleToDecryptScope = getScope(moduleToDecrypt);
 
-				var peFile = new PeImage(File.ReadAllBytes(moduleToDecrypt.FullyQualifiedName));
-				methodDefTable = peFile.Cor20Header.createMetadataTables().getMetadataType(MetadataIndex.iMethodDef);
-				methodDefTablePtr = new IntPtr((byte*)hInstModule + peFile.offsetToRva(methodDefTable.fileOffset));
+				dnlibModule = ModuleDefMD.Load(hInstModule);
+				methodDefTable = dnlibModule.TablesStream.MethodTable;
+				methodDefTablePtr = new IntPtr((byte*)hInstModule + (uint)dnlibModule.MetaData.PEImage.ToRVA(methodDefTable.StartOffset));
 
-				initializeMonoCecilMethods();
+				initializeDNLibMethods();
 			}
 		}
 
@@ -174,17 +176,16 @@ namespace de4dot.mdecrypt {
 			return field.GetValue(obj);
 		}
 
-		unsafe void initializeMonoCecilMethods() {
-			monoModule = ModuleDefinition.ReadModule(moduleToDecrypt.FullyQualifiedName);
-			moduleCctor = DotNetUtils.getModuleTypeCctor(monoModule);
+		unsafe void initializeDNLibMethods() {
+			moduleCctor = dnlibModule.GlobalType.FindStaticConstructor();
 			if (moduleCctor == null)
 				moduleCctorCodeRva = 0;
 			else {
-				byte* p = (byte*)hInstModule + moduleCctor.RVA;
+				byte* p = (byte*)hInstModule + (uint)moduleCctor.RVA;
 				if ((*p & 3) == 2)
 					moduleCctorCodeRva = (uint)moduleCctor.RVA + 1;
 				else
-					moduleCctorCodeRva = (uint)(moduleCctor.RVA + (p[1] >> 4) * 4);
+					moduleCctorCodeRva = (uint)((uint)moduleCctor.RVA + (p[1] >> 4) * 4);
 			}
 		}
 
@@ -423,30 +424,31 @@ namespace de4dot.mdecrypt {
 		}
 
 		unsafe void updateFromMethodDefTableRow() {
-			int methodIndex = (int)(ctx.dm.token - 0x06000001);
-			byte* row = (byte*)methodDefTablePtr + methodIndex * methodDefTable.totalSize;
-			ctx.dm.mdImplFlags = (ushort)read(row, methodDefTable.fields[1]);
-			ctx.dm.mdFlags = (ushort)read(row, methodDefTable.fields[2]);
-			ctx.dm.mdName = read(row, methodDefTable.fields[3]);
-			ctx.dm.mdSignature = read(row, methodDefTable.fields[4]);
-			ctx.dm.mdParamList = read(row, methodDefTable.fields[5]);
+			uint methodIndex = ctx.dm.token - 0x06000001;
+			byte* row = (byte*)methodDefTablePtr + methodIndex * methodDefTable.RowSize;
+			ctx.dm.mdRVA = read(row, methodDefTable.Columns[0]);
+			ctx.dm.mdImplFlags = (ushort)read(row, methodDefTable.Columns[1]);
+			ctx.dm.mdFlags = (ushort)read(row, methodDefTable.Columns[2]);
+			ctx.dm.mdName = read(row, methodDefTable.Columns[3]);
+			ctx.dm.mdSignature = read(row, methodDefTable.Columns[4]);
+			ctx.dm.mdParamList = read(row, methodDefTable.Columns[5]);
 		}
 
-		static unsafe uint read(byte* row, MetadataField mdField) {
-			switch (mdField.size) {
-			case 1: return *(row + mdField.offset);
-			case 2: return *(ushort*)(row + mdField.offset);
-			case 4: return *(uint*)(row + mdField.offset);
-			default: throw new ApplicationException(string.Format("Unknown size: {0}", mdField.size));
+		static unsafe uint read(byte* row, ColumnInfo colInfo) {
+			switch (colInfo.Size) {
+			case 1: return *(row + colInfo.Offset);
+			case 2: return *(ushort*)(row + colInfo.Offset);
+			case 4: return *(uint*)(row + colInfo.Offset);
+			default: throw new ApplicationException(string.Format("Unknown size: {0}", colInfo.Size));
 			}
 		}
 
 		string returnNameOfMethod() {
-			return ctx.method.Name;
+			return ctx.method.Name.String;
 		}
 
 		int returnMethodToken() {
-			return ctx.method.MetadataToken.ToInt32();
+			return ctx.method.MDToken.ToInt32();
 		}
 
 		public DumpedMethods decryptMethods() {
@@ -457,8 +459,8 @@ namespace de4dot.mdecrypt {
 			var dumpedMethods = new DumpedMethods();
 
 			if (decryptMethodsInfo.methodsToDecrypt == null) {
-				for (uint i = 0; i < methodDefTable.rows; i++)
-					dumpedMethods.add(decryptMethod(0x06000001 + i));
+				for (uint rid = 1; rid <= methodDefTable.Rows; rid++)
+					dumpedMethods.add(decryptMethod(0x06000000 + rid));
 			}
 			else {
 				foreach (var token in decryptMethodsInfo.methodsToDecrypt)
@@ -476,11 +478,11 @@ namespace de4dot.mdecrypt {
 			ctx.dm = new DumpedMethod();
 			ctx.dm.token = token;
 
-			ctx.method = monoModule.LookupToken((int)token) as MethodDefinition;
+			ctx.method = dnlibModule.ResolveMethod(MDToken.ToRID(token));
 			if (ctx.method == null)
 				throw new ApplicationException(string.Format("Could not find method {0:X8}", token));
 
-			byte* mh = (byte*)hInstModule + ctx.method.RVA;
+			byte* mh = (byte*)hInstModule + (uint)ctx.method.RVA;
 			byte* code;
 			if (mh == (byte*)hInstModule) {
 				ctx.dm.mhMaxStack = 0;

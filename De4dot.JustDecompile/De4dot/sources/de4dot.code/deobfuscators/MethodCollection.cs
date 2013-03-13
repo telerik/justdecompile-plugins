@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -18,15 +18,15 @@
 */
 
 using System.Collections.Generic;
-using Mono.Cecil;
+using dnlib.DotNet;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators {
 	class MethodCollection {
-		TypeDefinitionDict<bool> types = new TypeDefinitionDict<bool>();
-		MethodDefinitionAndDeclaringTypeDict<bool> methods = new MethodDefinitionAndDeclaringTypeDict<bool>();
+		TypeDefDict<bool> types = new TypeDefDict<bool>();
+		MethodDefAndDeclaringTypeDict<bool> methods = new MethodDefAndDeclaringTypeDict<bool>();
 
-		public bool exists(MethodReference method) {
+		public bool exists(IMethod method) {
 			if (method == null)
 				return false;
 			if (method.DeclaringType != null && types.find(method.DeclaringType))
@@ -34,26 +34,27 @@ namespace de4dot.code.deobfuscators {
 			return methods.find(method);
 		}
 
-		public void add(MethodDefinition method) {
+		public void add(MethodDef method) {
 			methods.add(method, true);
 		}
 
-		public void add(IEnumerable<MethodDefinition> methods) {
+		public void add(IEnumerable<MethodDef> methods) {
 			foreach (var method in methods)
 				add(method);
 		}
 
-		public void add(TypeDefinition type) {
+		public void add(TypeDef type) {
 			types.add(type, true);
 		}
 
-		public void addAndNested(TypeDefinition type) {
-			foreach (var t in TypeDefinition.GetTypes(new List<TypeDefinition> { type }))
-				add(type);
+		public void addAndNested(TypeDef type) {
+			add(type);
+			foreach (var t in type.GetTypes())
+				add(t);
 		}
 
-		public void addAndNested(IList<TypeDefinition> types) {
-			foreach (var type in TypeDefinition.GetTypes(types))
+		public void addAndNested(IList<TypeDef> types) {
+			foreach (var type in AllTypesHelper.Types(types))
 				add(type);
 		}
 	}

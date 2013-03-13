@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -63,12 +63,9 @@ namespace de4dot.code.deobfuscators.Unknown {
 			get { return obfuscatorName ?? "Unknown Obfuscator"; }
 		}
 
-		protected override bool KeepTypes {
-			get { return true; }
-		}
-
 		internal Deobfuscator(Options options)
 			: base(options) {
+			KeepTypes = true;
 		}
 
 		void setName(string name) {
@@ -86,15 +83,16 @@ namespace de4dot.code.deobfuscators.Unknown {
 
 		string scanTypes() {
 			foreach (var type in module.Types) {
-				if (type.FullName == "ConfusedByAttribute")
+				var fn = type.FullName;
+				if (fn == "ConfusedByAttribute")
 					return "Confuser";
-				if (type.FullName == "ZYXDNGuarder")
+				if (fn == "ZYXDNGuarder")
 					return "DNGuard HVM";
-				if (type.Name.Contains("();\t"))
+				if (type.Name.String.Contains("();\t"))
 					return "Manco .NET Obfuscator";
-				if (Regex.IsMatch(type.FullName, @"^EMyPID_\d+_$"))
+				if (Regex.IsMatch(fn, @"^EMyPID_\d+_$"))
 					return "BitHelmet Obfuscator";
-				if (type.FullName == "YanoAttribute")
+				if (fn == "YanoAttribute")
 					return "Yano Obfuscator";
 			}
 			return null;

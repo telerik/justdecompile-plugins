@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -18,8 +18,7 @@
 */
 
 using System.Collections.Generic;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+using dnlib.DotNet.Emit;
 
 namespace de4dot.blocks.cflow {
 	public class BlocksCflowDeobfuscator {
@@ -44,6 +43,7 @@ namespace de4dot.blocks.cflow {
 			ourBlocksDeobfuscators.Add(new DeadCodeRemover { ExecuteOnNoChange = false });
 			ourBlocksDeobfuscators.Add(new ConstantsFolder { ExecuteOnNoChange = true });
 			ourBlocksDeobfuscators.Add(new StLdlocFixer { ExecuteOnNoChange = true });
+			ourBlocksDeobfuscators.Add(new DupBlockCflowDeobfuscator { ExecuteOnNoChange = true });
 		}
 
 		public void add(IEnumerable<IBlocksDeobfuscator> blocksDeobfuscators) {

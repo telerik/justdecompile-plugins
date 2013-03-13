@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -21,8 +21,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Mono.MyStuff;
-using de4dot.PE;
+using dnlib.IO;
+using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.MaxtoCode {
 	// Decrypts methods, resources and strings (#US heap)
@@ -31,7 +31,7 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 
 		class MethodInfos {
 			MainType mainType;
-			PeImage peImage;
+			MyPEImage peImage;
 			PeHeader peHeader;
 			McKey mcKey;
 			uint structSize;
@@ -50,6 +50,7 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 			readonly Decrypt[] decryptHandlersV5a;
 			readonly Decrypt[] decryptHandlersV5b;
 			readonly Decrypt[] decryptHandlersV5c;
+			readonly Decrypt[] decryptHandlersV6a;
 
 			public class DecryptedMethodInfo {
 				public uint bodyRva;
@@ -61,7 +62,7 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 				}
 			}
 
-			public MethodInfos(MainType mainType, PeImage peImage, PeHeader peHeader, McKey mcKey) {
+			public MethodInfos(MainType mainType, MyPEImage peImage, PeHeader peHeader, McKey mcKey) {
 				this.mainType = mainType;
 				this.peImage = peImage;
 				this.peHeader = peHeader;
@@ -74,6 +75,7 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 				decryptHandlersV5a = new Decrypt[] { decrypt4a, decrypt2a, decrypt3a, decrypt1a, decrypt5, decrypt6, decrypt7 };
 				decryptHandlersV5b = new Decrypt[] { decrypt4b, decrypt2b, decrypt3b, decrypt1b, decrypt6, decrypt7, decrypt5 };
 				decryptHandlersV5c = new Decrypt[] { decrypt4c, decrypt2c, decrypt3c, decrypt1c, decrypt6, decrypt7, decrypt5 };
+				decryptHandlersV6a = new Decrypt[] { decrypt4d, decrypt2d, decrypt3d, decrypt1d, decrypt6, decrypt7, decrypt5 };
 
 				structSize = getStructSize(mcKey);
 
@@ -106,7 +108,7 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 						return info.Version;
 				}
 
-				Log.w("Could not detect MC version. Magic2: {0:X8} {1:X8}", m2lo, m2hi);
+				Logger.w("Could not detect MC version. Magic2: {0:X8} {1:X8}", m2lo, m2hi);
 				return EncryptionVersion.Unknown;
 			}
 
@@ -172,6 +174,9 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 					decrypters.Add(new Decrypter(decryptHandlersV5a));
 					decrypters.Add(new Decrypter(decryptHandlersV5b));
 					decrypters.Add(new Decrypter(decryptHandlersV5c));
+					break;
+				case EncryptionVersion.V6:
+					decrypters.Add(new Decrypter(decryptHandlersV6a));
 					break;
 
 				case EncryptionVersion.Unknown:
@@ -287,6 +292,10 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 				return decrypt1(encrypted, 6, 0, 0x1000);
 			}
 
+			byte[] decrypt1d(byte[] encrypted) {
+				return decrypt1(encrypted, 5, 5, 0x500);
+			}
+
 			byte[] decrypt1(byte[] encrypted, int keyStart, int keyReset, int keyEnd) {
 				var decrypted = new byte[encrypted.Length];
 				for (int i = 0, ki = keyStart; i < decrypted.Length; i++) {
@@ -307,6 +316,10 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 
 			byte[] decrypt2c(byte[] encrypted) {
 				return decrypt2(encrypted, 0x00FA + 0x24);
+			}
+
+			byte[] decrypt2d(byte[] encrypted) {
+				return decrypt2(encrypted, 0x00FA + 7);
 			}
 
 			byte[] decrypt2(byte[] encrypted, int offset) {
@@ -342,6 +355,10 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 
 			byte[] decrypt3c(byte[] encrypted) {
 				return decrypt3(encrypted, 0x015E + 0x28);
+			}
+
+			byte[] decrypt3d(byte[] encrypted) {
+				return decrypt3(encrypted, 0x015E + 8);
 			}
 
 			static readonly byte[] decrypt3Shifts = new byte[16] { 5, 11, 14, 21, 6, 20, 17, 29, 4, 10, 3, 2, 7, 1, 26, 18 };
@@ -385,6 +402,10 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 				return decrypt4(encrypted, 5, 0, 0x2000);
 			}
 
+			byte[] decrypt4d(byte[] encrypted) {
+				return decrypt4(encrypted, 0x0B, 0x0B, 0x1000);
+			}
+
 			byte[] decrypt4(byte[] encrypted, int keyStart, int keyReset, int keyEnd) {
 				var decrypted = new byte[encrypted.Length / 3 * 2 + 1];
 
@@ -398,7 +419,7 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 					decrypted[j++] = (byte)(((encrypted[i + 1] ^ k2) << 4) + ((encrypted[i + 2] ^ k3) & 0x0F));
 					i += 3;
 					ki += 4;
-					if (ki == keyEnd)
+					if (ki >= keyEnd)
 						ki = keyReset;
 				}
 
@@ -463,54 +484,21 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 			var methodInfos = new MethodInfos(decrypterInfo.mainType, peImage, decrypterInfo.peHeader, decrypterInfo.mcKey);
 			methodInfos.initializeInfos();
 
-			var metadataTables = peImage.Cor20Header.createMetadataTables();
-			var methodDef = metadataTables.getMetadataType(MetadataIndex.iMethodDef);
-			uint methodDefOffset = methodDef.fileOffset;
-			for (int i = 0; i < methodDef.rows; i++, methodDefOffset += methodDef.totalSize) {
-				uint bodyRva = peImage.offsetReadUInt32(methodDefOffset);
-				if (bodyRva == 0)
-					continue;
+			var methodDef = peImage.DotNetFile.MetaData.TablesStream.MethodTable;
+			for (uint rid = 1; rid <= methodDef.Rows; rid++) {
+				var dm = new DumpedMethod();
+				peImage.readMethodTableRowTo(dm, rid);
 
-				var info = methodInfos.lookup(bodyRva);
+				var info = methodInfos.lookup(dm.mdRVA);
 				if (info == null)
 					continue;
 
-				uint bodyOffset = peImage.rvaToOffset(bodyRva);
-				ushort magic = peImage.offsetReadUInt16(bodyOffset);
+				ushort magic = peImage.readUInt16(dm.mdRVA);
 				if (magic != 0xFFF3)
 					continue;
 
-				var dm = new DumpedMethod();
-				dm.token = (uint)(0x06000001 + i);
-				dm.mdImplFlags = peImage.offsetReadUInt16(methodDefOffset + (uint)methodDef.fields[1].offset);
-				dm.mdFlags = peImage.offsetReadUInt16(methodDefOffset + (uint)methodDef.fields[2].offset);
-				dm.mdName = peImage.offsetRead(methodDefOffset + (uint)methodDef.fields[3].offset, methodDef.fields[3].size);
-				dm.mdSignature = peImage.offsetRead(methodDefOffset + (uint)methodDef.fields[4].offset, methodDef.fields[4].size);
-				dm.mdParamList = peImage.offsetRead(methodDefOffset + (uint)methodDef.fields[5].offset, methodDef.fields[5].size);
-
-				var reader = new BinaryReader(new MemoryStream(info.body));
-				byte b = reader.ReadByte();
-				if ((b & 3) == 2) {
-					dm.mhFlags = 2;
-					dm.mhMaxStack = 8;
-					dm.mhCodeSize = (uint)(b >> 2);
-					dm.mhLocalVarSigTok = 0;
-				}
-				else {
-					reader.BaseStream.Position--;
-					dm.mhFlags = reader.ReadUInt16();
-					dm.mhMaxStack = reader.ReadUInt16();
-					dm.mhCodeSize = reader.ReadUInt32();
-					dm.mhLocalVarSigTok = reader.ReadUInt32();
-					uint codeOffset = (uint)(dm.mhFlags >> 12) * 4;
-					reader.BaseStream.Position += codeOffset - 12;
-				}
-
-				dm.code = reader.ReadBytes((int)dm.mhCodeSize);
-				if ((dm.mhFlags & 8) != 0) {
-					reader.BaseStream.Position = (reader.BaseStream.Position + 3) & ~3;
-					dm.extraSections = reader.ReadBytes((int)(reader.BaseStream.Length - reader.BaseStream.Position));
-				}
+				var mbHeader = MethodBodyParser.parseMethodBody(MemoryImageStream.Create(info.body), out dm.code, out dm.extraSections);
+				peImage.updateMethodHeaderInfo(dm, mbHeader);
 
 				dumpedMethods.add(dm);
 			}
@@ -528,12 +516,12 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 			uint resourceSize = peHeader.readUInt32(0x0E14) ^ mcKey.readUInt32(0x00AA);
 			if (resourceRva == 0 || resourceSize == 0)
 				return;
-			if (resourceRva != peImage.Cor20Header.resources.virtualAddress ||
-				resourceSize != peImage.Cor20Header.resources.size) {
-				Log.w("Invalid resource RVA and size found");
+			if (resourceRva != (uint)peImage.Cor20Header.Resources.VirtualAddress ||
+				resourceSize != peImage.Cor20Header.Resources.Size) {
+				Logger.w("Invalid resource RVA and size found");
 			}
 
-			Log.v("Decrypting resources @ RVA {0:X8}, {1} bytes", resourceRva, resourceSize);
+			Logger.v("Decrypting resources @ RVA {0:X8}, {1} bytes", resourceRva, resourceSize);
 
 			int resourceOffset = (int)peImage.rvaToOffset(resourceRva);
 			for (int i = 0; i < resourceSize; i++)
@@ -550,15 +538,15 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 			uint usHeapSize = peHeader.readUInt32(0x0E04) ^ mcKey.readUInt32(0x0082);
 			if (usHeapRva == 0 || usHeapSize == 0)
 				return;
-			var usHeap = peImage.Cor20Header.metadata.getStream("#US");
-			if (usHeap == null ||
-				peImage.rvaToOffset(usHeapRva) != usHeap.fileOffset ||
-				usHeapSize != usHeap.Length) {
-				Log.w("Invalid #US heap RVA and size found");
+			var usHeap = peImage.DotNetFile.MetaData.USStream;
+			if (usHeap.StartOffset == 0 ||	// Start offset is 0 if it's not present in the file
+				peImage.rvaToOffset(usHeapRva) != (uint)usHeap.StartOffset ||
+				usHeapSize != (uint)(usHeap.EndOffset - usHeap.StartOffset)) {
+				Logger.w("Invalid #US heap RVA and size found");
 			}
 
-			Log.v("Decrypting strings @ RVA {0:X8}, {1} bytes", usHeapRva, usHeapSize);
-			Log.indent();
+			Logger.v("Decrypting strings @ RVA {0:X8}, {1} bytes", usHeapRva, usHeapSize);
+			Logger.Instance.indent();
 
 			int mcKeyOffset = 0;
 			int usHeapOffset = (int)peImage.rvaToOffset(usHeapRva);
@@ -581,16 +569,16 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 				}
 
 				try {
-					Log.v("Decrypted string: {0}", Utils.toCsharpString(Encoding.Unicode.GetString(fileData, usHeapOffsetString, stringDataLength - 1)));
+					Logger.v("Decrypted string: {0}", Utils.toCsharpString(Encoding.Unicode.GetString(fileData, usHeapOffsetString, stringDataLength - 1)));
 				}
 				catch {
-					Log.v("Could not decrypt string at offset {0:X8}", usHeapOffsetOrig);
+					Logger.v("Could not decrypt string at offset {0:X8}", usHeapOffsetOrig);
 				}
 
 				usHeapOffset++;
 			}
 
-			Log.deIndent();
+			Logger.Instance.deIndent();
 		}
 
 		byte rolb(byte b, int n) {

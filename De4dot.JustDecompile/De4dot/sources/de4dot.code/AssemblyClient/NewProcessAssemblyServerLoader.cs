@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -24,6 +24,13 @@ namespace de4dot.code.AssemblyClient {
 	// Starts the server in a new process
 	class NewProcessAssemblyServerLoader : IpcAssemblyServerLoader {
 		Process process;
+
+		public NewProcessAssemblyServerLoader() {
+		}
+
+		public NewProcessAssemblyServerLoader(ServerClrVersion version)
+			: base(version) {
+		}
 
 		public override void loadServer(string filename) {
 			if (process != null)

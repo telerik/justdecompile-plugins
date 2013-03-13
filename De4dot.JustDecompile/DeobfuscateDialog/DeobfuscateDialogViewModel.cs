@@ -7,6 +7,7 @@ using Microsoft.Practices.Prism.ViewModel;
 using Microsoft.Win32;
 using de4dot.code;
 using JustDecompile.API.Core;
+using dnlib.DotNet;
 
 namespace De4dot.JustDecompile.DeobfuscateDialog
 {
@@ -175,7 +176,8 @@ namespace De4dot.JustDecompile.DeobfuscateDialog
 			options.NewFilename = newFile;
 			options.KeepObfuscatorTypes = this.KeepObfuscatorClasses;
 			options.Filename = location;
-			ObfuscatedFile result = de4Dot.CreateObfuscationFile(options);
+			var context = new ModuleContext();
+			ObfuscatedFile result = de4Dot.CreateObfuscationFile(options, context);
 			return result;
 		}
 	}

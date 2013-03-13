@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -19,10 +19,8 @@
 
 using System;
 using System.Collections.Generic;
-using Mono.Cecil;
-using Mono.MyStuff;
+using dnlib.DotNet;
 using de4dot.blocks;
-using de4dot.PE;
 
 namespace de4dot.code.deobfuscators.CodeWall {
 	public class DeobfuscatorInfo : DeobfuscatorInfoBase {
@@ -165,10 +163,10 @@ namespace de4dot.code.deobfuscators.CodeWall {
 				return false;
 
 			byte[] fileData = ModuleBytes ?? DeobUtils.readModule(module);
-			var peImage = new PeImage(fileData);
-
-			if (!methodsDecrypter.decrypt(peImage, ref dumpedMethods))
-				return false;
+			using (var peImage = new MyPEImage(fileData)) {
+				if (!methodsDecrypter.decrypt(peImage, ref dumpedMethods))
+					return false;
+			}
 
 			newFileData = fileData;
 			return true;
@@ -194,7 +192,7 @@ namespace de4dot.code.deobfuscators.CodeWall {
 			return asmInfo.data;
 		}
 
-		public override IDeobfuscator moduleReloaded(ModuleDefinition module) {
+		public override IDeobfuscator moduleReloaded(ModuleDefMD module) {
 			var newOne = new Deobfuscator(options);
 			newOne.setModule(module);
 			newOne.methodsDecrypter = new MethodsDecrypter(module);
@@ -209,7 +207,6 @@ namespace de4dot.code.deobfuscators.CodeWall {
 
 		public override void deobfuscateBegin() {
 			base.deobfuscateBegin();
-			addAssemblyReferenceToBeRemoved(methodsDecrypter.AssemblyNameReference, "Obfuscator decrypter DLL reference");
 
 			initializeStringDecrypter();
 			initializeAssemblyDecrypter();
@@ -263,7 +260,7 @@ namespace de4dot.code.deobfuscators.CodeWall {
 		public override IEnumerable<int> getStringDecrypterMethods() {
 			var list = new List<int>();
 			foreach (var info in stringDecrypter.Infos)
-				list.Add(info.Method.MetadataToken.ToInt32());
+				list.Add(info.Method.MDToken.ToInt32());
 			return list;
 		}
 	}

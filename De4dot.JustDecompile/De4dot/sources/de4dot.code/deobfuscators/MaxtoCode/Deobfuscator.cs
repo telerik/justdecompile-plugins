@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -20,8 +20,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Mono.Cecil;
-using Mono.MyStuff;
+using dnlib.DotNet;
+using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.MaxtoCode {
 	public class DeobfuscatorInfo : DeobfuscatorInfoBase {
@@ -115,12 +115,21 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 			return true;
 		}
 
-		public override IDeobfuscator moduleReloaded(ModuleDefinition module) {
+		public override IDeobfuscator moduleReloaded(ModuleDefMD module) {
 			var newOne = new Deobfuscator(options);
 			newOne.setModule(module);
 			newOne.mainType = new MainType(module, mainType);
 			newOne.decrypterInfo = decrypterInfo;
+			decrypterInfo = null;
+			if (newOne.decrypterInfo != null)
+				newOne.decrypterInfo.mainType = newOne.mainType;
 			return newOne;
+		}
+
+		void freePEImage() {
+			if (decrypterInfo != null)
+				decrypterInfo.Dispose();
+			decrypterInfo = null;
 		}
 
 		public override void deobfuscateBegin() {
@@ -133,12 +142,19 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 				staticStringInliner.add(stringDecrypter.Method, (method, gim, args) => stringDecrypter.decrypt((uint)args[0]));
 				DeobfuscatedFile.stringDecryptersAdded();
 			}
+			else
+				freePEImage();
 
 			foreach (var method in mainType.InitMethods)
 				addCctorInitCallToBeRemoved(method);
 			addTypeToBeRemoved(mainType.Type, "Obfuscator type");
-			addModuleReferencesToBeRemoved(mainType.ModuleReferences, "MC runtime module reference");
 			removeDuplicateEmbeddedResources();
+			removeInvalidResources();
+		}
+
+		public override void deobfuscateEnd() {
+			freePEImage();
+			base.deobfuscateEnd();
 		}
 
 		static Encoding getEncoding(int cp) {
@@ -146,7 +162,7 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 				return Encoding.GetEncoding(cp);
 			}
 			catch {
-				Log.w("Invalid code page {0}!", cp);
+				Logger.w("Invalid code page {0}!", cp);
 				return Encoding.Default;
 			}
 		}
@@ -159,18 +175,24 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 			}
 
 			public override int GetHashCode() {
-				return resource._GetHashCode();
+				int hash = 0;
+				if (resource.Offset != null)
+					hash ^= resource.Offset.GetHashCode();
+				hash ^= (int)resource.Data.Position;
+				hash ^= (int)resource.Data.Length;
+				return hash;
 			}
 
 			public override bool Equals(object obj) {
 				var other = obj as ResourceKey;
 				if (other == null)
 					return false;
-				return resource._Equals(other.resource);
+				return resource.Data.FileOffset == other.resource.Data.FileOffset &&
+					resource.Data.Length == other.resource.Data.Length;
 			}
 
 			public override string ToString() {
-				return resource.Name;
+				return resource.Name.String;
 			}
 		}
 
@@ -195,7 +217,7 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 
 				EmbeddedResource resourceToKeep = null;
 				foreach (var rsrc in list) {
-					if (string.IsNullOrEmpty(rsrc.Name))
+					if (UTF8String.IsNullOrEmpty(rsrc.Name))
 						continue;
 
 					resourceToKeep = rsrc;
@@ -212,11 +234,27 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 			}
 		}
 
+		void removeInvalidResources() {
+			foreach (var tmp in module.Resources) {
+				var resource = tmp as EmbeddedResource;
+				if (resource == null)
+					continue;
+				if (resource.Offset == null || (resource.Data.FileOffset == 0 && resource.Data.Length == 0))
+					addResourceToBeRemoved(resource, "Invalid resource");
+			}
+		}
+
 		public override IEnumerable<int> getStringDecrypterMethods() {
 			var list = new List<int>();
 			if (stringDecrypter != null && stringDecrypter.Detected)
-				list.Add(stringDecrypter.Method.MetadataToken.ToInt32());
+				list.Add(stringDecrypter.Method.MDToken.ToInt32());
 			return list;
+		}
+
+		protected override void Dispose(bool disposing) {
+			if (disposing)
+				freePEImage();
+			base.Dispose(disposing);
 		}
 	}
 }

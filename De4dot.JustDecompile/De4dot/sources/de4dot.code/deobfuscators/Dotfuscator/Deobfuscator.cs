@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -18,7 +18,7 @@
 */
 
 using System.Collections.Generic;
-using Mono.Cecil;
+using dnlib.DotNet;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.Dotfuscator {
@@ -101,7 +101,7 @@ namespace de4dot.code.deobfuscators.Dotfuscator {
 			}
 		}
 
-		void initializeVersion(TypeDefinition attr) {
+		void initializeVersion(TypeDef attr) {
 			var s = DotNetUtils.getCustomArgAsString(getAssemblyAttribute(attr), 0);
 			if (s == null)
 				return;
@@ -129,7 +129,7 @@ namespace de4dot.code.deobfuscators.Dotfuscator {
 		public override IEnumerable<int> getStringDecrypterMethods() {
 			var list = new List<int>();
 			foreach (var method in stringDecrypter.StringDecrypters)
-				list.Add(method.MetadataToken.ToInt32());
+				list.Add(method.MDToken.ToInt32());
 			return list;
 		}
 	}

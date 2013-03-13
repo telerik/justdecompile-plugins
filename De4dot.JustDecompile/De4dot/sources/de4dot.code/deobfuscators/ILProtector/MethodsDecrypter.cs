@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -20,26 +20,217 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+using dnlib.IO;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.ILProtector {
 	class MethodsDecrypter {
-		public static readonly byte[] ilpPublicKeyToken = new byte[8] { 0x20, 0x12, 0xD3, 0xC0, 0x55, 0x1F, 0xE0, 0x3D };
-
-		// This is the first four bytes of ILProtector's public key token
-		const uint RESOURCE_MAGIC = 0xC0D31220;
-
-		ModuleDefinition module;
+		ModuleDefMD module;
 		MainType mainType;
 		EmbeddedResource methodsResource;
-		Version ilpVersion;
 		Dictionary<int, MethodInfo2> methodInfos = new Dictionary<int, MethodInfo2>();
-		List<TypeDefinition> delegateTypes = new List<TypeDefinition>();
-		int startOffset;
-		byte[] decryptionKey;
-		int decryptionKeyMod;
+		List<TypeDef> delegateTypes = new List<TypeDef>();
+		IDecrypter decrypter;
+
+		interface IDecrypter {
+			string Version { get; }
+			byte[] getMethodsData(EmbeddedResource resource);
+		}
+
+		class DecrypterBase : IDecrypter {
+			protected static readonly byte[] ilpPublicKeyToken = new byte[8] { 0x20, 0x12, 0xD3, 0xC0, 0x55, 0x1F, 0xE0, 0x3D };
+
+			protected string ilpVersion;
+			protected int startOffset;
+			protected byte[] decryptionKey;
+			protected int decryptionKeyMod;
+
+			public string Version {
+				get { return ilpVersion; }
+			}
+
+			protected void setVersion(Version version) {
+				if (version.Revision == 0)
+					ilpVersion = string.Format("{0}.{1}.{2}", version.Major, version.Minor, version.Build);
+				else
+					ilpVersion = version.ToString();
+			}
+
+			public virtual byte[] getMethodsData(EmbeddedResource resource) {
+				var reader = resource.Data;
+				reader.Position = startOffset;
+				if ((reader.ReadInt32() & 1) != 0)
+					return decompress(reader);
+				else
+					return reader.ReadRemainingBytes();
+			}
+
+			byte[] decompress(IBinaryReader reader) {
+				return decompress(reader, decryptionKey, decryptionKeyMod);
+			}
+
+			static void copy(byte[] src, int srcIndex, byte[] dst, int dstIndex, int size) {
+				for (int i = 0; i < size; i++)
+					dst[dstIndex++] = src[srcIndex++];
+			}
+
+			static byte[] decompress(IBinaryReader reader, byte[] key, int keyMod) {
+				return decompress(new byte[reader.Read7BitEncodedUInt32()], reader, key, keyMod);
+			}
+
+			protected static byte[] decompress(byte[] decrypted, IBinaryReader reader, byte[] key, int keyMod) {
+				int destIndex = 0;
+				while (reader.Position < reader.Length) {
+					if (destIndex >= decrypted.Length)
+						break;
+					byte flags = reader.ReadByte();
+					for (int mask = 1; mask != 0x100; mask <<= 1) {
+						if (reader.Position >= reader.Length)
+							break;
+						if (destIndex >= decrypted.Length)
+							break;
+						if ((flags & mask) != 0) {
+							int displ = (int)reader.Read7BitEncodedUInt32();
+							int size = (int)reader.Read7BitEncodedUInt32();
+							copy(decrypted, destIndex - displ, decrypted, destIndex, size);
+							destIndex += size;
+						}
+						else {
+							byte b = reader.ReadByte();
+							if (key != null)
+								b ^= key[destIndex % keyMod];
+							decrypted[destIndex++] = b;
+						}
+					}
+				}
+
+				return decrypted;
+			}
+		}
+
+		// 1.0.0 - 1.0.4
+		class DecrypterV100 : DecrypterBase {
+			// This is the first four bytes of ILProtector's public key token
+			const uint RESOURCE_MAGIC = 0xC0D31220;
+
+			DecrypterV100(Version ilpVersion) {
+				setVersion(ilpVersion);
+				this.startOffset = 8;
+				this.decryptionKey = ilpPublicKeyToken;
+				this.decryptionKeyMod = 8;
+			}
+
+			public static DecrypterV100 create(IBinaryReader reader) {
+				reader.Position = 0;
+				if (reader.Length < 12)
+					return null;
+				if (reader.ReadUInt32() != RESOURCE_MAGIC)
+					return null;
+
+				return new DecrypterV100(new Version(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()));
+			}
+		}
+
+		// 1.0.5
+		class DecrypterV105 : DecrypterBase {
+			DecrypterV105(Version ilpVersion, byte[] key) {
+				setVersion(ilpVersion);
+				this.startOffset = 0xA0;
+				this.decryptionKey = key;
+				this.decryptionKeyMod = key.Length - 1;
+			}
+
+			public static DecrypterV105 create(IBinaryReader reader) {
+				reader.Position = 0;
+				if (reader.Length < 0xA4)
+					return null;
+				var key = reader.ReadBytes(0x94);
+				if (!Utils.compare(reader.ReadBytes(8), ilpPublicKeyToken))
+					return null;
+				return new DecrypterV105(new Version(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()), key);
+			}
+		}
+
+		// 1.0.6
+		class DecrypterV106 : DecrypterBase {
+			byte[] decryptionKey6;
+			byte[] decryptionKey7;
+
+			DecrypterV106(byte[] key0, byte[] key6, byte[] key7, int startOffset) {
+				this.ilpVersion = "1.0.6";
+				this.startOffset = startOffset;
+				this.decryptionKey = key0;
+				this.decryptionKey6 = key6;
+				this.decryptionKey7 = key7;
+				this.decryptionKeyMod = key0.Length - 1;
+			}
+
+			public static DecrypterV106 create(IBinaryReader reader) {
+				try {
+					int keyXorOffs7 = (ReadByteAt(reader, 0) ^ ReadByteAt(reader, 2)) + 2;
+					reader.Position = keyXorOffs7 + (ReadByteAt(reader, 1) ^ ReadByteAt(reader, keyXorOffs7));
+
+					int sha1DataLen = reader.Read7BitEncodedInt32() + 0x80;
+					int keyXorOffs6 = (int)reader.Position;
+					int encryptedOffs = (int)reader.Position + sha1DataLen;
+					var sha1Data = reader.ReadBytes(sha1DataLen);
+					uint crc32 = CRC32.checksum(sha1Data);
+
+					reader.Position = reader.Length - 0x18;
+					uint origCrc32 = reader.ReadUInt32();
+					if (crc32 != origCrc32)
+						return null;
+
+					var key0 = DeobUtils.sha1Sum(sha1Data);			// 1.0.6.0
+					var key6 = getKey(reader, key0, keyXorOffs6);	// 1.0.6.6
+					var key7 = getKey(reader, key0, keyXorOffs7);	// 1.0.6.7
+					return new DecrypterV106(key0, key6, key7, encryptedOffs);
+				}
+				catch (IOException) {
+					return null;
+				}
+			}
+
+			static byte[] getKey(IBinaryReader reader, byte[] sha1Sum, int offs) {
+				var key = (byte[])sha1Sum.Clone();
+				reader.Position = offs;
+				for (int i = 0; i < key.Length; i++)
+					key[i] ^= reader.ReadByte();
+				return key;
+			}
+
+			static byte ReadByteAt(IBinaryReader reader, int offs) {
+				reader.Position = offs;
+				return reader.ReadByte();
+			}
+
+			public override byte[] getMethodsData(EmbeddedResource resource) {
+				var reader = resource.Data;
+				reader.Position = startOffset;
+				var decrypted = new byte[reader.Read7BitEncodedUInt32()];
+				uint origCrc32 = reader.ReadUInt32();
+				long pos = reader.Position;
+
+				var keys = new byte[][] { decryptionKey, decryptionKey6, decryptionKey7 };
+				foreach (var key in keys) {
+					try {
+						reader.Position = pos;
+						decompress(decrypted, reader, key, decryptionKeyMod);
+						uint crc32 = CRC32.checksum(decrypted);
+						if (crc32 == origCrc32)
+							return decrypted;
+					}
+					catch (OutOfMemoryException) {
+					}
+					catch (IOException) {
+					}
+				}
+
+				throw new ApplicationException("Could not decrypt methods data");
+			}
+		}
 
 		class MethodInfo2 {
 			public int id;
@@ -60,19 +251,19 @@ namespace de4dot.code.deobfuscators.ILProtector {
 			get { return methodsResource; }
 		}
 
-		public IEnumerable<TypeDefinition> DelegateTypes {
+		public IEnumerable<TypeDef> DelegateTypes {
 			get { return delegateTypes; }
 		}
 
-		public Version Version {
-			get { return ilpVersion; }
+		public string Version {
+			get { return decrypter == null ? null : decrypter.Version; }
 		}
 
 		public bool Detected {
 			get { return methodsResource != null; }
 		}
 
-		public MethodsDecrypter(ModuleDefinition module, MainType mainType) {
+		public MethodsDecrypter(ModuleDefMD module, MainType mainType) {
 			this.module = module;
 			this.mainType = mainType;
 		}
@@ -82,9 +273,11 @@ namespace de4dot.code.deobfuscators.ILProtector {
 				var resource = tmp as EmbeddedResource;
 				if (resource == null)
 					continue;
-				var reader = new BinaryReader(resource.GetResourceStream());
+				var reader = resource.Data;
+				reader.Position = 0;
 				if (!checkResourceV100(reader) &&
-					!checkResourceV105(reader))
+					!checkResourceV105(reader) &&
+					!checkResourceV106(reader))
 					continue;
 
 				methodsResource = resource;
@@ -92,106 +285,47 @@ namespace de4dot.code.deobfuscators.ILProtector {
 			}
 		}
 
-		// 1.0.0 - 1.0.4
-		bool checkResourceV100(BinaryReader reader) {
-			reader.BaseStream.Position = 0;
-			if (reader.BaseStream.Length < 12)
-				return false;
-			if (reader.ReadUInt32() != RESOURCE_MAGIC)
-				return false;
-			ilpVersion = new Version(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
-			startOffset = 8;
-			decryptionKey = ilpPublicKeyToken;
-			decryptionKeyMod = 8;
-			return true;
+		bool checkResourceV100(IBinaryReader reader) {
+			decrypter = DecrypterV100.create(reader);
+			return decrypter != null;
 		}
 
-		// 1.0.5+
-		bool checkResourceV105(BinaryReader reader) {
-			reader.BaseStream.Position = 0;
-			if (reader.BaseStream.Length < 0xA4)
-				return false;
-			var key = reader.ReadBytes(0x94);
-			if (!Utils.compare(reader.ReadBytes(8), ilpPublicKeyToken))
-				return false;
-			ilpVersion = new Version(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
-			startOffset = 0xA0;
-			decryptionKey = key;
-			decryptionKeyMod = key.Length - 1;
-			return true;
+		bool checkResourceV105(IBinaryReader reader) {
+			decrypter = DecrypterV105.create(reader);
+			return decrypter != null;
+		}
+
+		bool checkResourceV106(IBinaryReader reader) {
+			decrypter = DecrypterV106.create(reader);
+			return decrypter != null;
 		}
 
 		public void decrypt() {
-			if (methodsResource == null)
+			if (methodsResource == null || decrypter == null)
 				return;
 
-			foreach (var info in readMethodInfos(getMethodsData(methodsResource)))
+			foreach (var info in readMethodInfos(decrypter.getMethodsData(methodsResource)))
 				methodInfos[info.id] = info;
 
 			restoreMethods();
 		}
 
-		byte[] getMethodsData(EmbeddedResource resource) {
-			var reader = new BinaryReader(resource.GetResourceStream());
-			reader.BaseStream.Position = startOffset;
-			if ((reader.ReadInt32() & 1) != 0)
-				return decompress(reader);
-			else
-				return reader.ReadBytes((int)(reader.BaseStream.Length - reader.BaseStream.Position));
-		}
-
-		byte[] decompress(BinaryReader reader) {
-			return decompress(reader, decryptionKey, decryptionKeyMod);
-		}
-
-		static void copy(byte[] src, int srcIndex, byte[] dst, int dstIndex, int size) {
-			for (int i = 0; i < size; i++)
-				dst[dstIndex++] = src[srcIndex++];
-		}
-
-		static byte[] decompress(BinaryReader reader, byte[] key, int keyMod) {
-			var decrypted = new byte[Utils.readEncodedInt32(reader)];
-
-			int destIndex = 0;
-			while (reader.BaseStream.Position < reader.BaseStream.Length) {
-				byte flags = reader.ReadByte();
-				for (int mask = 1; mask != 0x100; mask <<= 1) {
-					if (reader.BaseStream.Position >= reader.BaseStream.Length)
-						break;
-					if ((flags & mask) != 0) {
-						int displ = Utils.readEncodedInt32(reader);
-						int size = Utils.readEncodedInt32(reader);
-						copy(decrypted, destIndex - displ, decrypted, destIndex, size);
-						destIndex += size;
-					}
-					else {
-						byte b = reader.ReadByte();
-						if (key != null)
-							b ^= key[destIndex % keyMod];
-						decrypted[destIndex++] = b;
-					}
-				}
-			}
-
-			return decrypted;
-		}
-
 		static MethodInfo2[] readMethodInfos(byte[] data) {
-			var reader = new BinaryReader(new MemoryStream(data));
-			int numMethods = Utils.readEncodedInt32(reader);
-			int totalCodeSize = Utils.readEncodedInt32(reader);
+			var reader = MemoryImageStream.Create(data);
+			int numMethods = (int)reader.Read7BitEncodedUInt32();
+			int totalCodeSize = (int)reader.Read7BitEncodedUInt32();
 			var methodInfos = new MethodInfo2[numMethods];
 			int offset = 0;
 			for (int i = 0; i < numMethods; i++) {
-				int id = Utils.readEncodedInt32(reader);
-				int size = Utils.readEncodedInt32(reader);
+				int id = (int)reader.Read7BitEncodedUInt32();
+				int size = (int)reader.Read7BitEncodedUInt32();
 				methodInfos[i] = new MethodInfo2(id, offset, size);
 				offset += size;
 			}
-			long dataOffset = reader.BaseStream.Position;
+			long dataOffset = reader.Position;
 			foreach (var info in methodInfos) {
-				reader.BaseStream.Position = dataOffset + info.offset;
-				reader.BaseStream.Read(info.data, 0, info.data.Length);
+				reader.Position = dataOffset + info.offset;
+				reader.Read(info.data, 0, info.data.Length);
 			}
 			return methodInfos;
 		}
@@ -200,35 +334,35 @@ namespace de4dot.code.deobfuscators.ILProtector {
 			if (methodInfos.Count == 0)
 				return;
 
-			Log.v("Restoring {0} methods", methodInfos.Count);
-			Log.indent();
+			Logger.v("Restoring {0} methods", methodInfos.Count);
+			Logger.Instance.indent();
 			foreach (var type in module.GetTypes()) {
 				foreach (var method in type.Methods) {
 					if (method.Body == null)
 						continue;
 
 					if (restoreMethod(method)) {
-						Log.v("Restored method {0} ({1:X8}). Instrs:{2}, Locals:{3}, Exceptions:{4}",
+						Logger.v("Restored method {0} ({1:X8}). Instrs:{2}, Locals:{3}, Exceptions:{4}",
 							Utils.removeNewlines(method.FullName),
-							method.MetadataToken.ToInt32(),
+							method.MDToken.ToInt32(),
 							method.Body.Instructions.Count,
 							method.Body.Variables.Count,
 							method.Body.ExceptionHandlers.Count);
 					}
 				}
 			}
-			Log.deIndent();
+			Logger.Instance.deIndent();
 			if (methodInfos.Count != 0)
-				Log.w("{0} methods weren't restored", methodInfos.Count);
+				Logger.w("{0} methods weren't restored", methodInfos.Count);
 		}
 
 		const int INVALID_METHOD_ID = -1;
-		bool restoreMethod(MethodDefinition method) {
+		bool restoreMethod(MethodDef method) {
 			int methodId = getMethodId(method);
 			if (methodId == INVALID_METHOD_ID)
 				return false;
 
-			var parameters = DotNetUtils.getParameters(method);
+			var parameters = method.Parameters;
 			var methodInfo = methodInfos[methodId];
 			methodInfos.Remove(methodId);
 			var methodReader = new MethodReader(module, methodInfo.data, parameters);
@@ -240,13 +374,13 @@ namespace de4dot.code.deobfuscators.ILProtector {
 			return true;
 		}
 
-		static void restoreMethod(MethodDefinition method, MethodReader methodReader) {
-			// body.MaxStackSize = <let Mono.Cecil calculate this>
+		static void restoreMethod(MethodDef method, MethodReader methodReader) {
+			// body.MaxStackSize = <let dnlib calculate this>
 			method.Body.InitLocals = methodReader.InitLocals;
-			methodReader.restoreMethod(method);
+			methodReader.RestoreMethod(method);
 		}
 
-		int getMethodId(MethodDefinition method) {
+		int getMethodId(MethodDef method) {
 			if (method == null || method.Body == null)
 				return INVALID_METHOD_ID;
 
@@ -257,14 +391,14 @@ namespace de4dot.code.deobfuscators.ILProtector {
 					continue;
 
 				var ldci4 = instrs[i + 1];
-				if (!DotNetUtils.isLdcI4(ldci4))
+				if (!ldci4.IsLdcI4())
 					continue;
 
-				var field = ldsfld.Operand as FieldDefinition;
+				var field = ldsfld.Operand as FieldDef;
 				if (field == null || field != mainType.InvokerInstanceField)
 					continue;
 
-				return DotNetUtils.getLdcI4Value(ldci4);
+				return ldci4.GetLdcI4Value();
 			}
 
 			return INVALID_METHOD_ID;

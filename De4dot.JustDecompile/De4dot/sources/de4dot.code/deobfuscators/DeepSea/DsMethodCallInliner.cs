@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -18,19 +18,18 @@
 */
 
 using System.Collections.Generic;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-using Mono.Cecil.Metadata;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
 using de4dot.blocks;
 using de4dot.blocks.cflow;
 
 namespace de4dot.code.deobfuscators.DeepSea {
 	class DsMethodCallInliner : MethodCallInlinerBase {
 		InstructionEmulator instructionEmulator = new InstructionEmulator();
-		List<ParameterDefinition> parameters;
-		ParameterDefinition arg1, arg2;
+		IList<Parameter> parameters;
+		Parameter arg1, arg2;
 		Value returnValue;
-		MethodDefinition methodToInline;
+		MethodDef methodToInline;
 		CachedCflowDeobfuscator cflowDeobfuscator;
 
 		public DsMethodCallInliner(CachedCflowDeobfuscator cflowDeobfuscator) {
@@ -51,9 +50,14 @@ namespace de4dot.code.deobfuscators.DeepSea {
 		}
 
 		bool inlineMethod(Instruction callInstr, int instrIndex) {
-			var method = callInstr.Operand as MethodDefinition;
-			if (method == null)
-				return false;
+			var method = callInstr.Operand as MethodDef;
+			if (method == null) {
+				var ms = callInstr.Operand as MethodSpec;
+				if (ms != null)
+					method = ms.Method as MethodDef;
+				if (method == null)
+					return false;
+			}
 			if (!canInline(method))
 				return false;
 
@@ -70,17 +74,27 @@ namespace de4dot.code.deobfuscators.DeepSea {
 			return true;
 		}
 
-		bool inlineMethod(MethodDefinition methodToInline, int instrIndex, int const1, int const2) {
+		protected override Instruction onAfterLoadArg(MethodDef methodToInline, Instruction instr, ref int instrIndex) {
+			if (instr.OpCode.Code != Code.Box)
+				return instr;
+			if (methodToInline.MethodSig.GetGenParamCount() == 0)
+				return instr;
+			return DotNetUtils.getInstruction(methodToInline.Body.Instructions, ref instrIndex);
+		}
+
+		bool inlineMethod(MethodDef methodToInline, int instrIndex, int const1, int const2) {
 			this.methodToInline = methodToInline = cflowDeobfuscator.deobfuscate(methodToInline);
 
-			parameters = DotNetUtils.getParameters(methodToInline);
+			parameters = methodToInline.Parameters;
 			arg1 = parameters[parameters.Count - 2];
 			arg2 = parameters[parameters.Count - 1];
 			returnValue = null;
 
 			instructionEmulator.init(methodToInline);
 			foreach (var arg in parameters) {
-				if (arg.ParameterType.EType >= ElementType.Boolean && arg.ParameterType.EType <= ElementType.U4)
+				if (!arg.IsNormalMethodParameter)
+					continue;
+				if (arg.Type.ElementType >= ElementType.Boolean && arg.Type.ElementType <= ElementType.U4)
 					instructionEmulator.setArg(arg, new Int32Value(0));
 			}
 			instructionEmulator.setArg(arg1, new Int32Value(const1));
@@ -95,8 +109,8 @@ namespace de4dot.code.deobfuscators.DeepSea {
 			if (!emulateToReturn(patcher.afterIndex, patcher.lastInstr))
 				return false;
 			patcher.patch(block);
-			block.insert(instrIndex, Instruction.Create(OpCodes.Pop));
-			block.insert(instrIndex, Instruction.Create(OpCodes.Pop));
+			block.insert(instrIndex, OpCodes.Pop.ToInstruction());
+			block.insert(instrIndex, OpCodes.Pop.ToInstruction());
 			return true;
 		}
 
@@ -157,7 +171,7 @@ namespace de4dot.code.deobfuscators.DeepSea {
 				case Code.Ldarg_1:
 				case Code.Ldarg_2:
 				case Code.Ldarg_3:
-					var arg = DotNetUtils.getParameter(parameters, instr);
+					var arg = instr.GetParameter(parameters);
 					if (arg != arg1 && arg != arg2) {
 						if (!allowUnknownArgs)
 							goto done;
@@ -269,9 +283,8 @@ done:
 
 		bool emulateToReturn(int index, Instruction lastInstr) {
 			int pushes, pops;
-			DotNetUtils.calculateStackUsage(lastInstr, false, out pushes, out pops);
-			for (int i = 0; i < pops; i++)
-				instructionEmulator.pop();
+			lastInstr.CalculateStackUsage(false, out pushes, out pops);
+			instructionEmulator.pop(pops);
 
 			returnValue = null;
 			if (pushes != 0) {
@@ -294,25 +307,31 @@ done:
 			return instructionEmulator.stackSize() == 0;
 		}
 
-		public static bool canInline(MethodDefinition method) {
+		public static bool canInline(MethodDef method) {
 			if (method == null || method.Body == null)
 				return false;
 			if (method.Attributes != (MethodAttributes.Assembly | MethodAttributes.Static))
 				return false;
-			if (method.GenericParameters.Count > 0)
-				return false;
 			if (method.Body.ExceptionHandlers.Count > 0)
 				return false;
 
-			var parameters = method.Parameters;
+			var parameters = method.MethodSig.GetParams();
 			int paramCount = parameters.Count;
 			if (paramCount < 2)
 				return false;
+
+			if (method.GenericParameters.Count > 0) {
+				foreach (var gp in method.GenericParameters) {
+					if (gp.GenericParamConstraints.Count == 0)
+						return false;
+				}
+			}
+
 			var param1 = parameters[paramCount - 1];
 			var param2 = parameters[paramCount - 2];
-			if (!isIntType(param1.ParameterType.EType))
+			if (!isIntType(param1.ElementType))
 				return false;
-			if (!isIntType(param2.ParameterType.EType))
+			if (!isIntType(param2.ElementType))
 				return false;
 
 			return true;
@@ -322,7 +341,7 @@ done:
 			return etype == ElementType.Char || etype == ElementType.I2 || etype == ElementType.I4;
 		}
 
-		protected override bool isReturn(MethodDefinition methodToInline, int instrIndex) {
+		protected override bool isReturn(MethodDef methodToInline, int instrIndex) {
 			int oldIndex = instrIndex;
 			if (base.isReturn(methodToInline, oldIndex))
 				return true;

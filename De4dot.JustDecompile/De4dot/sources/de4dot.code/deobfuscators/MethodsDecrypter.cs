@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -17,14 +17,19 @@
     along with de4dot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Mono.MyStuff;
+using dnlib.DotNet;
 using de4dot.code.AssemblyClient;
+using de4dot.blocks;
 using de4dot.mdecrypt;
 
 namespace de4dot.code.deobfuscators {
 	static class MethodsDecrypter {
-		public static DumpedMethods decrypt(string filename, byte[] moduleCctorBytes) {
-			using (var client = new NewProcessAssemblyClientFactory().create()) {
+		public static DumpedMethods decrypt(ModuleDef module, byte[] moduleCctorBytes) {
+			return decrypt(NewProcessAssemblyClientFactory.getServerClrVersion(module), module.Location, moduleCctorBytes);
+		}
+
+		public static DumpedMethods decrypt(ServerClrVersion serverVersion, string filename, byte[] moduleCctorBytes) {
+			using (var client = new NewProcessAssemblyClientFactory(serverVersion).create()) {
 				client.connect();
 				client.waitConnected();
 				var info = new DecryptMethodsInfo();

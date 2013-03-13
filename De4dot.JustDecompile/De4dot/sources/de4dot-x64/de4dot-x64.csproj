@@ -13,7 +13,7 @@
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>de4dot.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\de4dot.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -42,8 +42,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Fix a warning that the referenced mscorlib is not 64-bit... -->
+    <Reference Include="$(Windir)\Microsoft.NET\Framework64\v2.0.50727\mscorlib.dll" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="App.config" />
-    <None Include="de4dot.snk" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\de4dot.cui\de4dot.cui.csproj">

@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -20,18 +20,18 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Mono.Cecil;
+using dnlib.DotNet;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.CryptoObfuscator {
 	static class CoUtils {
-		public static EmbeddedResource getResource(ModuleDefinition module, MethodDefinition method) {
+		public static EmbeddedResource getResource(ModuleDefMD module, MethodDef method) {
 			if (method == null || method.Body == null)
 				return null;
 			return getResource(module, DotNetUtils.getCodeStrings(method));
 		}
 
-		public static EmbeddedResource getResource(ModuleDefinition module, IEnumerable<string> names) {
+		public static EmbeddedResource getResource(ModuleDefMD module, IEnumerable<string> names) {
 			foreach (var name in names) {
 				var resource = DotNetUtils.getResource(module, name) as EmbeddedResource;
 				if (resource != null)

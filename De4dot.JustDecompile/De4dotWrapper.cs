@@ -13,14 +13,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
 using System;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq;
 using de4dot.code;
 using de4dot.code.AssemblyClient;
 using de4dot.code.deobfuscators;
 using System.Windows;
+using dnlib.DotNet;
 
 namespace De4dot.JustDecompile
 {
@@ -30,8 +29,8 @@ namespace De4dot.JustDecompile
         {
             return new List<IDeobfuscatorInfo> {
 				new de4dot.code.deobfuscators.Unknown.DeobfuscatorInfo(),
+				new de4dot.code.deobfuscators.Agile_NET.DeobfuscatorInfo(), // aka CliSecure
 				new de4dot.code.deobfuscators.Babel_NET.DeobfuscatorInfo(),
-				new de4dot.code.deobfuscators.CliSecure.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.CodeFort.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.CodeVeil.DeobfuscatorInfo(),
 				new de4dot.code.deobfuscators.CodeWall.DeobfuscatorInfo(),
@@ -60,16 +59,16 @@ namespace De4dot.JustDecompile
 
 		public IObfuscatedFile SearchDeobfuscator(string filename)
 		{
-            AssemblyResolver.Instance.clearAll();
-
+			ModuleContext context = new ModuleContext();
 			ObfuscatedFile.Options fileOptions = new ObfuscatedFile.Options { Filename = filename };
-			ObfuscatedFile ofile = CreateObfuscationFile(fileOptions);
+			ObfuscatedFile ofile = CreateObfuscationFile(fileOptions, context);
 			return ofile;
 		}
   
-		public ObfuscatedFile CreateObfuscationFile(ObfuscatedFile.Options fileOptions)
+		public ObfuscatedFile CreateObfuscationFile(ObfuscatedFile.Options fileOptions, ModuleContext moduleContext)
 		{
-			ObfuscatedFile ofile = new ObfuscatedFile(fileOptions, new NewAppDomainAssemblyClientFactory());
+
+			ObfuscatedFile ofile = new ObfuscatedFile(fileOptions, moduleContext, new NewAppDomainAssemblyClientFactory());
 			ofile.DeobfuscatorContext = new DeobfuscatorContext();
 
 			try
