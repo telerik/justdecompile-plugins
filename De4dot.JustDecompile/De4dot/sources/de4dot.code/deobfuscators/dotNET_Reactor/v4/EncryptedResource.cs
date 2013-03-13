@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -21,22 +21,22 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 	class EncryptedResource {
-		ModuleDefinition module;
-		MethodDefinition resourceDecrypterMethod;
+		ModuleDefMD module;
+		MethodDef resourceDecrypterMethod;
 		EmbeddedResource encryptedDataResource;
 		byte[] key, iv;
 
-		public TypeDefinition Type {
+		public TypeDef Type {
 			get { return resourceDecrypterMethod == null ? null : resourceDecrypterMethod.DeclaringType; }
 		}
 
-		public MethodDefinition Method {
+		public MethodDef Method {
 			get { return resourceDecrypterMethod; }
 			set { resourceDecrypterMethod = value; }
 		}
@@ -49,15 +49,15 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 			get { return encryptedDataResource != null; }
 		}
 
-		public EncryptedResource(ModuleDefinition module) {
+		public EncryptedResource(ModuleDefMD module) {
 			this.module = module;
 		}
 
-		public EncryptedResource(ModuleDefinition module, EncryptedResource oldOne) {
+		public EncryptedResource(ModuleDefMD module, EncryptedResource oldOne) {
 			this.module = module;
 			resourceDecrypterMethod = lookup(oldOne.resourceDecrypterMethod, "Could not find resource decrypter method");
 			if (oldOne.encryptedDataResource != null)
-				encryptedDataResource = DotNetUtils.getResource(module, oldOne.encryptedDataResource.Name) as EmbeddedResource;
+				encryptedDataResource = DotNetUtils.getResource(module, oldOne.encryptedDataResource.Name.String) as EmbeddedResource;
 			key = oldOne.key;
 			iv = oldOne.iv;
 
@@ -65,15 +65,15 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 				throw new ApplicationException("Could not initialize EncryptedResource");
 		}
 
-		T lookup<T>(T def, string errorMessage) where T : MemberReference {
+		T lookup<T>(T def, string errorMessage) where T : class, ICodedToken {
 			return DeobUtils.lookup(module, def, errorMessage);
 		}
 
-		public bool couldBeResourceDecrypter(MethodDefinition method, IEnumerable<string> additionalTypes) {
+		public bool couldBeResourceDecrypter(MethodDef method, IEnumerable<string> additionalTypes) {
 			return couldBeResourceDecrypter(method, additionalTypes, true);
 		}
 
-		public bool couldBeResourceDecrypter(MethodDefinition method, IEnumerable<string> additionalTypes, bool checkResource) {
+		public bool couldBeResourceDecrypter(MethodDef method, IEnumerable<string> additionalTypes, bool checkResource) {
 			if (!method.IsStatic)
 				return false;
 			if (method.Body == null)
@@ -116,11 +116,13 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 			iv = ArrayFinder.getInitializedByteArray(resourceDecrypterMethod, 16);
 			if (iv == null)
 				throw new ApplicationException("Could not find resource decrypter IV");
+			if (needReverse())
+				Array.Reverse(iv);	// DNR 4.5.0.0
 			if (usesPublicKeyToken()) {
-				var publicKeyToken = module.Assembly.Name.PublicKeyToken;
-				if (publicKeyToken != null && publicKeyToken.Length > 0) {
+				var publicKeyToken = module.Assembly.PublicKeyToken;
+				if (publicKeyToken != null && publicKeyToken.Data.Length > 0) {
 					for (int i = 0; i < 8; i++)
-						iv[i * 2 + 1] = publicKeyToken[i];
+						iv[i * 2 + 1] = publicKeyToken.Data[i];
 				}
 			}
 		}
@@ -133,9 +135,9 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 					pktIndex = 0;
 					continue;
 				}
-				if (!DotNetUtils.isLdcI4(instr))
+				if (!instr.IsLdcI4())
 					continue;
-				int val = DotNetUtils.getLdcI4Value(instr);
+				int val = instr.GetLdcI4Value();
 				if (val != pktIndexes[pktIndex++]) {
 					pktIndex = 0;
 					continue;
@@ -146,7 +148,11 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 			return false;
 		}
 
-		EmbeddedResource findMethodsDecrypterResource(MethodDefinition method) {
+		bool needReverse() {
+			return DotNetUtils.callsMethod(resourceDecrypterMethod, "System.Void System.Array::Reverse(System.Array)");
+		}
+
+		EmbeddedResource findMethodsDecrypterResource(MethodDef method) {
 			foreach (var s in DotNetUtils.getCodeStrings(method)) {
 				var resource = DotNetUtils.getResource(module, s) as EmbeddedResource;
 				if (resource != null)
@@ -171,17 +177,6 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 					return transform.TransformFinalBlock(data, 0, data.Length);
 				}
 			}
-		}
-
-		public void updateResource(byte[] encryptedData) {
-			for (int i = 0; i < module.Resources.Count; i++) {
-				if (module.Resources[i] == encryptedDataResource) {
-					encryptedDataResource = new EmbeddedResource(encryptedDataResource.Name, encryptedDataResource.Attributes, encryptedData);
-					module.Resources[i] = encryptedDataResource;
-					return;
-				}
-			}
-			throw new ApplicationException("Could not find encrypted resource");
 		}
 	}
 }

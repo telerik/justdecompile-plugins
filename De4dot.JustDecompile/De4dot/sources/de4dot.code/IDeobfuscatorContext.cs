@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -17,7 +17,7 @@
     along with de4dot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Mono.Cecil;
+using dnlib.DotNet;
 
 namespace de4dot.code {
 	public interface IDeobfuscatorContext {
@@ -25,8 +25,8 @@ namespace de4dot.code {
 		void setData(string name, object data);
 		object getData(string name);
 		void clearData(string name);
-		TypeDefinition resolve(TypeReference type);
-		MethodDefinition resolve(MethodReference method);
-		FieldDefinition resolve(FieldReference field);
+		TypeDef resolveType(ITypeDefOrRef type);
+		MethodDef resolveMethod(IMethod method);
+		FieldDef resolveField(IField field);
 	}
 }

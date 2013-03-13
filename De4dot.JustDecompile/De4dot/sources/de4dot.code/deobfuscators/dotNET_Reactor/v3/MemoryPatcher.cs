@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -20,10 +20,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Mono.Cecil;
+using dnlib.DotNet;
 using de4dot.blocks;
 using de4dot.blocks.cflow;
-using de4dot.PE;
 
 namespace de4dot.code.deobfuscators.dotNET_Reactor.v3 {
 	class MemoryPatcher {
@@ -43,11 +42,11 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v3 {
 			get { return decryptMethod.Detected; }
 		}
 
-		public MemoryPatcher(TypeDefinition type, ICflowDeobfuscator cflowDeobfuscator) {
+		public MemoryPatcher(TypeDef type, ICflowDeobfuscator cflowDeobfuscator) {
 			find(type, cflowDeobfuscator);
 		}
 
-		void find(TypeDefinition type, ICflowDeobfuscator cflowDeobfuscator) {
+		void find(TypeDef type, ICflowDeobfuscator cflowDeobfuscator) {
 			var additionalTypes = new List<string> {
 				"System.IO.BinaryWriter",
 			};
@@ -65,7 +64,7 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v3 {
 			}
 		}
 
-		void findPatchData(TypeDefinition type, ICflowDeobfuscator cflowDeobfuscator) {
+		void findPatchData(TypeDef type, ICflowDeobfuscator cflowDeobfuscator) {
 			var locals = new List<string> {
 				"System.Int32[]",
 				"System.UInt32[]",
@@ -86,7 +85,7 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v3 {
 			}
 		}
 
-		PatchInfo getPatchInfo(MethodDefinition method) {
+		PatchInfo getPatchInfo(MethodDef method) {
 			int index1 = 0, index2, index3, size1, size2, size3;
 			if (!ArrayFinder.findNewarr(method, ref index1, out size1))
 				return null;
@@ -135,10 +134,11 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v3 {
 		}
 
 		public void patch(byte[] peImageData) {
-			var peImage = new PeImage(peImageData);
-			foreach (var info in patchInfos) {
-				for (int i = 0; i < info.offsets.Length; i++)
-					peImage.dotNetSafeWriteOffset((uint)info.offsets[i], BitConverter.GetBytes(info.values[i]));
+			using (var peImage = new MyPEImage(peImageData)) {
+				foreach (var info in patchInfos) {
+					for (int i = 0; i < info.offsets.Length; i++)
+						peImage.dotNetSafeWriteOffset((uint)info.offsets[i], BitConverter.GetBytes(info.values[i]));
+				}
 			}
 		}
 	}

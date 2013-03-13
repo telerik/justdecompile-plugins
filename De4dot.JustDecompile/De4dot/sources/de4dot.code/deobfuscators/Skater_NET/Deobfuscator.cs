@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -18,7 +18,7 @@
 */
 
 using System.Collections.Generic;
-using Mono.Cecil;
+using dnlib.DotNet;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.Skater_NET {
@@ -85,12 +85,12 @@ namespace de4dot.code.deobfuscators.Skater_NET {
 		protected override void scanForObfuscator() {
 			stringDecrypter = new StringDecrypter(module);
 
-			if (hasAssemblyReference("Microsoft.VisualBasic"))
+			if (hasAssemblyRef("Microsoft.VisualBasic"))
 				stringDecrypter.find();
 		}
 
-		bool hasAssemblyReference(string name) {
-			foreach (var asmRef in module.AssemblyReferences) {
+		bool hasAssemblyRef(string name) {
+			foreach (var asmRef in module.GetAssemblyRefs()) {
 				if (asmRef.Name == name)
 					return true;
 			}

@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -17,26 +17,26 @@
     along with de4dot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Mono.Cecil;
+using dnlib.DotNet;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.CryptoObfuscator {
 	class AntiDebugger {
-		ModuleDefinition module;
+		ModuleDefMD module;
 		ISimpleDeobfuscator simpleDeobfuscator;
 		IDeobfuscator deob;
-		TypeDefinition antiDebuggerType;
-		MethodDefinition antiDebuggerMethod;
+		TypeDef antiDebuggerType;
+		MethodDef antiDebuggerMethod;
 
-		public TypeDefinition Type {
+		public TypeDef Type {
 			get { return antiDebuggerType; }
 		}
 
-		public MethodDefinition Method {
+		public MethodDef Method {
 			get { return antiDebuggerMethod; }
 		}
 
-		public AntiDebugger(ModuleDefinition module, ISimpleDeobfuscator simpleDeobfuscator, IDeobfuscator deob) {
+		public AntiDebugger(ModuleDefMD module, ISimpleDeobfuscator simpleDeobfuscator, IDeobfuscator deob) {
 			this.module = module;
 			this.simpleDeobfuscator = simpleDeobfuscator;
 			this.deob = deob;
@@ -49,7 +49,7 @@ namespace de4dot.code.deobfuscators.CryptoObfuscator {
 				return;
 		}
 
-		bool find(MethodDefinition methodToCheck) {
+		bool find(MethodDef methodToCheck) {
 			if (methodToCheck == null)
 				return false;
 			foreach (var method in DotNetUtils.getCalledMethods(module, methodToCheck)) {
@@ -64,10 +64,10 @@ namespace de4dot.code.deobfuscators.CryptoObfuscator {
 				deobfuscate(method);
 				if (!containsString(method, "debugger is activ") &&
 					!containsString(method, "debugger is running") &&
-					!containsString(method, "run under a debugger") &&
-					!containsString(method, "run under debugger") &&
 					!containsString(method, "Debugger detected") &&
-					!containsString(method, "Debugger was detected"))
+					!containsString(method, "Debugger was detected") &&
+					!containsString(method, "{0} was detected") &&
+					!containsString(method, "run under"))
 					continue;
 
 				antiDebuggerType = type;
@@ -78,12 +78,12 @@ namespace de4dot.code.deobfuscators.CryptoObfuscator {
 			return false;
 		}
 
-		void deobfuscate(MethodDefinition method) {
+		void deobfuscate(MethodDef method) {
 			simpleDeobfuscator.deobfuscate(method);
 			simpleDeobfuscator.decryptStrings(method, deob);
 		}
 
-		bool containsString(MethodDefinition method, string part) {
+		bool containsString(MethodDef method, string part) {
 			foreach (var s in DotNetUtils.getCodeStrings(method)) {
 				if (s.Contains(part))
 					return true;

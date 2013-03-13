@@ -63,7 +63,13 @@ namespace De4dot.JustDecompile
 						obfuscationFile.deobfuscateEnd();
 
 						ReportProgress(60, "Renaming items");
-						Renamer renamer = new Renamer(obfuscationFile.DeobfuscatorContext, new IObfuscatedFile[] { obfuscationFile });
+						// turn all flags on
+						RenamerFlags flags = RenamerFlags.DontCreateNewParamDefs | RenamerFlags.DontRenameDelegateFields | RenamerFlags.RenameEvents | 
+											 RenamerFlags.RenameFields | RenamerFlags.RenameGenericParams | RenamerFlags.RenameMethodArgs | 
+											 RenamerFlags.RenameMethods | RenamerFlags.RenameNamespaces | RenamerFlags.RenameProperties | 
+											 RenamerFlags.RenameTypes | RenamerFlags.RestoreEvents | RenamerFlags.RestoreEventsFromNames | 
+											 RenamerFlags.RestoreProperties  | RenamerFlags.RestorePropertiesFromNames;
+						Renamer renamer = new Renamer(obfuscationFile.DeobfuscatorContext, new IObfuscatedFile[] { obfuscationFile }, flags);
 						renamer.rename();
 
 						ReportProgress(80, "Saving");

@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -18,14 +18,14 @@
 */
 
 using System.Collections.Generic;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
 
 namespace de4dot.blocks.cflow {
 	// Only deobfuscates a method once. A copy of the method (now deobfuscated) is returned.
 	public class CachedCflowDeobfuscator {
 		BlocksCflowDeobfuscator cflowDeobfuscator = new BlocksCflowDeobfuscator();
-		Dictionary<MethodDefinition, MethodDefinition> deobfuscated = new Dictionary<MethodDefinition, MethodDefinition>();
+		Dictionary<MethodDef, MethodDef> deobfuscated = new Dictionary<MethodDef, MethodDef>();
 
 		public CachedCflowDeobfuscator() {
 		}
@@ -43,8 +43,8 @@ namespace de4dot.blocks.cflow {
 			cflowDeobfuscator.add(blocksDeobfuscator);
 		}
 
-		public MethodDefinition deobfuscate(MethodDefinition method) {
-			MethodDefinition deobfuscatedMethod;
+		public MethodDef deobfuscate(MethodDef method) {
+			MethodDef deobfuscatedMethod;
 			if (deobfuscated.TryGetValue(method, out deobfuscatedMethod))
 				return deobfuscatedMethod;
 

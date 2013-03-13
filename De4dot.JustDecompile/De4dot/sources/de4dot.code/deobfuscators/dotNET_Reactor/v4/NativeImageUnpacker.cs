@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -20,31 +20,28 @@
 using System;
 using System.IO;
 using ICSharpCode.SharpZipLib.Zip.Compression;
-using de4dot.PE;
+using dnlib.PE;
+using dnlib.IO;
+using dnlib.DotNet;
 
 namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 	class NativeImageUnpacker {
-		PeImage peImage;
+		MyPEImage peImage;
 		bool isNet1x;
+		const int loaderHeaderSizeV45 = 14;
 
-		public NativeImageUnpacker(PeImage peImage) {
-			this.peImage = peImage;
+		public NativeImageUnpacker(IPEImage peImage) {
+			this.peImage = new MyPEImage(peImage);
 		}
 
 		public byte[] unpack() {
-			var resources = peImage.Resources;
-			var dir = resources.getRoot();
-			if ((dir = dir.getDirectory(10)) == null)
+			if (peImage.PEImage.Win32Resources == null)
 				return null;
-			if ((dir = dir.getDirectory("__")) == null)
-				return null;
-			var dataEntry = dir.getData(0);
+			var dataEntry = peImage.PEImage.Win32Resources.Find(10, "__", 0);
 			if (dataEntry == null)
 				return null;
 
-			var encryptedData = peImage.readBytes(dataEntry.RVA, (int)dataEntry.Size);
-			if (encryptedData.Length != dataEntry.Size)
-				return null;
+			var encryptedData = dataEntry.Data.ReadAllBytes();
 
 			var keyData = getKeyData();
 			if (keyData == null)
@@ -65,18 +62,44 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 					return null;
 			}
 
-			if (BitConverter.ToInt16(inflatedData, 0) != 0x5A4D)
-				return null;
+			// CLR 1.x or DNR v4.0 - v4.4
+			if (BitConverter.ToInt16(inflatedData, 0) == 0x5A4D)
+				return inflatedData;
 
-			return inflatedData;
+			// DNR v4.5
+			if (BitConverter.ToInt16(inflatedData, loaderHeaderSizeV45) == 0x5A4D)
+				return unpackLoader(inflatedData);
+
+			return null;
 		}
 
-		static uint[] baseOffsets = new uint[] {
+		static byte[] unpackLoader(byte[] loaderData) {
+			var loaderBytes = new byte[loaderData.Length - loaderHeaderSizeV45];
+			Array.Copy(loaderData, loaderHeaderSizeV45, loaderBytes, 0, loaderBytes.Length);
+
+			try {
+				using (var asmLoader = ModuleDefMD.Load(loaderBytes)) {
+					if (asmLoader.Resources.Count == 0)
+						return null;
+					var resource = asmLoader.Resources[0] as EmbeddedResource;
+					if (resource == null)
+						return null;
+
+					return resource.Data.ReadAllBytes();
+				}
+			}
+			catch {
+				return null;
+			}
+		}
+
+		static readonly uint[] baseOffsets = new uint[] {
 			0x1C00,	// DNR 4.0 & 4.1
 			0x1900,	// DNR 4.2.7.5
-			0x1B60,	// DNR 4.2.8.4, 4.3 & 4.4
+			0x1B60,	// DNR 4.2.8.4, 4.3, 4.4, 4.5
+			0x700,	// DNR 4.5.0.0
 		};
-		static short[] decryptMethodPattern = new short[] {
+		static readonly short[] decryptMethodPattern = new short[] {
 			/* 00 */	0x83, 0xEC, 0x38,		// sub     esp, 38h
 			/* 03 */	0x53,					// push    ebx
 			/* 04 */	0xB0, -1,				// mov     al, ??h
@@ -89,7 +112,7 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 			/* 1C */	0x55,					// push    ebp
 			/* 1D */	0x56,					// push    esi
 		};
-		static short[] startMethodNet1xPattern = new short[] {
+		static readonly short[] startMethodNet1xPattern = new short[] {
 			/* 00 */ 0x55,						// push    ebp
 			/* 01 */ 0x8B, 0xEC,				// mov     ebp, esp
 			/* 03 */ 0xB9, 0x14, 0x00, 0x00, 0x00, // mov  ecx, 14h

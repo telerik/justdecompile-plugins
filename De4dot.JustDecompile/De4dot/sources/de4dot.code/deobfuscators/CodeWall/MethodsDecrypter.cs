@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -18,10 +18,8 @@
 */
 
 using System;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-using Mono.MyStuff;
-using de4dot.PE;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.CodeWall {
@@ -29,18 +27,14 @@ namespace de4dot.code.deobfuscators.CodeWall {
 		static readonly byte[] newCodeHeader = new byte[6] { 0x2B, 4, 0, 0, 0, 0 };
 		static readonly byte[] decryptKey = new byte[10] { 0x8D, 0xB5, 0x2C, 0x3A, 0x1F, 0xC7, 0x31, 0xC3, 0xCD, 0x47 };
 
-		ModuleDefinition module;
-		MethodReference initMethod;
+		ModuleDefMD module;
+		IMethod initMethod;
 
 		public bool Detected {
 			get { return initMethod != null; }
 		}
 
-		public AssemblyNameReference AssemblyNameReference {
-			get { return initMethod == null ? null : (AssemblyNameReference)initMethod.DeclaringType.Scope; }
-		}
-
-		public MethodsDecrypter(ModuleDefinition module) {
+		public MethodsDecrypter(ModuleDefMD module) {
 			this.module = module;
 		}
 
@@ -51,14 +45,14 @@ namespace de4dot.code.deobfuscators.CodeWall {
 			}
 		}
 
-		bool checkCctor(MethodDefinition method) {
+		bool checkCctor(MethodDef method) {
 			if (method == null || method.Body == null)
 				return false;
 
 			foreach (var instr in method.Body.Instructions) {
 				if (instr.OpCode.Code != Code.Call)
 					continue;
-				var calledMethod = instr.Operand as MethodReference;
+				var calledMethod = instr.Operand as IMethod;
 				if (calledMethod == null)
 					continue;
 				if (calledMethod.DeclaringType.Scope == module)
@@ -72,49 +66,33 @@ namespace de4dot.code.deobfuscators.CodeWall {
 			return false;
 		}
 
-		public bool decrypt(PeImage peImage, ref DumpedMethods dumpedMethods) {
+		public bool decrypt(MyPEImage peImage, ref DumpedMethods dumpedMethods) {
 			dumpedMethods = new DumpedMethods();
 
 			bool decrypted = false;
 
-			var metadataTables = peImage.Cor20Header.createMetadataTables();
-			var methodDef = metadataTables.getMetadataType(MetadataIndex.iMethodDef);
-			uint methodDefOffset = methodDef.fileOffset;
-			for (int i = 0; i < methodDef.rows; i++, methodDefOffset += methodDef.totalSize) {
-				uint bodyRva = peImage.offsetReadUInt32(methodDefOffset);
-				if (bodyRva == 0)
-					continue;
-				uint bodyOffset = peImage.rvaToOffset(bodyRva);
-
+			var methodDef = peImage.DotNetFile.MetaData.TablesStream.MethodTable;
+			for (uint rid = 1; rid <= methodDef.Rows; rid++) {
 				var dm = new DumpedMethod();
-				dm.token = (uint)(0x06000001 + i);
+				peImage.readMethodTableRowTo(dm, rid);
 
-				byte[] code, extraSections;
-				peImage.Reader.BaseStream.Position = bodyOffset;
-				var mbHeader = MethodBodyParser.parseMethodBody(peImage.Reader, out code, out extraSections);
-
-				if (code.Length < 6 || code[0] != 0x2A || code[1] != 0x2A)
+				if (dm.mdRVA == 0)
 					continue;
-				dm.code = code;
-				dm.extraSections = extraSections;
+				uint bodyOffset = peImage.rvaToOffset(dm.mdRVA);
 
-				int seed = BitConverter.ToInt32(code, 2);
-				Array.Copy(newCodeHeader, code, newCodeHeader.Length);
+				peImage.Reader.Position = bodyOffset;
+				var mbHeader = MethodBodyParser.parseMethodBody(peImage.Reader, out dm.code, out dm.extraSections);
+				peImage.updateMethodHeaderInfo(dm, mbHeader);
+
+				if (dm.code.Length < 6 || dm.code[0] != 0x2A || dm.code[1] != 0x2A)
+					continue;
+
+				int seed = BitConverter.ToInt32(dm.code, 2);
+				Array.Copy(newCodeHeader, dm.code, newCodeHeader.Length);
 				if (seed == 0)
-					decrypt(code);
+					decrypt(dm.code);
 				else
-					decrypt(code, seed);
-
-				dm.mdImplFlags = peImage.offsetReadUInt16(methodDefOffset + (uint)methodDef.fields[1].offset);
-				dm.mdFlags = peImage.offsetReadUInt16(methodDefOffset + (uint)methodDef.fields[2].offset);
-				dm.mdName = peImage.offsetRead(methodDefOffset + (uint)methodDef.fields[3].offset, methodDef.fields[3].size);
-				dm.mdSignature = peImage.offsetRead(methodDefOffset + (uint)methodDef.fields[4].offset, methodDef.fields[4].size);
-				dm.mdParamList = peImage.offsetRead(methodDefOffset + (uint)methodDef.fields[5].offset, methodDef.fields[5].size);
-
-				dm.mhFlags = mbHeader.flags;
-				dm.mhMaxStack = mbHeader.maxStack;
-				dm.mhCodeSize = (uint)dm.code.Length;
-				dm.mhLocalVarSigTok = mbHeader.localVarSigTok;
+					decrypt(dm.code, seed);
 
 				dumpedMethods.add(dm);
 				decrypted = true;
@@ -146,8 +124,8 @@ namespace de4dot.code.deobfuscators.CodeWall {
 					var instr = instrs[i];
 					if (instr.OpCode.Code != Code.Call)
 						continue;
-					var calledMethod = instr.Operand as MethodReference;
-					if (!MemberReferenceHelper.compareMethodReferenceAndDeclaringType(calledMethod, initMethod))
+					var calledMethod = instr.Operand as IMethod;
+					if (!MethodEqualityComparer.CompareDeclaringTypes.Equals(calledMethod, initMethod))
 						continue;
 					block.remove(i, 1);
 					i--;

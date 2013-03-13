@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -19,7 +19,7 @@
 
 using System;
 using System.Collections.Generic;
-using Mono.Cecil;
+using dnlib.DotNet;
 
 namespace de4dot.code.deobfuscators.SmartAssembly {
 	class AssemblyResolver {
@@ -45,7 +45,7 @@ namespace de4dot.code.deobfuscators.SmartAssembly {
 			var returned = new Dictionary<Resource, bool>();
 			foreach (var info in assemblyResolverInfo.EmbeddedAssemblyInfos) {
 				if (info.resource == null) {
-					Log.w("Could not find embedded resource {0}", Utils.toCsharpString(info.resourceName));
+					Logger.w("Could not find embedded resource {0}", Utils.toCsharpString(info.resourceName));
 					continue;
 				}
 				if (returned.ContainsKey(info.resource))

@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -18,12 +18,13 @@
 */
 
 using System.Collections.Generic;
-using Mono.Cecil.Cil;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
 
 namespace de4dot.blocks.cflow {
 	// Replace stloc + ldloc with dup + stloc
 	class StLdlocFixer : BlockDeobfuscator {
-		IList<VariableDefinition> locals;
+		IList<Local> locals;
 
 		protected override void init(List<Block> allBlocks) {
 			base.init(allBlocks);
@@ -49,11 +50,11 @@ namespace de4dot.blocks.cflow {
 					if (!instructions[i + 1].isLdloc())
 						break;
 					var local = Instr.getLocalVar(locals, instr);
-					if (local.VariableType.FullName != "System.Boolean")
+					if (local.Type.ElementType != ElementType.Boolean)
 						continue;
 					if (local != Instr.getLocalVar(locals, instructions[i + 1]))
 						break;
-					instructions[i] = new Instr(Instruction.Create(OpCodes.Dup));
+					instructions[i] = new Instr(OpCodes.Dup.ToInstruction());
 					instructions[i + 1] = instr;
 					changed = true;
 					break;

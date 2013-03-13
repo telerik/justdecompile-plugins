@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -19,13 +19,11 @@
 
 using System;
 using System.Collections.Generic;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
 
 namespace de4dot.blocks {
 	// This class makes sure that each block that is entered with a non-empty stack has at
 	// least one of its source blocks sorted before itself. This is to make sure peverify
-	// doesn't complain AND also to make sure Mono.Cecil sets the correct maxstack.
+	// doesn't complain AND also to make sure dnlib sets the correct maxstack.
 	class ForwardScanOrder {
 		ScopeBlock scopeBlock;
 		IList<BaseBlock> sorted;
@@ -52,7 +50,7 @@ namespace de4dot.blocks {
 
 				int stack = stackStart;
 				foreach (var instr in block.Instructions)
-					DotNetUtils.updateStack(instr.Instruction, ref stack, false);
+					instr.Instruction.UpdateStack(ref stack, false);
 				stackEnd = stack;
 			}
 		}

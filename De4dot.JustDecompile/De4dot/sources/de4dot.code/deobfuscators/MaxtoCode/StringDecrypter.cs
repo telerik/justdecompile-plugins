@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -20,17 +20,17 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Mono.Cecil;
+using dnlib.DotNet;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.MaxtoCode {
 	class StringDecrypter {
 		DecrypterInfo decrypterInfo;
-		MethodDefinition decryptMethod;
+		MethodDef decryptMethod;
 		string[] decryptedStrings;
 		Encoding encoding;
 
-		public MethodDefinition Method {
+		public MethodDef Method {
 			get { return decryptMethod; }
 		}
 
@@ -50,7 +50,7 @@ namespace de4dot.code.deobfuscators.MaxtoCode {
 				return;
 		}
 
-		static MethodDefinition findDecryptMethod(TypeDefinition type) {
+		static MethodDef findDecryptMethod(TypeDef type) {
 			if (type == null)
 				return null;
 			foreach (var method in type.Methods) {

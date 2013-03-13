@@ -10,15 +10,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>de4dot.blocks</RootNamespace>
     <AssemblyName>blocks</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\de4dot.snk</AssemblyOriginatorKeyFile>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,44 +27,11 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\bin\Release\</OutputPath>
+    <OutputPath>..\Release\bin\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseInternal|AnyCPU'">
-    <OutputPath>bin\ReleaseInternal\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisLogFile>..\Release\bin\blocks.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
-    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
-    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
-    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugInternal|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\..\..\bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisLogFile>..\Debug\bin\blocks.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
-    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
-    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
-    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BaseBlock.cs" />
@@ -78,6 +40,7 @@
     <Compile Include="BlocksSorter.cs" />
     <Compile Include="cflow\BlockCflowDeobfuscator.cs" />
     <Compile Include="cflow\BlockDeobfuscator.cs" />
+    <Compile Include="cflow\BlocksCflowDeobfuscator.cs" />
     <Compile Include="cflow\BranchEmulator.cs" />
     <Compile Include="cflow\CachedCflowDeobfuscator.cs" />
     <Compile Include="cflow\CflowDeobfuscator.cs" />
@@ -85,6 +48,7 @@
     <Compile Include="cflow\ConstantsFolder.cs" />
     <Compile Include="cflow\DeadCodeRemover.cs" />
     <Compile Include="cflow\DeadStoreRemover.cs" />
+    <Compile Include="cflow\DupBlockDeobfuscator.cs" />
     <Compile Include="cflow\IBlocksDeobfuscator.cs" />
     <Compile Include="cflow\ICflowDeobfuscator.cs" />
     <Compile Include="cflow\InstructionEmulator.cs" />
@@ -98,44 +62,28 @@
     <Compile Include="cflow\Value.cs" />
     <Compile Include="cflow\ValueStack.cs" />
     <Compile Include="CodeGenerator.cs" />
-    <Compile Include="cflow\BlocksCflowDeobfuscator.cs" />
     <Compile Include="DeadBlocksRemover.cs" />
     <Compile Include="DotNetUtils.cs" />
+    <Compile Include="DumpedMethod.cs" />
+    <Compile Include="DumpedMethods.cs" />
     <Compile Include="FilterHandlerBlock.cs" />
     <Compile Include="ForwardScanOrder.cs" />
+    <Compile Include="GenericArgsSubstitutor.cs" />
     <Compile Include="HandlerBlock.cs" />
     <Compile Include="Instr.cs" />
     <Compile Include="InstructionListParser.cs" />
-    <Compile Include="MemberRefInstance.cs" />
-    <Compile Include="MemberReferenceHelper.cs" />
+    <Compile Include="MemberDefDict.cs" />
     <Compile Include="MethodBlocks.cs" />
-    <Compile Include="PE\Cor20Header.cs" />
-    <Compile Include="PE\DataDirectory.cs" />
-    <Compile Include="PE\DotNetStream.cs" />
-    <Compile Include="PE\FileHeader.cs" />
-    <Compile Include="PE\IFileLocation.cs" />
-    <Compile Include="PE\Metadata.cs" />
-    <Compile Include="PE\MetadataTables.cs" />
-    <Compile Include="PE\MetadataType.cs" />
-    <Compile Include="PE\MetadataTypeBuilder.cs" />
-    <Compile Include="PE\OptionalHeader.cs" />
-    <Compile Include="PE\PeImage.cs" />
-    <Compile Include="PE\ResourceData.cs" />
-    <Compile Include="PE\ResourceDirectory.cs" />
-    <Compile Include="PE\ResourceDirectoryEntry.cs" />
-    <Compile Include="PE\Resources.cs" />
-    <Compile Include="PE\SectionHeader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScopeBlock.cs" />
     <Compile Include="TryBlock.cs" />
     <Compile Include="TryHandlerBlock.cs" />
-    <Compile Include="TypeReferenceUpdaterBase.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\cecil\Mono.Cecil.csproj">
-      <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
-      <Name>Mono.Cecil</Name>
+    <ProjectReference Include="..\dnlib\src\dnlib.csproj">
+      <Project>{FDFC1237-143F-4919-8318-4926901F4639}</Project>
+      <Name>dnlib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

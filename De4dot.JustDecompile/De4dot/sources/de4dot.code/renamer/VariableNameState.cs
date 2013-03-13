@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -17,7 +17,7 @@
     along with de4dot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Mono.Cecil;
+using dnlib.DotNet;
 
 namespace de4dot.code.renamer {
 	class VariableNameState {
@@ -86,29 +86,27 @@ namespace de4dot.code.renamer {
 			existingEventNames.merge(other.existingEventNames);
 		}
 
-		public string getNewPropertyName(PropertyDefinition propertyDefinition) {
-			var propType = propertyDefinition.PropertyType;
+		public string getNewPropertyName(PropertyDef propertyDef) {
+			var propType = propertyDef.PropertySig.GetRetType();
 			string newName;
 			if (isGeneric(propType))
-				newName = existingPropertyNames.getName(propertyDefinition.Name, genericPropertyNameCreator);
+				newName = existingPropertyNames.getName(propertyDef.Name, genericPropertyNameCreator);
 			else
-				newName = existingPropertyNames.getName(propertyDefinition.Name, () => propertyNameCreator.create(propType));
+				newName = existingPropertyNames.getName(propertyDef.Name, () => propertyNameCreator.create(propType));
 			addPropertyName(newName);
 			return newName;
 		}
 
-		static bool isGeneric(TypeReference type) {
-			while (true) {
-				if (type is GenericParameter)
+		static bool isGeneric(TypeSig type) {
+			while (type != null) {
+				if (type.IsGenericParameter)
 					return true;
-				var ts = type as TypeSpecification;
-				if (ts == null)
-					return false;
-				type = ts.ElementType;
+				type = type.Next;
 			}
+			return false;
 		}
 
-		public string getNewEventName(EventDefinition eventDefinition) {
+		public string getNewEventName(EventDef eventDef) {
 			string newName = eventNameCreator.create();
 			addEventName(newName);
 			return newName;
@@ -146,16 +144,16 @@ namespace de4dot.code.renamer {
 			return existingEventNames.exists(eventName);
 		}
 
-		public string getNewFieldName(FieldDefinition field) {
-			return existingVariableNames.getName(field.Name, () => variableNameCreator.create(field.FieldType));
+		public string getNewFieldName(FieldDef field) {
+			return existingVariableNames.getName(field.Name, () => variableNameCreator.create(field.FieldSig.GetFieldType()));
 		}
 
 		public string getNewFieldName(string oldName, INameCreator nameCreator) {
 			return existingVariableNames.getName(oldName, () => nameCreator.create());
 		}
 
-		public string getNewParamName(string oldName, ParameterDefinition param) {
-			return existingVariableNames.getName(oldName, () => variableNameCreator.create(param.ParameterType));
+		public string getNewParamName(string oldName, Parameter param) {
+			return existingVariableNames.getName(oldName, () => variableNameCreator.create(param.Type));
 		}
 
 		public string getNewMethodName(string oldName, INameCreator nameCreator) {

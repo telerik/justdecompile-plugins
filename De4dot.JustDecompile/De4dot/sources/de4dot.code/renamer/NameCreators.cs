@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -18,7 +18,7 @@
 */
 
 using System.Collections.Generic;
-using Mono.Cecil;
+using dnlib.DotNet;
 using de4dot.blocks;
 
 namespace de4dot.code.renamer {
@@ -107,7 +107,7 @@ namespace de4dot.code.renamer {
 	}
 
 	interface ITypeNameCreator {
-		string create(TypeDefinition typeDefinition, string newBaseTypeName);
+		string create(TypeDef typeDef, string newBaseTypeName);
 	}
 
 	class NameInfos {
@@ -172,25 +172,26 @@ namespace de4dot.code.renamer {
 			return new NameCreator(prefix);
 		}
 
-		public string create(TypeDefinition typeDefinition, string newBaseTypeName) {
-			var nameCreator = getNameCreator(typeDefinition, newBaseTypeName);
-			return existingNames.getName(typeDefinition.Name, nameCreator);
+		public string create(TypeDef typeDef, string newBaseTypeName) {
+			var nameCreator = getNameCreator(typeDef, newBaseTypeName);
+			return existingNames.getName(typeDef.Name.String, nameCreator);
 		}
 
-		NameCreator getNameCreator(TypeDefinition typeDefinition, string newBaseTypeName) {
+		NameCreator getNameCreator(TypeDef typeDef, string newBaseTypeName) {
 			var nameCreator = createUnknownTypeName;
-			if (typeDefinition.IsEnum)
+			if (typeDef.IsEnum)
 				nameCreator = createEnumName;
-			else if (typeDefinition.IsValueType)
+			else if (typeDef.IsValueType)
 				nameCreator = createStructName;
-			else if (typeDefinition.IsClass) {
-				if (typeDefinition.BaseType != null) {
-					if (MemberReferenceHelper.verifyType(typeDefinition.BaseType, "mscorlib", "System.Delegate"))
+			else if (typeDef.IsClass) {
+				if (typeDef.BaseType != null) {
+					var fn = typeDef.BaseType.FullName;
+					if (fn == "System.Delegate")
 						nameCreator = createDelegateName;
-					else if (MemberReferenceHelper.verifyType(typeDefinition.BaseType, "mscorlib", "System.MulticastDelegate"))
+					else if (fn == "System.MulticastDelegate")
 						nameCreator = createDelegateName;
 					else {
-						nameCreator = nameInfos.find(newBaseTypeName ?? typeDefinition.BaseType.Name);
+						nameCreator = nameInfos.find(newBaseTypeName ?? typeDef.BaseType.Name.String);
 						if (nameCreator == null)
 							nameCreator = createClassName;
 					}
@@ -198,7 +199,7 @@ namespace de4dot.code.renamer {
 				else
 					nameCreator = createClassName;
 			}
-			else if (typeDefinition.IsInterface)
+			else if (typeDef.IsInterface)
 				nameCreator = createInterfaceName;
 			return nameCreator;
 		}

@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -18,7 +18,7 @@
 */
 
 using System.Collections.Generic;
-using Mono.Cecil;
+using dnlib.DotNet;
 using de4dot.blocks;
 using de4dot.blocks.cflow;
 
@@ -266,7 +266,7 @@ done:
 		}
 
 		public override void deobfuscateEnd() {
-			if (options.RestoreFields)
+			if (options.RestoreFields && CanRemoveTypes)
 				fieldsRestorer.cleanUp();
 			removeInlinedMethods();
 
@@ -292,7 +292,7 @@ done:
 		public override IEnumerable<int> getStringDecrypterMethods() {
 			var list = new List<int>();
 			foreach (var method in stringDecrypter.DecrypterMethods)
-				list.Add(method.MetadataToken.ToInt32());
+				list.Add(method.MDToken.ToInt32());
 			return list;
 		}
 	}

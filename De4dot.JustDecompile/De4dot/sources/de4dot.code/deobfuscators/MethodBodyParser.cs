@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -19,6 +19,7 @@
 
 using System;
 using System.IO;
+using dnlib.IO;
 
 namespace de4dot.code.deobfuscators {
 	[Serializable]
@@ -39,7 +40,7 @@ namespace de4dot.code.deobfuscators {
 	}
 
 	static class MethodBodyParser {
-		public static MethodBodyHeader parseMethodBody(BinaryReader reader, out byte[] code, out byte[] extraSections) {
+		public static MethodBodyHeader parseMethodBody(IBinaryReader reader, out byte[] code, out byte[] extraSections) {
 			try {
 				return parseMethodBody2(reader, out code, out extraSections);
 			}
@@ -49,14 +50,10 @@ namespace de4dot.code.deobfuscators {
 		}
 
 		public static bool verify(byte[] data) {
-			return verify(new BinaryReader(new MemoryStream(data)));
+			return verify(MemoryImageStream.Create(data));
 		}
 
-		public static bool verify(Stream data) {
-			return verify(new BinaryReader(data));
-		}
-
-		public static bool verify(BinaryReader reader) {
+		public static bool verify(IBinaryReader reader) {
 			try {
 				byte[] code, extraSections;
 				parseMethodBody(reader, out code, out extraSections);
@@ -67,20 +64,19 @@ namespace de4dot.code.deobfuscators {
 			}
 		}
 
-		static MethodBodyHeader parseMethodBody2(BinaryReader reader, out byte[] code, out byte[] extraSections) {
+		static MethodBodyHeader parseMethodBody2(IBinaryReader reader, out byte[] code, out byte[] extraSections) {
 			var mbHeader = new MethodBodyHeader();
 
 			uint codeOffset;
-			switch (peek(reader) & 3) {
-			case 2:
+			byte b = peek(reader);
+			if ((b & 3) == 2) {
 				mbHeader.flags = 2;
 				mbHeader.maxStack = 8;
 				mbHeader.codeSize = (uint)(reader.ReadByte() >> 2);
 				mbHeader.localVarSigTok = 0;
 				codeOffset = 1;
-				break;
-
-			case 3:
+			}
+			else if ((b & 7) == 3) {
 				mbHeader.flags = reader.ReadUInt16();
 				codeOffset = (uint)(4 * (mbHeader.flags >> 12));
 				if (codeOffset != 12)
@@ -92,13 +88,11 @@ namespace de4dot.code.deobfuscators {
 				mbHeader.localVarSigTok = reader.ReadUInt32();
 				if (mbHeader.localVarSigTok != 0 && (mbHeader.localVarSigTok >> 24) != 0x11)
 					throw new InvalidMethodBody();
-				break;
-
-			default:
-				throw new InvalidMethodBody();
 			}
+			else
+				throw new InvalidMethodBody();
 
-			if (mbHeader.codeSize + codeOffset > reader.BaseStream.Length)
+			if (mbHeader.codeSize + codeOffset > reader.Length)
 				throw new InvalidMethodBody();
 			code = reader.ReadBytes((int)mbHeader.codeSize);
 
@@ -110,11 +104,11 @@ namespace de4dot.code.deobfuscators {
 			return mbHeader;
 		}
 
-		static void align(BinaryReader reader, int alignment) {
-			reader.BaseStream.Position = (reader.BaseStream.Position + alignment - 1) & ~(alignment - 1);
+		static void align(IBinaryReader reader, int alignment) {
+			reader.Position = (reader.Position + alignment - 1) & ~(alignment - 1);
 		}
 
-		public static byte[] readExtraSections(BinaryReader reader) {
+		public static byte[] readExtraSections(IBinaryReader reader) {
 			try {
 				return readExtraSections2(reader);
 			}
@@ -123,16 +117,16 @@ namespace de4dot.code.deobfuscators {
 			}
 		}
 
-		static byte[] readExtraSections2(BinaryReader reader) {
+		static byte[] readExtraSections2(IBinaryReader reader) {
 			align(reader, 4);
-			int startPos = (int)reader.BaseStream.Position;
+			int startPos = (int)reader.Position;
 			parseSection(reader);
-			int size = (int)reader.BaseStream.Position - startPos;
-			reader.BaseStream.Position = startPos;
+			int size = (int)reader.Position - startPos;
+			reader.Position = startPos;
 			return reader.ReadBytes(size);
 		}
 
-		static void parseSection(BinaryReader reader) {
+		static void parseSection(IBinaryReader reader) {
 			byte flags;
 			do {
 				align(reader, 4);
@@ -144,20 +138,20 @@ namespace de4dot.code.deobfuscators {
 					throw new InvalidMethodBody("Invalid bits set");
 
 				if ((flags & 0x40) != 0) {
-					reader.BaseStream.Position--;
+					reader.Position--;
 					int num = (int)(reader.ReadUInt32() >> 8) / 24;
-					reader.BaseStream.Position += num * 24;
+					reader.Position += num * 24;
 				}
 				else {
 					int num = reader.ReadByte() / 12;
-					reader.BaseStream.Position += 2 + num * 12;
+					reader.Position += 2 + num * 12;
 				}
 			} while ((flags & 0x80) != 0);
 		}
 
-		static byte peek(BinaryReader reader) {
+		static byte peek(IBinaryReader reader) {
 			byte b = reader.ReadByte();
-			reader.BaseStream.Position--;
+			reader.Position--;
 			return b;
 		}
 	}

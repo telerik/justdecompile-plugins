@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -18,7 +18,7 @@
 */
 
 using System;
-using Mono.Cecil.Cil;
+using dnlib.DotNet.Emit;
 
 namespace de4dot.blocks.cflow {
 	class BlockCflowDeobfuscator : BlockDeobfuscator, IBranchHandler {
@@ -33,7 +33,7 @@ namespace de4dot.blocks.cflow {
 
 		protected override bool deobfuscate(Block block) {
 			this.block = block;
-			if (!DotNetUtils.isConditionalBranch(block.LastInstr.OpCode.Code) && block.LastInstr.OpCode.Code != Code.Switch)
+			if (!block.LastInstr.isConditionalBranch() && block.LastInstr.OpCode.Code != Code.Switch)
 				return false;
 			instructionEmulator.init(blocks);
 
@@ -58,7 +58,7 @@ namespace de4dot.blocks.cflow {
 			// Pop the arguments to the bcc instruction. The dead code remover will get rid of the
 			// pop and any pushed arguments. Insert the pops just before the bcc instr.
 			for (int i = 0; i < stackArgs; i++)
-				block.insert(block.Instructions.Count - 1, Instruction.Create(OpCodes.Pop));
+				block.insert(block.Instructions.Count - 1, OpCodes.Pop.ToInstruction());
 		}
 
 		void IBranchHandler.handleNormal(int stackArgs, bool isTaken) {

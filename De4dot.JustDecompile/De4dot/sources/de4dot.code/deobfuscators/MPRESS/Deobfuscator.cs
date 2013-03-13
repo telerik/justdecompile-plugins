@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -21,9 +21,8 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using Mono.Cecil;
-using Mono.MyStuff;
-using de4dot.PE;
+using dnlib.PE;
+using dnlib.DotNet;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.MPRESS {
@@ -160,7 +159,7 @@ namespace de4dot.code.deobfuscators.MPRESS {
 			if (checkMethods(type, methods_v1x)) {
 				var lfMethod = DotNetUtils.getMethod(type, "System.Boolean", "(System.String,System.Byte[]&)");
 				if (lfMethod != null) {
-					if (DeobUtils.hasInteger(lfMethod, (int)Machine.amd64))
+					if (DeobUtils.hasInteger(lfMethod, (int)Machine.AMD64))
 						return Version.V218;
 					return Version.V1x_217;
 				}
@@ -168,8 +167,8 @@ namespace de4dot.code.deobfuscators.MPRESS {
 			return Version.Unknown;
 		}
 
-		static bool checkMethods(TypeDefinition type, MethodInfo[] requiredMethods) {
-			var methods = new List<MethodDefinition>(type.Methods);
+		static bool checkMethods(TypeDef type, MethodInfo[] requiredMethods) {
+			var methods = new List<MethodDef>(type.Methods);
 			foreach (var info in requiredMethods) {
 				if (!checkMethod(methods, info))
 					return false;
@@ -177,7 +176,7 @@ namespace de4dot.code.deobfuscators.MPRESS {
 			return methods.Count == 0;
 		}
 
-		static bool checkMethod(List<MethodDefinition> methods, MethodInfo info) {
+		static bool checkMethod(List<MethodDef> methods, MethodInfo info) {
 			foreach (var method in methods) {
 				if (info.name != null && info.name != method.Name)
 					continue;
@@ -195,44 +194,46 @@ namespace de4dot.code.deobfuscators.MPRESS {
 				return false;
 
 			byte[] fileData = ModuleBytes ?? DeobUtils.readModule(module);
-			var peImage = new PeImage(fileData);
-			var section = peImage.Sections[peImage.Sections.Length - 1];
-			var offset = section.pointerToRawData;
-			offset += 16;
+			byte[] decompressed;
+			using (var peImage = new MyPEImage(fileData)) {
+				var section = peImage.Sections[peImage.Sections.Count - 1];
+				var offset = section.PointerToRawData;
+				offset += 16;
 
-			byte[] decompressed, compressed;
-			int compressedLen;
-			switch (version) {
-			case Version.V0x:
-				compressedLen = fileData.Length - (int)offset;
-				compressed = peImage.offsetReadBytes(offset, compressedLen);
-				decompressed = Lzmat.decompress_old(compressed);
-				if (decompressed == null)
-					throw new ApplicationException("LZMAT decompression failed");
-				break;
+				byte[] compressed;
+				int compressedLen;
+				switch (version) {
+				case Version.V0x:
+					compressedLen = fileData.Length - (int)offset;
+					compressed = peImage.offsetReadBytes(offset, compressedLen);
+					decompressed = Lzmat.decompress_old(compressed);
+					if (decompressed == null)
+						throw new ApplicationException("LZMAT decompression failed");
+					break;
 
-			case Version.V1x_217:
-			case Version.V218:
-				if (peImage.FileHeader.machine == Machine.amd64 && version == Version.V218)
-					offset = section.pointerToRawData + section.virtualSize;
-				int decompressedLen = (int)peImage.offsetReadUInt32(offset);
-				compressedLen = fileData.Length - (int)offset - 4;
-				compressed = peImage.offsetReadBytes(offset + 4, compressedLen);
-				decompressed = new byte[decompressedLen];
-				uint decompressedLen2;
-				if (Lzmat.decompress(decompressed, out decompressedLen2, compressed) != LzmatStatus.OK)
-					throw new ApplicationException("LZMAT decompression failed");
-				break;
+				case Version.V1x_217:
+				case Version.V218:
+					if (peImage.PEImage.ImageNTHeaders.FileHeader.Machine == Machine.AMD64 && version == Version.V218)
+						offset = section.PointerToRawData + section.VirtualSize;
+					int decompressedLen = (int)peImage.offsetReadUInt32(offset);
+					compressedLen = fileData.Length - (int)offset - 4;
+					compressed = peImage.offsetReadBytes(offset + 4, compressedLen);
+					decompressed = new byte[decompressedLen];
+					uint decompressedLen2;
+					if (Lzmat.decompress(decompressed, out decompressedLen2, compressed) != LzmatStatus.OK)
+						throw new ApplicationException("LZMAT decompression failed");
+					break;
 
-			default:
-				throw new ApplicationException("Unknown MPRESS version");
+				default:
+					throw new ApplicationException("Unknown MPRESS version");
+				}
 			}
 
 			newFileData = decompressed;
 			return true;
 		}
 
-		public override IDeobfuscator moduleReloaded(ModuleDefinition module) {
+		public override IDeobfuscator moduleReloaded(ModuleDefMD module) {
 			var newOne = new Deobfuscator(options);
 			newOne.setModule(module);
 			return newOne;
@@ -252,7 +253,7 @@ namespace de4dot.code.deobfuscators.MPRESS {
 									BitConverter.ToInt16(hash, 6),
 									hash[8], hash[9], hash[10], hash[11],
 									hash[12], hash[13], hash[14], hash[15]);
-				Log.v("Updating MVID: {0}", guid.ToString("B"));
+				Logger.v("Updating MVID: {0}", guid.ToString("B"));
 				module.Mvid = guid;
 			}
 		}

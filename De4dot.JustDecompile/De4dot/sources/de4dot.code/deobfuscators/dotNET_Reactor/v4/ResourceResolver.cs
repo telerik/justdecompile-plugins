@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -19,25 +19,25 @@
 
 using System;
 using System.Collections.Generic;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 	class ResourceResolver {
-		ModuleDefinition module;
+		ModuleDefMD module;
 		EncryptedResource encryptedResource;
-		MethodDefinition initMethod;
+		MethodDef initMethod;
 
 		public bool Detected {
 			get { return encryptedResource.Method != null; }
 		}
 
-		public TypeDefinition Type {
+		public TypeDef Type {
 			get { return encryptedResource.Type; }
 		}
 
-		public MethodDefinition InitMethod {
+		public MethodDef InitMethod {
 			get { return initMethod; }
 		}
 
@@ -45,12 +45,12 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 			get { return encryptedResource.FoundResource; }
 		}
 
-		public ResourceResolver(ModuleDefinition module) {
+		public ResourceResolver(ModuleDefMD module) {
 			this.module = module;
 			this.encryptedResource = new EncryptedResource(module);
 		}
 
-		public ResourceResolver(ModuleDefinition module, ResourceResolver oldOne) {
+		public ResourceResolver(ModuleDefMD module, ResourceResolver oldOne) {
 			this.module = module;
 			this.encryptedResource = new EncryptedResource(module, oldOne.encryptedResource);
 		}
@@ -79,7 +79,7 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 			}
 		}
 
-		bool checkFields(IList<FieldDefinition> fields) {
+		bool checkFields(IList<FieldDef> fields) {
 			if (fields.Count != 3)
 				return false;
 
@@ -105,8 +105,8 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 			encryptedResource.init(simpleDeobfuscator);
 		}
 
-		MethodDefinition findInitMethod(ISimpleDeobfuscator simpleDeobfuscator) {
-			var ctor = DotNetUtils.getMethod(Type, ".ctor");
+		MethodDef findInitMethod(ISimpleDeobfuscator simpleDeobfuscator) {
+			var ctor = Type.FindMethod(".ctor");
 			foreach (var method in Type.Methods) {
 				if (!method.IsStatic || method.Body == null)
 					continue;
@@ -119,18 +119,18 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 				bool stsfldUsed = false, newobjUsed = false;
 				foreach (var instr in method.Body.Instructions) {
 					if (instr.OpCode.Code == Code.Stsfld) {
-						var field = instr.Operand as FieldReference;
-						if (field == null || field.FieldType.FullName != "System.Boolean")
+						var field = instr.Operand as IField;
+						if (field == null || field.FieldSig.GetFieldType().GetElementType() != ElementType.Boolean)
 							continue;
-						if (!MemberReferenceHelper.compareTypes(Type, field.DeclaringType))
+						if (!new SigComparer().Equals(Type, field.DeclaringType))
 							continue;
 						stsfldUsed = true;
 					}
 					else if (instr.OpCode.Code == Code.Newobj) {
-						var calledCtor = instr.Operand as MethodReference;
+						var calledCtor = instr.Operand as IMethod;
 						if (calledCtor == null)
 							continue;
-						if (!MemberReferenceHelper.compareMethodReferenceAndDeclaringType(calledCtor, ctor))
+						if (!MethodEqualityComparer.CompareDeclaringTypes.Equals(calledCtor, ctor))
 							continue;
 						newobjUsed = true;
 					}
@@ -146,7 +146,7 @@ namespace de4dot.code.deobfuscators.dotNET_Reactor.v4 {
 		public EmbeddedResource mergeResources() {
 			if (encryptedResource.Resource == null)
 				return null;
-			DeobUtils.decryptAndAddResources(module, encryptedResource.Resource.Name, () => {
+			DeobUtils.decryptAndAddResources(module, encryptedResource.Resource.Name.String, () => {
 				return QuickLZ.decompress(encryptedResource.decrypt());
 			});
 			return encryptedResource.Resource;

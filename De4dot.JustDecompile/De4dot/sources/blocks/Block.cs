@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -19,7 +19,7 @@
 
 using System;
 using System.Collections.Generic;
-using Mono.Cecil.Cil;
+using dnlib.DotNet.Emit;
 
 namespace de4dot.blocks {
 	public class Block : BaseBlock {
@@ -52,7 +52,7 @@ namespace de4dot.blocks {
 		public Instr FirstInstr {
 			get {
 				if (instructions.Count == 0)
-					add(new Instr(Instruction.Create(OpCodes.Nop)));
+					add(new Instr(OpCodes.Nop.ToInstruction()));
 				return instructions[0];
 			}
 		}
@@ -60,7 +60,7 @@ namespace de4dot.blocks {
 		public Instr LastInstr {
 			get {
 				if (instructions.Count == 0)
-					add(new Instr(Instruction.Create(OpCodes.Nop)));
+					add(new Instr(OpCodes.Nop.ToInstruction()));
 				return instructions[instructions.Count - 1];
 			}
 		}
@@ -269,7 +269,7 @@ namespace de4dot.blocks {
 			for (int i = 0; i < instrs.Count; i++) {
 				var instr = instrs[i];
 				if (instr.OpCode != OpCodes.Nop)
-					dest.Add(clone ? new Instr(DotNetUtils.clone(instr.Instruction)) : instr);
+					dest.Add(clone ? new Instr(instr.Instruction.Clone()) : instr);
 			}
 		}
 

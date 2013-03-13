@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -19,28 +19,28 @@
 
 using System;
 using System.Collections.Generic;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
 
 namespace de4dot.blocks {
 	public class Blocks {
-		MethodDefinition method;
-		IList<VariableDefinition> locals;
+		MethodDef method;
+		IList<Local> locals;
 		MethodBlocks methodBlocks;
 
 		public MethodBlocks MethodBlocks {
 			get { return methodBlocks; }
 		}
 
-		public IList<VariableDefinition> Locals {
+		public IList<Local> Locals {
 			get { return locals; }
 		}
 
-		public MethodDefinition Method {
+		public MethodDef Method {
 			get { return method; }
 		}
 
-		public Blocks(MethodDefinition method) {
+		public Blocks(MethodDef method) {
 			this.method = method;
 			updateBlocks();
 		}
@@ -79,11 +79,11 @@ namespace de4dot.blocks {
 			if (locals.Count == 0)
 				return 0;
 
-			var usedLocals = new Dictionary<VariableDefinition, List<LocalVariableInfo>>();
+			var usedLocals = new Dictionary<Local, List<LocalVariableInfo>>();
 			foreach (var block in methodBlocks.getAllBlocks()) {
 				for (int i = 0; i < block.Instructions.Count; i++) {
 					var instr = block.Instructions[i];
-					VariableDefinition local;
+					Local local;
 					switch (instr.OpCode.Code) {
 					case Code.Ldloc:
 					case Code.Ldloc_S:
@@ -102,7 +102,7 @@ namespace de4dot.blocks {
 
 					case Code.Ldloca_S:
 					case Code.Ldloca:
-						local = (VariableDefinition)instr.Operand;
+						local = (Local)instr.Operand;
 						break;
 
 					default:
@@ -122,12 +122,37 @@ namespace de4dot.blocks {
 			}
 
 			int newIndex = -1;
-			var newLocals = new List<VariableDefinition>(usedLocals.Count);
+			var newLocals = new List<Local>(usedLocals.Count);
+			var newLocalsDict = new Dictionary<Local, bool>(usedLocals.Count);
 			foreach (var local in usedLocals.Keys) {
 				newIndex++;
 				newLocals.Add(local);
+				newLocalsDict[local] = true;
 				foreach (var info in usedLocals[local])
 					info.block.Instructions[info.index] = new Instr(optimizeLocalInstr(info.block.Instructions[info.index], local, (uint)newIndex));
+			}
+
+			// We can't remove all locals. Locals that reference another assembly will
+			// cause the CLR to load that assembly before the method is executed if it
+			// hasn't been loaded yet. This is a side effect the program may depend on.
+			// At least one program has this dependency and will crash if we remove the
+			// unused local. This took a while to figure out...
+			var keptAssemblies = new Dictionary<string, bool>(StringComparer.Ordinal);
+			foreach (var local in locals) {
+				if (newLocalsDict.ContainsKey(local))
+					continue;
+				var defAsm = local.Type.DefinitionAssembly;
+				if (defAsm == null)
+					continue;	// eg. fnptr
+				if (defAsm == method.DeclaringType.Module.Assembly)
+					continue;	// this assembly is always loaded
+				if (defAsm.IsCorLib())
+					continue;	// mscorlib is always loaded
+				var asmName = defAsm.FullName;
+				if (keptAssemblies.ContainsKey(asmName))
+					continue;
+				keptAssemblies[asmName] = true;
+				newLocals.Add(local);
 			}
 
 			int numRemoved = locals.Count - newLocals.Count;
@@ -137,7 +162,7 @@ namespace de4dot.blocks {
 			return numRemoved;
 		}
 
-		static Instruction optimizeLocalInstr(Instr instr, VariableDefinition local, uint newIndex) {
+		static Instruction optimizeLocalInstr(Instr instr, Local local, uint newIndex) {
 			switch (instr.OpCode.Code) {
 			case Code.Ldloc:
 			case Code.Ldloc_S:
@@ -146,16 +171,16 @@ namespace de4dot.blocks {
 			case Code.Ldloc_2:
 			case Code.Ldloc_3:
 				if (newIndex == 0)
-					return Instruction.Create(OpCodes.Ldloc_0);
+					return OpCodes.Ldloc_0.ToInstruction();
 				if (newIndex == 1)
-					return Instruction.Create(OpCodes.Ldloc_1);
+					return OpCodes.Ldloc_1.ToInstruction();
 				if (newIndex == 2)
-					return Instruction.Create(OpCodes.Ldloc_2);
+					return OpCodes.Ldloc_2.ToInstruction();
 				if (newIndex == 3)
-					return Instruction.Create(OpCodes.Ldloc_3);
+					return OpCodes.Ldloc_3.ToInstruction();
 				if (newIndex <= 0xFF)
-					return Instruction.Create(OpCodes.Ldloc_S, local);
-				return Instruction.Create(OpCodes.Ldloc, local);
+					return OpCodes.Ldloc_S.ToInstruction(local);
+				return OpCodes.Ldloc.ToInstruction(local);
 
 			case Code.Stloc:
 			case Code.Stloc_S:
@@ -164,22 +189,22 @@ namespace de4dot.blocks {
 			case Code.Stloc_2:
 			case Code.Stloc_3:
 				if (newIndex == 0)
-					return Instruction.Create(OpCodes.Stloc_0);
+					return OpCodes.Stloc_0.ToInstruction();
 				if (newIndex == 1)
-					return Instruction.Create(OpCodes.Stloc_1);
+					return OpCodes.Stloc_1.ToInstruction();
 				if (newIndex == 2)
-					return Instruction.Create(OpCodes.Stloc_2);
+					return OpCodes.Stloc_2.ToInstruction();
 				if (newIndex == 3)
-					return Instruction.Create(OpCodes.Stloc_3);
+					return OpCodes.Stloc_3.ToInstruction();
 				if (newIndex <= 0xFF)
-					return Instruction.Create(OpCodes.Stloc_S, local);
-				return Instruction.Create(OpCodes.Stloc, local);
+					return OpCodes.Stloc_S.ToInstruction(local);
+				return OpCodes.Stloc.ToInstruction(local);
 
 			case Code.Ldloca_S:
 			case Code.Ldloca:
 				if (newIndex <= 0xFF)
-					return Instruction.Create(OpCodes.Ldloca_S, local);
-				return Instruction.Create(OpCodes.Ldloca, local);
+					return OpCodes.Ldloca_S.ToInstruction(local);
+				return OpCodes.Ldloca.ToInstruction(local);
 
 			default:
 				throw new ApplicationException("Invalid ld/st local instruction");
@@ -194,7 +219,7 @@ namespace de4dot.blocks {
 				}
 				catch (NullReferenceException) {
 					//TODO: Send this message to the log
-					Console.WriteLine("Null ref exception! Invalid metadata token in code? Method: {0:X8}: {1}", method.MetadataToken.ToUInt32(), method.FullName);
+					Console.WriteLine("Null ref exception! Invalid metadata token in code? Method: {0:X8}: {1}", method.MDToken.Raw, method.FullName);
 					return;
 				}
 			}

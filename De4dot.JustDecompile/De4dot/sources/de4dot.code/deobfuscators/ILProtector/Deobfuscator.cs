@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2012 de4dot@gmail.com
+    Copyright (C) 2011-2013 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -19,7 +19,7 @@
 
 using System;
 using System.Collections.Generic;
-using Mono.Cecil;
+using dnlib.DotNet;
 using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.ILProtector {
@@ -86,31 +86,30 @@ namespace de4dot.code.deobfuscators.ILProtector {
 			mainType = new MainType(module);
 			mainType.find();
 			methodsDecrypter = new MethodsDecrypter(module, mainType);
-			methodsDecrypter.find();
+			if (mainType.Detected)
+				methodsDecrypter.find();
 
 			if (mainType.Detected && methodsDecrypter.Detected && methodsDecrypter.Version != null)
-				obfuscatorName += " " + getVersion(methodsDecrypter.Version);
-		}
-
-		static string getVersion(Version version) {
-			if (version.Revision == 0)
-				return string.Format("{0}.{1}.{2}", version.Major, version.Minor, version.Build);
-			return version.ToString();
+				obfuscatorName += " " + methodsDecrypter.Version;
 		}
 
 		public override void deobfuscateBegin() {
 			base.deobfuscateBegin();
 
-			methodsDecrypter.decrypt();
-			addTypesToBeRemoved(methodsDecrypter.DelegateTypes, "Obfuscator method delegate type");
-			addResourceToBeRemoved(methodsDecrypter.Resource, "Encrypted methods resource");
-			addTypeToBeRemoved(mainType.InvokerDelegate, "Invoker delegate type");
-			addFieldToBeRemoved(mainType.InvokerInstanceField, "Invoker delegate instance field");
-			foreach (var pm in mainType.ProtectMethods) {
-				addMethodToBeRemoved(pm, "Obfuscator 'Protect' init method");
-				addModuleReferenceToBeRemoved(pm.PInvokeInfo.Module, "Obfuscator native protection file");
+			if (mainType.Detected) {
+				if (methodsDecrypter.Detected) {
+					methodsDecrypter.decrypt();
+					addTypesToBeRemoved(methodsDecrypter.DelegateTypes, "Obfuscator method delegate type");
+					addResourceToBeRemoved(methodsDecrypter.Resource, "Encrypted methods resource");
+					addTypeToBeRemoved(mainType.InvokerDelegate, "Invoker delegate type");
+					addFieldToBeRemoved(mainType.InvokerInstanceField, "Invoker delegate instance field");
+					foreach (var pm in mainType.ProtectMethods)
+						addMethodToBeRemoved(pm, "Obfuscator 'Protect' init method");
+					mainType.cleanUp();
+				}
+				else
+					Logger.w("New ILProtector version. Can't decrypt methods (yet)");
 			}
-			mainType.cleanUp();
 		}
 
 		public override IEnumerable<int> getStringDecrypterMethods() {
