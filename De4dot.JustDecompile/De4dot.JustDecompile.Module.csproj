@@ -125,15 +125,17 @@
     <None Include="LicenseAgreements\COPYING" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="LicenseAgreements\LICENSE.de4dot.txt" />
+    <None Include="LicenseAgreements\LICENSE.de4dot.txt" />
+    <None Include="LicenseAgreements\ThirdParty\LICENSE.dnlib.txt" />
+    <None Include="LicenseAgreements\ThirdParty\LICENSE.ICSharpCode.SharpZipLib.txt" />
+    <None Include="LicenseAgreements\ThirdParty\LICENSE.QuickLZ.txt" />
+    <None Include="LicenseAgreements\ThirdParty\LICENSE.randomc.txt" />
     <None Include="PluginConfig.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="LicenseAgreements\ThirdParty\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition=" '$(Configuration)' == 'DebugInternal' OR '$(Configuration)' == 'ReleaseInternal'">
     <PreBuildEvent>
