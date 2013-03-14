@@ -8,8 +8,8 @@
     - Suitable for cases like deobfuscating .NET malware, your lost source code for which you have only obfuscated .NET assembly.
     - Verify whether an obfuscated .NET assembly contains the claimed source code, optimizing program code and getting rid of obfuscator generated code.
   </Description>
-  <Version>2012.2.1121.0</Version>
-  <SupportedJDversion>2012.2.1121.0</SupportedJDversion>
+  <Version>2013.1.314.0</Version>
+  <SupportedJDversion>2013.1.305.4</SupportedJDversion>
   <Guid>2DE1911A-564D-457B-A4EF-77200C39AB42</Guid>
   <Url>http://www.telerik.com/products/decompiler/extensions.aspx#de4dot-deobfuscator</Url>
   <Licenses>
@@ -695,68 +695,125 @@ Public License instead of this License.  But first, please read
     <License Title="LICENSE de4dot">
       <![CDATA[
 <LICENSE>
-//  Copyright (C) 2011-2012 de4dot@gmail.com
-//
-//  This file is part of de4dot.
-//
-//  de4dot is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  de4dot is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with de4dot.  If not, see <http://www.gnu.org/licenses/>.
+    Copyright (C) 2011-2013 de4dot@gmail.com
+
+    This file is part of de4dot.
+
+    de4dot is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    de4dot is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with de4dot.  If not, see <http://www.gnu.org/licenses/>.
 </LICENSE>
 
-Official site: https://github.com/0xd4d/de4dot
+Official site: https://bitbucket.org/0xd4d/de4dot
 
-See the file COPYING for more info.
-
+See the file COPYING for more details.
       ]]>
     </License>
 
-    <License Title="LICENSE Mono.Cecil">
-      <![CDATA[
+		<License Title="LICENSE dnlib">
+			<![CDATA[
 <LICENSE>
-//
-// Author:
-//   Jb Evain (jbevain@gmail.com)
-//
-// Copyright (c) 2008 - 2012 Jb Evain
-//
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//
+    Copyright (C) 2012-2013 de4dot@gmail.com
+
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+
+    The above copyright notice and this permission notice shall be
+    included in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 </LICENSE>
 
-Official site: https://github.com/jbevain/cecil
-
-This version of Mono.Cecil is not the official version. I have added code
-to access internal types and structures. Legacy code is also available to
-provide backward compatibility with Cecil 0.6.x features like visitors.
-
+Official site: https://bitbucket.org/0xd4d/dnlib
       ]]>
-    </License>
+		</License>
+		
+		<License Title="LICENSE ICSharpCode.SharpZipLib">
+			<![CDATA[
+<LICENSE>
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// Linking this library statically or dynamically with other modules is
+// making a combined work based on this library.  Thus, the terms and
+// conditions of the GNU General Public License cover the whole
+// combination.
+// 
+// As a special exception, the copyright holders of this library give you
+// permission to link this library with independent modules to produce an
+// executable, regardless of the license terms of these independent
+// modules, and to copy and distribute the resulting executable under
+// terms of your choice, provided that you also meet, for each linked
+// independent module, the terms and conditions of the license of that
+// module.  An independent module is a module which is not derived from
+// or based on this library.  If you modify this library, you may extend
+// this exception to your version of the library, but you are not
+// obligated to do so.  If you do not wish to do so, delete this
+// exception statement from your version.
+</LICENSE>
+
+Official site: http://www.icsharpcode.net/opensource/sharpziplib/
+      ]]>
+		</License>
+		
+		<License Title="LICENSE QuickLZ">
+			<![CDATA[
+<LICENSE>
+// QuickLZ data compression library
+// Copyright (C) 2006-2011 Lasse Mikkel Reinhold
+// lar@quicklz.com
+//
+// QuickLZ can be used for free under the GPL 1, 2 or 3 license (where anything 
+// released into public must be open source) or under a commercial license if such 
+// has been acquired (see http://www.quicklz.com/order.html). The commercial license 
+// does not cover derived or ported versions created by third parties under GPL.
+</LICENSE>
+      ]]>
+		</License>
+		
+		<License Title="LICENSE randomc">
+			<![CDATA[
+<LICENSE>
+* Copyright 2001-2008 by Agner Fog.
+* GNU General Public License http://www.gnu.org/licenses/gpl.html
+</LICENSE>
+
+
+See these links for the original C++ code:
+	http://www.agner.org/random/
+	http://www.agner.org/random/randomc.zip
+      ]]>
+		</License>
   </Licenses>
 </PluginConfig>
