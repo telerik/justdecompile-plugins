@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoToEntryPoint", "GoToEntryPoint\GoToEntryPoint.csproj", "{51A5199A-9D21-401B-B182-8D867711D872}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 1
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://tfs:8082/defaultcollection
+		SccProjectUniqueName0 = GoToEntryPoint\\GoToEntryPoint.csproj
+		SccProjectName0 = GoToEntryPoint
+		SccAuxPath0 = http://tfs:8082/defaultcollection
+		SccLocalPath0 = GoToEntryPoint
+		SccProvider0 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		DebugInternal|Any CPU = DebugInternal|Any CPU
+		DebugInternal|x86 = DebugInternal|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+		ReleaseInternal|Any CPU = ReleaseInternal|Any CPU
+		ReleaseInternal|x86 = ReleaseInternal|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{51A5199A-9D21-401B-B182-8D867711D872}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51A5199A-9D21-401B-B182-8D867711D872}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51A5199A-9D21-401B-B182-8D867711D872}.Debug|x86.ActiveCfg = Debug|x86
+		{51A5199A-9D21-401B-B182-8D867711D872}.Debug|x86.Build.0 = Debug|x86
+		{51A5199A-9D21-401B-B182-8D867711D872}.DebugInternal|Any CPU.ActiveCfg = DebugInternal|Any CPU
+		{51A5199A-9D21-401B-B182-8D867711D872}.DebugInternal|Any CPU.Build.0 = DebugInternal|Any CPU
+		{51A5199A-9D21-401B-B182-8D867711D872}.DebugInternal|x86.ActiveCfg = DebugInternal|x86
+		{51A5199A-9D21-401B-B182-8D867711D872}.DebugInternal|x86.Build.0 = DebugInternal|x86
+		{51A5199A-9D21-401B-B182-8D867711D872}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51A5199A-9D21-401B-B182-8D867711D872}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51A5199A-9D21-401B-B182-8D867711D872}.Release|x86.ActiveCfg = Release|x86
+		{51A5199A-9D21-401B-B182-8D867711D872}.Release|x86.Build.0 = Release|x86
+		{51A5199A-9D21-401B-B182-8D867711D872}.ReleaseInternal|Any CPU.ActiveCfg = ReleaseInternal|Any CPU
+		{51A5199A-9D21-401B-B182-8D867711D872}.ReleaseInternal|Any CPU.Build.0 = ReleaseInternal|Any CPU
+		{51A5199A-9D21-401B-B182-8D867711D872}.ReleaseInternal|x86.ActiveCfg = ReleaseInternal|x86
+		{51A5199A-9D21-401B-B182-8D867711D872}.ReleaseInternal|x86.Build.0 = ReleaseInternal|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

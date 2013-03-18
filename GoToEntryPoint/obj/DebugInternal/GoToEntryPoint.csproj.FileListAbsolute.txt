@@ -1,0 +1,4 @@
+C:\Trunk\JustDecompile Plugins\GoToEntryPoint\obj\DebugInternal\ResolveAssemblyReference.cache
+C:\Trunk\Source\UI\DebugBuild\Plugins\GoToEntryPoint\PluginConfig.xml
+C:\Trunk\Source\UI\DebugBuild\Plugins\GoToEntryPoint\GoToEntryPoint.Module.dll
+C:\Trunk\JustDecompile Plugins\GoToEntryPoint\obj\DebugInternal\GoToEntryPoint.Module.dll
