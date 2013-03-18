@@ -1,6 +1,0 @@
-C:\Trunk\Source\UI\ReleaseBuild\Plugins\GoToEntryPoint\PluginConfig.xml
-C:\Trunk\Source\UI\ReleaseBuild\Plugins\GoToEntryPoint\GoToEntryPoint.Module.dll
-C:\Trunk\JustDecompile Plugins\GoToEntryPoint\obj\ReleaseInternal\ResolveAssemblyReference.cache
-C:\Trunk\JustDecompile Plugins\GoToEntryPoint\obj\ReleaseInternal\GoToEntryPoint.Module.dll
-C:\Trunk\Source\UI\ReleaseBuild\Plugins\GoToEntryPoint\GoToEntryPoint.Module.pdb
-C:\Trunk\JustDecompile Plugins\GoToEntryPoint\obj\ReleaseInternal\GoToEntryPoint.Module.pdb
