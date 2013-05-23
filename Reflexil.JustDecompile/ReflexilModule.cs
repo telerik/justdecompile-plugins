@@ -26,6 +26,7 @@ using Reflexil.Forms;
 using Reflexil.Handlers;
 using Reflexil.JustDecompile.MenuItems;
 using Reflexil.Plugins;
+using System.Windows.Media;
 
 namespace Reflexil.JustDecompile
 {
@@ -130,6 +131,18 @@ namespace Reflexil.JustDecompile
 
 		private void SetReflexilHandler(ITreeViewItem selectedTreeItem)
 		{
+            if (selectedTreeItem is IAssemblyDefinitionTreeViewItem)
+            {
+                if (((IAssemblyDefinitionTreeViewItem)selectedTreeItem).Background == null)
+                {
+                    ((IAssemblyDefinitionTreeViewItem)selectedTreeItem).Background = new SolidColorBrush(Colors.Red);
+                }
+                else
+                {
+                    ((IAssemblyDefinitionTreeViewItem)selectedTreeItem).Background = null;
+                }
+            }
+
             this.selectedItem = selectedTreeItem;
 
             if (!this.IsReflexilHostLoaded)
