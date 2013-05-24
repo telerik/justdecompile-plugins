@@ -12,6 +12,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
+
+using System;
+using System.Windows.Media;
 using JustDecompile.API.CompositeEvents;
 using JustDecompile.API.Core;
 using Microsoft.Practices.Prism.Commands;
@@ -30,6 +33,8 @@ namespace Reflexil.JustDecompile
             this.StudioPackage = new JustDecompileCecilStudioPackage();
 
             this.Header = StudioPackage.GetProductVersion();
+
+            this.StudioPackage.NewItemInjected += OnNewItemInjected;
 
             eventAggregator.GetEvent<SelectedTreeViewItemChangedEvent>().Subscribe(SetReflexilHandler);
         }
@@ -84,6 +89,13 @@ namespace Reflexil.JustDecompile
             {
                 this.StudioPackage.SelectedTreeViewItem = selectedTreeItem;
             }
+        }
+
+        private void OnNewItemInjected(object sender, EventArgs e)
+        {
+            JustDecompileCecilStudioPackage.UpdatedItems.Add(StudioPackage.SelectedTreeViewItem);
+
+            StudioPackage.SelectedTreeViewItem.TreeNodeVisuals.SetForeground(new SolidColorBrush(Colors.Red));
         }
     }
 }

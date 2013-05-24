@@ -21,12 +21,22 @@ using Reflexil.Utils;
 using Reflexil.Handlers;
 using Reflexil.Plugins;
 using System.Windows.Forms;
+using System.Collections.Generic;
 
 namespace Reflexil.JustDecompile
 {
 	internal class JustDecompileCecilStudioPackage : CecilStudioPackage
 	{
         public static event EventHandler HandleItemRequest = delegate { };
+
+        public event EventHandler NewItemInjected = delegate { };
+
+        public static IList<ITreeViewItem> UpdatedItems;
+
+        static JustDecompileCecilStudioPackage()
+        {
+            UpdatedItems = new List<ITreeViewItem>();
+        }
 
         public JustDecompileCecilStudioPackage() { }
 
@@ -103,6 +113,7 @@ namespace Reflexil.JustDecompile
 
 		protected override void ActiveItemChanged(object sender, EventArgs e)
 		{
+            NewItemInjected(sender, e);
 		}
 	}
 }

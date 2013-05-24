@@ -131,18 +131,6 @@ namespace Reflexil.JustDecompile
 
 		private void SetReflexilHandler(ITreeViewItem selectedTreeItem)
 		{
-            if (selectedTreeItem is IAssemblyDefinitionTreeViewItem)
-            {
-                if (((IAssemblyDefinitionTreeViewItem)selectedTreeItem).Background == null)
-                {
-                    ((IAssemblyDefinitionTreeViewItem)selectedTreeItem).Background = new SolidColorBrush(Colors.Red);
-                }
-                else
-                {
-                    ((IAssemblyDefinitionTreeViewItem)selectedTreeItem).Background = null;
-                }
-            }
-
             this.selectedItem = selectedTreeItem;
 
             if (!this.IsReflexilHostLoaded)
