@@ -22,86 +22,95 @@ using Reflexil.Utils;
 
 namespace Reflexil.JustDecompile.MenuItems
 {
-	internal class ModuleDefinitionContextMenu : MenuItemBase
-	{
-		public ModuleDefinitionContextMenu(IEventAggregator eventAggregator) : base(eventAggregator)
-		{
-		}
+    internal class ModuleDefinitionContextMenu : MenuItemBase
+    {
+        public ModuleDefinitionContextMenu(IEventAggregator eventAggregator)
+            : base(eventAggregator)
+        {
+        }
 
-		public override void AddMenuItems()
-		{
-			base.AddMenuItems();
+        public override void AddMenuItems()
+        {
+            base.AddMenuItems();
 
-			this.MenuItems.Add(new MenuItem { Header = "Inject assembly reference", Command = new DelegateCommand(OnAssemblyReferenceClass) });
-			this.MenuItems.Add(new MenuItem { Header = "Inject resource", Command = new DelegateCommand(OnResourceClass) });
-			this.MenuItems.Add(new MenuSeparator());
-			this.MenuItems.Add(new MenuItem { Header = "Save as...", Command = new DelegateCommand(OnSaveAs) });
-			this.MenuItems.Add(new MenuItem { Header = "Reload", Command = new DelegateCommand(OnReaload) });
-			this.MenuItems.Add(new MenuItem { Header = "Rename", Command = new DelegateCommand(OnRename) });
-			this.MenuItems.Add(new MenuItem { Header = "Verify", Command = new DelegateCommand(OnVerify) });
-		}
+            this.MenuItems.Add(new MenuItem { Header = "Inject assembly reference", Command = new DelegateCommand(OnAssemblyReferenceClass) });
+            this.MenuItems.Add(new MenuItem { Header = "Inject resource", Command = new DelegateCommand(OnResourceClass) });
+            this.MenuItems.Add(new MenuSeparator());
+            this.MenuItems.Add(new MenuItem { Header = "Save as...", Command = new DelegateCommand(OnSaveAs) });
+            this.MenuItems.Add(new MenuItem { Header = "Reload", Command = new DelegateCommand(OnReaload) });
+            this.MenuItems.Add(new MenuItem { Header = "Rename", Command = new DelegateCommand(OnRename) });
+            this.MenuItems.Add(new MenuItem { Header = "Verify", Command = new DelegateCommand(OnVerify) });
+        }
 
-		private string GetFilePath()
-		{
-			if (this.StudioPackage.SelectedTreeViewItem == null)
-			{
-				return string.Empty;
-			}
-			switch (this.StudioPackage.SelectedTreeViewItem.TreeNodeType)
-			{
-				case TreeNodeType.AssemblyDefinition:
-					return ((IAssemblyDefinitionTreeViewItem)this.StudioPackage.SelectedTreeViewItem).AssemblyDefinition.MainModule.FilePath;
+        private string GetFilePath()
+        {
+            if (this.StudioPackage.SelectedTreeViewItem == null)
+            {
+                return string.Empty;
+            }
+            switch (this.StudioPackage.SelectedTreeViewItem.TreeNodeType)
+            {
+                case TreeNodeType.AssemblyDefinition:
+                    return ((IAssemblyDefinitionTreeViewItem)this.StudioPackage.SelectedTreeViewItem).AssemblyDefinition.MainModule.FilePath;
 
-				case TreeNodeType.AssemblyModuleDefinition:
-					return ((IAssemblyModuleDefinitionTreeViewItem)this.StudioPackage.SelectedTreeViewItem).ModuleDefinition.FilePath;
+                case TreeNodeType.AssemblyModuleDefinition:
+                    return ((IAssemblyModuleDefinitionTreeViewItem)this.StudioPackage.SelectedTreeViewItem).ModuleDefinition.FilePath;
 
-				default:
-					return string.Empty;
-			}
-		}
+                default:
+                    return string.Empty;
+            }
+        }
 
-		private void OnAssemblyReferenceClass()
-		{
-			StudioPackage.Inject(EInjectType.AssemblyReference);
-		}
+        private void OnAssemblyReferenceClass()
+        {
+            StudioPackage.Inject(EInjectType.AssemblyReference);
+        }
 
-		private void OnReaload()
-		{
-			StudioPackage.ReloadAssembly();
-		}
+        private void OnReaload()
+        {
+            StudioPackage.ReloadAssembly();
+        }
 
-		private void OnRename()
-		{
-			StudioPackage.Rename();
-		}
+        private void OnRename()
+        {
+            StudioPackage.Rename();
+        }
 
-		private void OnResourceClass()
-		{
-			StudioPackage.Inject(EInjectType.Resource);
-		}
+        private void OnResourceClass()
+        {
+            StudioPackage.Inject(EInjectType.Resource);
+        }
 
-		private void OnSaveAs()
-		{
-			AssemblyDefinition assemblyDefinition = StudioPackage.GetCurrentAssemblyDefinition();
+        private void OnSaveAs()
+        {
+            AssemblyDefinition assemblyDefinition = StudioPackage.GetCurrentAssemblyDefinition();
 
-			string getOrginalFilePath = GetFilePath();
+            string getOrginalFilePath = GetFilePath();
 
-			if (!string.IsNullOrEmpty(getOrginalFilePath))
-			{
-				AssemblyHelper.SaveAssembly(assemblyDefinition, getOrginalFilePath);
-			}
-		}
+            if (!string.IsNullOrEmpty(getOrginalFilePath))
+            {
+                bool saveAssembly = AssemblyHelper.TrySaveAssembly(assemblyDefinition, getOrginalFilePath);
 
-		private void OnVerify()
-		{
-			AssemblyDefinition assemblyDefinition = StudioPackage.GetCurrentAssemblyDefinition();
+                if (saveAssembly)
+                {
+                    foreach (ITreeViewItem item in JustDecompileCecilStudioPackage.UpdatedItems)
+                    {
+                        item.TreeNodeVisuals.SetForeground(null);
+                    }
+                }
+            }
+        }
 
-			string getOrginalFilePath = GetFilePath();
+        private void OnVerify()
+        {
+            AssemblyDefinition assemblyDefinition = StudioPackage.GetCurrentAssemblyDefinition();
 
-			if (!string.IsNullOrEmpty(getOrginalFilePath))
-			{
-				AssemblyHelper.VerifyAssembly(assemblyDefinition, getOrginalFilePath);
-			}
-		}
-	}
+            string getOrginalFilePath = GetFilePath();
+
+            if (!string.IsNullOrEmpty(getOrginalFilePath))
+            {
+                AssemblyHelper.VerifyAssembly(assemblyDefinition, getOrginalFilePath);
+            }
+        }
+    }
 }

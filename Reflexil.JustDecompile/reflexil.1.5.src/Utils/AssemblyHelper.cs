@@ -110,7 +110,7 @@ namespace Reflexil.Utils
         /// </summary>
         /// <param name="adef">Assembly definition</param>
         /// <param name="originallocation">Original location</param>
-        public static void SaveAssembly(AssemblyDefinition adef, string originallocation)
+        public static bool TrySaveAssembly(AssemblyDefinition adef, string originallocation)
         {
             if (adef != null)
             {
@@ -133,6 +133,7 @@ namespace Reflexil.Utils
                                     snform.ShowDialog();
                                 }
                             }
+                            return true;
                         }
                         catch (Exception ex)
                         {
@@ -145,6 +146,7 @@ namespace Reflexil.Utils
             {
                 MessageBox.Show("Assembly definition is not loaded (not a CLI image?)");
             }
+            return false;
         }
         #endregion
 
