@@ -15,7 +15,7 @@ using Microsoft.Practices.Prism.Regions;
 
 namespace JustDecompile.Plugins.GoToEntryPoint
 {
-    [ModuleExport(typeof(IModule))]
+    [ModuleExport(typeof(JustDecompilePowerTools))]
     public class JustDecompilePowerTools : IModule
     {
 #pragma warning disable 0649
