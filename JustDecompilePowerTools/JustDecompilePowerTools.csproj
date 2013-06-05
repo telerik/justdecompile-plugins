@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseInternal|AnyCPU'">
-    <OutputPath>..\..\Source\UI\ReleaseBuild\Plugins\GoToEntryPoint\</OutputPath>
+    <OutputPath>..\..\Source\UI\ReleaseBuild\Plugins\JustDecompilePowerTools\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -9,7 +9,7 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugInternal|AnyCPU'">
-    <OutputPath>..\..\Source\UI\DebugBuild\Plugins\GoToEntryPoint\</OutputPath>
+    <OutputPath>..\..\Source\UI\DebugBuild\Plugins\JustDecompilePowerTools\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
