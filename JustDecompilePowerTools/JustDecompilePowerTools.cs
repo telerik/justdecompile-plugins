@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using JustDecompile.API.CompositeEvents;
 using JustDecompile.API.Core;
@@ -11,13 +12,11 @@ using Microsoft.Practices.Prism.Events;
 using Microsoft.Practices.Prism.MefExtensions.Modularity;
 using Microsoft.Practices.Prism.Modularity;
 using Microsoft.Practices.Prism.Regions;
-using System.Windows.Controls;
-using System.Threading.Tasks;
 
 namespace JustDecompile.Plugins.GoToEntryPoint
 {
-    [ModuleExport(typeof(GoToEntryPointModule))]
-    public class GoToEntryPointModule : IModule
+    [ModuleExport(typeof(IModule))]
+    public class JustDecompilePowerTools : IModule
     {
 #pragma warning disable 0649
 
