@@ -60,7 +60,7 @@
   <ItemGroup>
     <Reference Include="JustDecompile.API">
       <HintPath>..\References\JustDecompile.API.dll</HintPath>
-	  <Private>False</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -78,6 +78,7 @@
   <ItemGroup>
     <Compile Include="GoToEntryPointModule.cs" />
     <Compile Include="MenuItem.cs" />
+    <Compile Include="ProgressWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
