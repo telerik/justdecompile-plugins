@@ -28,8 +28,8 @@
     <ProjectGuid>{51A5199A-9D21-401B-B182-8D867711D872}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>JustDecompile.Plugins.GoToEntryPoint</RootNamespace>
-    <AssemblyName>GoToEntryPoint.Module</AssemblyName>
+    <RootNamespace>JustDecompile.Plugins.JustDecompilePowerTools</RootNamespace>
+    <AssemblyName>JustDecompilePowerTools.Module</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
