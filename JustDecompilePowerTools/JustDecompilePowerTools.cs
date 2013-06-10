@@ -149,12 +149,18 @@ namespace JustDecompile.Plugins.GoToEntryPoint
 
         private bool HasMatchingType(ITypeDefinition typeDefinition)
         {
-            if ((typeDefinition.BaseType != null && typeDefinition.BaseType.Resolve().FullName == selectedTypeDefinition.FullName)
-                  || (typeDefinition.HasInterfaces && typeDefinition.Interfaces.Any(a => a.Resolve().FullName == selectedTypeDefinition.FullName)))
+            if ((typeDefinition.BaseType != null && AreNodeEquals(typeDefinition.BaseType)) || (typeDefinition.HasInterfaces && typeDefinition.Interfaces.Any(AreNodeEquals)))
             {
                 return true;
             }
             return false;
+        }
+
+        private bool AreNodeEquals(ITypeReference typeReference)
+        {
+            ITypeReference typeDef = typeReference.Resolve() ?? typeReference;
+
+            return typeDef.FullName == selectedTypeDefinition.FullName;
         }
 
         private void OnItemsLoaded(List<ITreeViewItem> items)
@@ -193,6 +199,10 @@ namespace JustDecompile.Plugins.GoToEntryPoint
 
         private void selectedTreeViewItemChanged(ITreeViewItem selectedTreeItem)
         {
+            if (selectedTreeItem == null)
+            {
+                return;
+            }
             string region = null;
             MenuItem menuItem = null;
 
