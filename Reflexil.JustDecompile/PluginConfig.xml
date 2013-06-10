@@ -9,8 +9,8 @@
     - Create, update or delete IL instructions with all supported operands like type, field or method references.
     - Remove assembly strong name and update referencing assemblies.
   </Description>
-  <Version>2012.2.1121.0</Version>
-  <SupportedJDversion>2012.2.1121.0</SupportedJDversion>
+  <Version>2013.1.607.3</Version>
+  <SupportedJDversion>2013.1.607.3</SupportedJDversion>
   <Guid>8C63CC62-D636-4A34-B92D-512F8B4F0EDB</Guid>
   <Url>http://www.telerik.com/products/decompiler/extensions.aspx#assembly-editor-plug-in</Url>
   <Licenses>
