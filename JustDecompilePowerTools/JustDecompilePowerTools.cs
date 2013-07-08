@@ -244,7 +244,7 @@ namespace JustDecompile.Plugins.GoToEntryPoint
                         regionManager.Regions[region].Remove(menuItem);
                 }
             }
-            else
+            else if (menuItem != null)
             {
                 //and add it when there is one
                 if (!regionManager.Regions[region].Views.Contains(menuItem))

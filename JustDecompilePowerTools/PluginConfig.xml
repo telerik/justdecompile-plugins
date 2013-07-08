@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <PluginConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <Author>Bernhard Lang</Author>
+  <Author>Bernhard Lang, Telerik</Author>
   <Description>
     Adds a simple menu item to jump to the assemblies/modules entry-point
   </Description>
@@ -35,5 +35,5 @@ This license governs use of the accompanying software. If you use the software, 
   <Name>JustDecompile Power Tools</Name>
   <SupportedJDversion>2013.1.607.3</SupportedJDversion>
   <Url>http://www.telerik.com/products/decompiler/extensions.aspx#goto-entrypoint-plug-in</Url>
-  <Version>1.0.0.1</Version>
+  <Version>1.0.0.2</Version>
 </PluginConfig>
