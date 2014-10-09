@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustDecompile.API", "Tools\JustDecompile.Core\JustDecompile.API.csproj", "{8A549CC3-55AC-46F8-9BC9-83E0804D87B9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustDecompile.API", "..\Source\Tools\JustDecompile.Core\JustDecompile.API.csproj", "{8A549CC3-55AC-46F8-9BC9-83E0804D87B9}"
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
