@@ -25,8 +25,8 @@ using System.Collections.Generic;
 
 namespace Reflexil.JustDecompile
 {
-	internal class JustDecompileCecilStudioPackage : CecilStudioPackage
-	{
+    internal class JustDecompileCecilStudioPackage : CecilStudioPackage
+    {
         public static event EventHandler HandleItemRequest = delegate { };
 
         public event EventHandler NewItemInjected = delegate { };
@@ -40,57 +40,57 @@ namespace Reflexil.JustDecompile
 
         public JustDecompileCecilStudioPackage() { }
 
-		public override object ActiveItem
-		{
-			get
-			{
-				return this.SelectedTreeViewItem;
-			}
-		}
-		public ITreeViewItem SelectedTreeViewItem { get; set; }
-		public void Delete()
-		{
+        public override object ActiveItem
+        {
+            get
+            {
+                return this.SelectedTreeViewItem;
+            }
+        }
+        public ITreeViewItem SelectedTreeViewItem { get; set; }
+        public void Delete()
+        {
             HandleItemRequest(this, EventArgs.Empty);
 
-			this.DeleteMember(this, EventArgs.Empty);
-		}
+            this.DeleteMember(this, EventArgs.Empty);
+        }
 
-		public void Rename()
-		{
+        public void Rename()
+        {
             HandleItemRequest(this, EventArgs.Empty);
 
-			this.RenameItem(this, EventArgs.Empty);
-		}
+            this.RenameItem(this, EventArgs.Empty);
+        }
 
-		internal AssemblyDefinition GetCurrentAssemblyDefinition()
-		{
+        internal AssemblyDefinition GetCurrentAssemblyDefinition()
+        {
             HandleItemRequest(this, EventArgs.Empty);
 
-			return base.GetCurrentAssemblyDefinition();
-		}
+            return base.GetCurrentAssemblyDefinition();
+        }
 
-		internal string GetProductTitle()
-		{
-			return REFLEXIL_WINDOW_TEXT;
-		}
+        internal string GetProductTitle()
+        {
+            return ReflexilWindowText;
+        }
 
-		internal string GetProductVersion()
-		{
-			return this.REFLEXIL_BUTTON_TEXT;
-		}
+        internal string GetProductVersion()
+        {
+            return this.ReflexilButtonText;
+        }
 
-		internal void Inject(EInjectType injectType)
-		{
+        internal void Inject(EInjectType injectType)
+        {
             HandleItemRequest(this, EventArgs.Empty);
 
-			base.Inject(injectType);
-		}
+            base.Inject(injectType);
+        }
 
-		internal void ReloadAssembly()
-		{
+        internal void ReloadAssembly()
+        {
             HandleItemRequest(this, EventArgs.Empty);
 
-			this.ReloadAssembly(this, EventArgs.Empty);
+            this.ReloadAssembly(this, EventArgs.Empty);
 
             ////string originallocation = GetCurrentModuleOriginalLocation();
 
@@ -109,11 +109,11 @@ namespace Reflexil.JustDecompile
             ////{
             ////    handler.HandleItem(ActiveItem);
             ////}
-		}
+        }
 
-		protected override void ActiveItemChanged(object sender, EventArgs e)
-		{
+        protected override void ActiveItemChanged(object sender, EventArgs e)
+        {
             NewItemInjected(sender, e);
-		}
-	}
+        }
+    }
 }

@@ -8,9 +8,20 @@
     - Easily update embedded, linked or assembly linked resources.
     - Create, update or delete IL instructions with all supported operands like type, field or method references.
     - Remove assembly strong name and update referencing assemblies.
+    ------------
+    - 9/18/2014
+    - Updated to Reflexil v1.8 by Robert McGinley (robert.mcginley@gmail.com) based on Telerik published module source code @ http://www.telerik.com/products/decompiler/extensions.aspx
+   
+   Changes 
+      * v1.0.1.1 Added "SaveInPlace" method to Reflexil (Reflexil.Utils.AssemblyHelper) to facilitate saving a modified assembly without dialogs. JD should detect this and prompt for reload.
+      * de4dot functionality is still disabled in this implementation of Reflexil module
+    - Compiled against JustDecompile API version 2014.1.225.0 (JustDecompile.API.dll)
+    - Reflexil Extension Requires .NET 4.0
+
   </Description>
-  <Version>2013.1.607.3</Version>
-  <SupportedJDversion>2013.1.607.3</SupportedJDversion>
+  <!--<Version>2013.1.607.3</Version>-->
+  <Version>2014.10.221.0</Version>
+  <SupportedJDversion>2014.1.225.0</SupportedJDversion>
   <Guid>8C63CC62-D636-4A34-B92D-512F8B4F0EDB</Guid>
   <Url>http://www.telerik.com/products/decompiler/extensions.aspx#assembly-editor-plug-in</Url>
   <Licenses>

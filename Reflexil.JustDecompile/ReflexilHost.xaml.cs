@@ -22,6 +22,9 @@ using Reflexil.Forms;
 
 namespace Reflexil.JustDecompile
 {
+    /// <summary>
+    ///     Interaction logic for ReflexilHost.xaml
+    /// </summary>
     public partial class ReflexilHost
     {
         private ReflexilWindow reflexilWindow;
@@ -29,20 +32,19 @@ namespace Reflexil.JustDecompile
         public ReflexilHost()
         {
             InitializeComponent();
-
-            this.Loaded += OnLoaded;
+            Loaded += OnLoaded;
         }
 
         public ReflexilHost(Action onCloseExecuted, ReflexilWindow reflexilWindow)
             : this()
         {
-            this.btnClose.Command = new DelegateCommand(onCloseExecuted);
+            btnClose.Command = new DelegateCommand(onCloseExecuted);
 
             this.reflexilWindow = reflexilWindow;
 
             var cecilStudioPackage = new JustDecompileCecilStudioPackage();
 
-            this.header.Text = cecilStudioPackage.GetProductTitle();
+            header.Text = cecilStudioPackage.GetProductTitle();
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)

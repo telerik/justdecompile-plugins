@@ -15,6 +15,8 @@
 using System;
 using System.Linq;
 using JustDecompile.API.Core;
+using System.Windows.Forms;
+using JustDecompile.API.Core;
 using Microsoft.Practices.Prism.Commands;
 using Microsoft.Practices.Prism.Events;
 using Mono.Cecil;
@@ -36,10 +38,29 @@ namespace Reflexil.JustDecompile.MenuItems
             this.MenuItems.Add(new MenuItem { Header = "Inject assembly reference", Command = new DelegateCommand(OnAssemblyReferenceClass) });
             this.MenuItems.Add(new MenuItem { Header = "Inject resource", Command = new DelegateCommand(OnResourceClass) });
             this.MenuItems.Add(new MenuSeparator());
+            this.MenuItems.Add(new MenuItem { Header = "Save and reload", Command = new DelegateCommand(OnSave) });
             this.MenuItems.Add(new MenuItem { Header = "Save as...", Command = new DelegateCommand(OnSaveAs) });
             this.MenuItems.Add(new MenuItem { Header = "Reload", Command = new DelegateCommand(OnReaload) });
             this.MenuItems.Add(new MenuItem { Header = "Rename", Command = new DelegateCommand(OnRename) });
             this.MenuItems.Add(new MenuItem { Header = "Verify", Command = new DelegateCommand(OnVerify) });
+        }
+
+        private void OnSave()
+        {
+            AssemblyDefinition assemblyDefinition = StudioPackage.GetCurrentAssemblyDefinition();
+
+            string getOrginalFilePath = GetFilePath();
+
+            if (!string.IsNullOrEmpty(getOrginalFilePath))
+            {
+                AssemblyHelper.SaveAssemblyInPlace(assemblyDefinition, getOrginalFilePath);
+                // 9/18/2014 - Robert McGinley (robert.mcginley@gmail.com)
+                // Update each modified item in the assembly to it's normal color
+                foreach (ITreeViewItem item in JustDecompileCecilStudioPackage.UpdatedItems)
+                {
+                    item.TreeNodeVisuals.SetForeground(null);
+                }
+            }
         }
 
         private string GetFilePath()
@@ -89,13 +110,13 @@ namespace Reflexil.JustDecompile.MenuItems
 
             if (!string.IsNullOrEmpty(getOrginalFilePath))
             {
-                bool saveAssembly = AssemblyHelper.TrySaveAssembly(assemblyDefinition, getOrginalFilePath);
-
-                if (saveAssembly)
+                AssemblyHelper.SaveAssembly(assemblyDefinition, getOrginalFilePath);
+                // 9/18/2014 - Robert McGinley (robert.mcginley@gmail.com)
+                // Update each modified item in the assembly to it's normal color
+                foreach (ITreeViewItem item in JustDecompileCecilStudioPackage.UpdatedItems)
                 {
-                    foreach (ITreeViewItem item in JustDecompileCecilStudioPackage.UpdatedItems)
-                    {
-                        item.TreeNodeVisuals.SetForeground(null);
+                    item.TreeNodeVisuals.SetForeground(null);
+                }
                     }
                 }
             }
