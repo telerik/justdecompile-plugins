@@ -13,36 +13,36 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Reflexil.JustDecompile")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Reflexil 1.8 JustDecompile Extension Module")]
+[assembly: AssemblyDescription("Reflexil v1.8 JustDecompile Extension Module")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Reflexil.JustDecompile")]
 [assembly: AssemblyCopyright("Copyright ©  2012")]
-[assembly: AssemblyTrademark("")] 
+[assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
+
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
-//In order to begin building localizable applications, set 
-//<UICulture>CultureYouAreCodingWith</UICulture> in your .csproj file
-//inside a <PropertyGroup>.  For example, if you are using US english
-//in your source files, set the <UICulture> to en-US.  Then uncomment
-//the NeutralResourceLanguage attribute below.  Update the "en-US" in
-//the line below to match the UICulture setting in the project file.
-//[assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.Satellite)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+/*[assembly: Guid("5f5eaf2a-42cc-4791-b4fe-0bb8faa9e6ee")]*/
+
+// Setup for WPF localization
+// Taken from AssemblyInfo.cs from Reflexil v1.5 JustDecompile Module Source
 [assembly: ThemeInfo(
-	ResourceDictionaryLocation.None, //where theme specific resource dictionaries are located
-					 //(used if a resource is not found in the page, 
-					 // or application resource dictionaries)
-	ResourceDictionaryLocation.SourceAssembly)]
+    ResourceDictionaryLocation.None,
+    ResourceDictionaryLocation.SourceAssembly)]
+
 // Version information for an assembly consists of the following four values:
 //
 //      Major Version
@@ -53,3 +53,5 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("2014.10.221.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

@@ -24,389 +24,390 @@ using Reflexil.Plugins.CecilStudio;
 
 namespace Reflexil.JustDecompile
 {
-	public class JustDecompileCecilPlugin : CecilStudioPlugin
-	{
-		public JustDecompileCecilPlugin(IPackage package) : base(package)
-		{
-		}
+    public class JustDecompileCecilPlugin : CecilStudioPlugin
+    {
+        public JustDecompileCecilPlugin(IPackage package)
+            : base(package)
+        {
+        }
 
-		#region AssemblyDefinition
-		public override bool IsAssemblyDefinitionHandled(object item)
-		{
-			CheckAssemblyNode(item);
+        #region AssemblyDefinition
+        public override bool IsAssemblyDefinitionHandled(object item)
+        {
+            CheckAssemblyNode(item);
 
-			return (item as ITreeViewItem).TreeNodeType == TreeNodeType.AssemblyDefinition;
-		}
+            return (item as ITreeViewItem).TreeNodeType == TreeNodeType.AssemblyDefinition;
+        }
 
-		public override AssemblyDefinition GetAssemblyDefinition(object item)
-		{
-			CheckAssemblyNode(item);
+        public override AssemblyDefinition GetAssemblyDefinition(object item)
+        {
+            CheckAssemblyNode(item);
 
-			var assemblyDefinitionTreeViewItem = item as IAssemblyDefinitionTreeViewItem;
+            var assemblyDefinitionTreeViewItem = item as IAssemblyDefinitionTreeViewItem;
 
-			return LoadAssembly(assemblyDefinitionTreeViewItem.AssemblyDefinition.MainModule.FilePath, false);
-		}
+            return LoadAssembly(assemblyDefinitionTreeViewItem.AssemblyDefinition.MainModule.FilePath, false);
+        }
 
-		#endregion
+        #endregion
 
-		#region ModuleDefinition
-		public override bool IsModuleDefinitionHandled(object item)
-		{
-			this.CheckAssemblyNode(item);
+        #region ModuleDefinition
+        public override bool IsModuleDefinitionHandled(object item)
+        {
+            this.CheckAssemblyNode(item);
 
-			return ((ITreeViewItem)item).TreeNodeType == TreeNodeType.AssemblyModuleDefinition;
-		}
+            return ((ITreeViewItem)item).TreeNodeType == TreeNodeType.AssemblyModuleDefinition;
+        }
 
-		public override string GetModuleLocation(object item)
-		{
-			CheckAssemblyNode(item);
+        public override string GetModuleLocation(object item)
+        {
+            CheckAssemblyNode(item);
 
-			return ((IAssemblyModuleDefinitionTreeViewItem)item).ModuleDefinition.FilePath;
-		}
+            return ((IAssemblyModuleDefinitionTreeViewItem)item).ModuleDefinition.FilePath;
+        }
 
-		#endregion
+        #endregion
 
-		#region TypeDefinition
-		public override bool IsTypeDefinitionHandled(object item)
-		{
-			CheckAssemblyNode(item);
+        #region TypeDefinition
+        public override bool IsTypeDefinitionHandled(object item)
+        {
+            CheckAssemblyNode(item);
 
-			return ((ITreeViewItem)item).TreeNodeType == TreeNodeType.AssemblyTypeDefinition;
-		}
+            return ((ITreeViewItem)item).TreeNodeType == TreeNodeType.AssemblyTypeDefinition;
+        }
 
-		public override TypeDefinition GetTypeDefinition(object item)
-		{
-			var treeViewItem = item as ITypeDefinitionTreeViewItem;
+        public override TypeDefinition GetTypeDefinition(object item)
+        {
+            var treeViewItem = item as ITypeDefinitionTreeViewItem;
 
-			return GetTypeDefinition(treeViewItem.TypeDefinition);
-		}
+            return GetTypeDefinition(treeViewItem.TypeDefinition);
+        }
 
-		private TypeDefinition GetTypeDefinition(ITypeDefinition item)
-		{
-			var typeDef = item as ITypeDefinition;
+        private TypeDefinition GetTypeDefinition(ITypeDefinition item)
+        {
+            var typeDef = item as ITypeDefinition;
 
-			TypeDefinition typeDefinition = null;
+            TypeDefinition typeDefinition = null;
 
-			if (typeDef.IsNested)
-			{
-				var parents = new List<ITypeDefinition> { };
+            if (typeDef.IsNested)
+            {
+                var parents = new List<ITypeDefinition> { };
 
-				while (typeDef.IsNested)
-				{
-					parents.Add(typeDef);
+                while (typeDef.IsNested)
+                {
+                    parents.Add(typeDef);
 
-					typeDef = typeDef.DeclaringType;
-				}
-				typeDefinition = this.FindTypeDefinition(typeDef.Module.FilePath, typeDef.FullName);
+                    typeDef = typeDef.DeclaringType;
+                }
+                typeDefinition = this.FindTypeDefinition(typeDef.Module.FilePath, typeDef.FullName);
 
-				parents.Reverse();
+                parents.Reverse();
 
-				while (parents.Count > 0)
-				{
-					for (int i = 0; i < typeDefinition.NestedTypes.Count; i++)
-					{
-						TypeDefinition childTypeDef = typeDefinition.NestedTypes[i];
+                while (parents.Count > 0)
+                {
+                    for (int i = 0; i < typeDefinition.NestedTypes.Count; i++)
+                    {
+                        TypeDefinition childTypeDef = typeDefinition.NestedTypes[i];
 
-						if (childTypeDef.FullName == parents[0].FullName)
-						{
-							typeDefinition = childTypeDef;
+                        if (childTypeDef.FullName == parents[0].FullName)
+                        {
+                            typeDefinition = childTypeDef;
 
-							parents.RemoveAt(0);
+                            parents.RemoveAt(0);
 
-							break;
-						}
-					}
-				}
-			}
-			else
-			{
-				typeDefinition = this.FindTypeDefinition(typeDef.Module.FilePath, typeDef.FullName);
-			}
-			return typeDefinition;
-		}
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                typeDefinition = this.FindTypeDefinition(typeDef.Module.FilePath, typeDef.FullName);
+            }
+            return typeDefinition;
+        }
 
-		#endregion
+        #endregion
 
-		#region MethodDefinition
-		public override bool IsMethodDefinitionHandled(object item)
-		{
-			CheckAssemblyNode(item);
+        #region MethodDefinition
+        public override bool IsMethodDefinitionHandled(object item)
+        {
+            CheckAssemblyNode(item);
 
-			return this.GetAssemblyNode<ITreeViewItem>(item).TreeNodeType == TreeNodeType.AssemblyMethodDefinition;
-		}
+            return this.GetAssemblyNode<ITreeViewItem>(item).TreeNodeType == TreeNodeType.AssemblyMethodDefinition;
+        }
 
-		public override MethodDefinition GetMethodDefinition(object item)
-		{
-			var treeViewItem = item as IMethodDefinitionTreeViewItem;
+        public override MethodDefinition GetMethodDefinition(object item)
+        {
+            var treeViewItem = item as IMethodDefinitionTreeViewItem;
 
-			IMethodDefinition method = treeViewItem.MethodDefinition;
+            IMethodDefinition method = treeViewItem.MethodDefinition;
 
-			TypeDefinition typeDef = GetTypeDefinition(method.DeclaringType);
+            TypeDefinition typeDef = GetTypeDefinition(method.DeclaringType);
 
-			MethodDefinition methodDefinition = this.FindMethodDefinition(method.FullName, typeDef);
+            MethodDefinition methodDefinition = this.FindMethodDefinition(method.FullName, typeDef);
 
-			return methodDefinition;
-		}
+            return methodDefinition;
+        }
 
-		#endregion
+        #endregion
 
-		#region PropertyDefinition
-		public override bool IsPropertyDefinitionHandled(object item)
-		{
-			CheckAssemblyNode(item);
+        #region PropertyDefinition
+        public override bool IsPropertyDefinitionHandled(object item)
+        {
+            CheckAssemblyNode(item);
 
-			return this.GetAssemblyNode<ITreeViewItem>(item).TreeNodeType == TreeNodeType.AssemblyPropertyDefinition;
-		}
+            return this.GetAssemblyNode<ITreeViewItem>(item).TreeNodeType == TreeNodeType.AssemblyPropertyDefinition;
+        }
 
-		public override PropertyDefinition GetPropertyDefinition(object item)
-		{
-			var treeViewItem = item as IPropertyDefinitionTreeViewItem;
+        public override PropertyDefinition GetPropertyDefinition(object item)
+        {
+            var treeViewItem = item as IPropertyDefinitionTreeViewItem;
 
-			var property = treeViewItem.PropertyDefinition;
+            var property = treeViewItem.PropertyDefinition;
 
-			TypeDefinition typeDef = GetTypeDefinition(property.DeclaringType);
+            TypeDefinition typeDef = GetTypeDefinition(property.DeclaringType);
 
-			PropertyDefinition propertyDefinition = this.FindPropertyDefinition(property.FullName, typeDef);
+            PropertyDefinition propertyDefinition = this.FindPropertyDefinition(property.FullName, typeDef);
 
-			return propertyDefinition;
-		}
+            return propertyDefinition;
+        }
 
-		#endregion
+        #endregion
 
-		#region FieldDefinition
-		public override bool IsFieldDefinitionHandled(object item)
-		{
-			CheckAssemblyNode(item);
+        #region FieldDefinition
+        public override bool IsFieldDefinitionHandled(object item)
+        {
+            CheckAssemblyNode(item);
 
-			return this.GetAssemblyNode<ITreeViewItem>(item).TreeNodeType == TreeNodeType.AssemblyFieldDefinition;
-		}
+            return this.GetAssemblyNode<ITreeViewItem>(item).TreeNodeType == TreeNodeType.AssemblyFieldDefinition;
+        }
 
-		public override FieldDefinition GetFieldDefinition(object item)
-		{
-			var treeViewItem = item as IFieldDefinitionTreeViewItem;
+        public override FieldDefinition GetFieldDefinition(object item)
+        {
+            var treeViewItem = item as IFieldDefinitionTreeViewItem;
 
-			var field = treeViewItem.FieldDefinition;
+            var field = treeViewItem.FieldDefinition;
 
-			TypeDefinition typeDef = GetTypeDefinition(field.DeclaringType);
+            TypeDefinition typeDef = GetTypeDefinition(field.DeclaringType);
 
-			FieldDefinition fieldDefinition = this.FindFieldDefinition(field.FullName, typeDef);
+            FieldDefinition fieldDefinition = this.FindFieldDefinition(field.FullName, typeDef);
 
-			return fieldDefinition;
-		}
+            return fieldDefinition;
+        }
 
-		#endregion
+        #endregion
 
-		#region EventDefinition
-		public override bool IsEventDefinitionHandled(object item)
-		{
-			CheckAssemblyNode(item);
+        #region EventDefinition
+        public override bool IsEventDefinitionHandled(object item)
+        {
+            CheckAssemblyNode(item);
 
-			return this.GetAssemblyNode<ITreeViewItem>(item).TreeNodeType == TreeNodeType.AssemblyEventDefinition;
-		}
+            return this.GetAssemblyNode<ITreeViewItem>(item).TreeNodeType == TreeNodeType.AssemblyEventDefinition;
+        }
 
-		public override EventDefinition GetEventDefinition(object item)
-		{
-			var treeViewItem = item as IEventDefinitionTreeViewItem;
+        public override EventDefinition GetEventDefinition(object item)
+        {
+            var treeViewItem = item as IEventDefinitionTreeViewItem;
 
-			var eventDef = treeViewItem.EventDefinition;
+            var eventDef = treeViewItem.EventDefinition;
 
-			TypeDefinition typeDef = GetTypeDefinition(eventDef.DeclaringType);
+            TypeDefinition typeDef = GetTypeDefinition(eventDef.DeclaringType);
 
-			EventDefinition propertyDefinition = this.FindEventDefinition(eventDef.FullName, typeDef);
+            EventDefinition propertyDefinition = this.FindEventDefinition(eventDef.FullName, typeDef);
 
-			return propertyDefinition;
-		}
+            return propertyDefinition;
+        }
 
-		#endregion
+        #endregion
 
-		#region AssemblyNameReference
-		public override bool IsAssemblyNameReferenceHandled(object item)
-		{
-			CheckAssemblyNode(item);
+        #region AssemblyNameReference
+        public override bool IsAssemblyNameReferenceHandled(object item)
+        {
+            CheckAssemblyNode(item);
 
-			return this.GetAssemblyNode<ITreeViewItem>(item).TreeNodeType == TreeNodeType.AssemblyReference;
-		}
+            return this.GetAssemblyNode<ITreeViewItem>(item).TreeNodeType == TreeNodeType.AssemblyReference;
+        }
 
-		public override AssemblyNameReference GetAssemblyNameReference(object item)
-		{
-			var assemblyReference = (item as IAssemblyReferenceTreeViewItem).AssemblyNameReference;
+        public override AssemblyNameReference GetAssemblyNameReference(object item)
+        {
+            var assemblyReference = (item as IAssemblyReferenceTreeViewItem).AssemblyNameReference;
 
-			var assemblyNameRef = new AssemblyNameReference(assemblyReference.Name, assemblyReference.Version);
-			assemblyNameRef.Culture = assemblyReference.Culture;
-			assemblyNameRef.Hash = assemblyReference.Hash;
-			assemblyNameRef.HashAlgorithm = (Mono.Cecil.AssemblyHashAlgorithm)assemblyReference.HashAlgorithm;
-			assemblyNameRef.HasPublicKey = assemblyReference.HasPublicKey;
-			assemblyNameRef.IsRetargetable = assemblyReference.IsRetargetable;
-			assemblyNameRef.IsSideBySideCompatible = assemblyReference.IsSideBySideCompatible;
-			assemblyNameRef.PublicKey = assemblyReference.PublicKey;
-			assemblyNameRef.PublicKeyToken = assemblyReference.PublicKeyToken;
-			assemblyNameRef.Attributes = (Mono.Cecil.AssemblyAttributes)assemblyReference.Attributes;
+            var assemblyNameRef = new AssemblyNameReference(assemblyReference.Name, assemblyReference.Version);
+            assemblyNameRef.Culture = assemblyReference.Culture;
+            assemblyNameRef.Hash = assemblyReference.Hash;
+            assemblyNameRef.HashAlgorithm = (Mono.Cecil.AssemblyHashAlgorithm)assemblyReference.HashAlgorithm;
+            assemblyNameRef.HasPublicKey = assemblyReference.HasPublicKey;
+            assemblyNameRef.IsRetargetable = assemblyReference.IsRetargetable;
+            assemblyNameRef.IsSideBySideCompatible = assemblyReference.IsSideBySideCompatible;
+            assemblyNameRef.PublicKey = assemblyReference.PublicKey;
+            assemblyNameRef.PublicKeyToken = assemblyReference.PublicKeyToken;
+            assemblyNameRef.Attributes = (Mono.Cecil.AssemblyAttributes)assemblyReference.Attributes;
 
-			return assemblyNameRef;
-			////var assemblyReference = item as IAssemblyReferenceTreeViewItem;
-			////AssemblyNameReference assemblyNameRef = LoadAssembly(assemblyReference.AssemblyPath, false)
-			////                                                .MainModule
-			////                                                .AssemblyReferences
-			////                                                .FirstOrDefault(i => i.FullName == ((IAssemblyNameReference)assemblyReference).FullName);
-			////return assemblyNameRef;
-		}
+            return assemblyNameRef;
+            ////var assemblyReference = item as IAssemblyReferenceTreeViewItem;
+            ////AssemblyNameReference assemblyNameRef = LoadAssembly(assemblyReference.AssemblyPath, false)
+            ////                                                .MainModule
+            ////                                                .AssemblyReferences
+            ////                                                .FirstOrDefault(i => i.FullName == ((IAssemblyNameReference)assemblyReference).FullName);
+            ////return assemblyNameRef;
+        }
 
-		#endregion
-
-		#region EmbeddedResource
-		public override bool IsEmbeddedResourceHandled(object item)
-		{
-			CheckAssemblyNode(item);
-
-			return this.GetAssemblyNode<ITreeViewItem>(item).TreeNodeType == TreeNodeType.AssemblyResource;
-		}
-
-		public override EmbeddedResource GetEmbeddedResource(object item)
-		{
-			var resourceTreeViewItem = item as IResourceTreeViewItem;
-
-			EmbeddedResource resource = FindEmbeddedResource(resourceTreeViewItem.Resource, resourceTreeViewItem.AssemblyFile);
-
-			return resource;
-		}
-
-		#endregion
-
-		public override ICollection GetAssemblies(bool wrap)
-		{
-			if (wrap)
-			{
-				var result = new Collection<CecilStudioAssemblyWrapper>();
-				foreach (AssemblyDefinition adef in m_assemblies)
-				{
-					result.Add(new CecilStudioAssemblyWrapper(adef));
-				}
-				return result;
-			}
-			else
-			{
-				return m_assemblies;
-			}
-		}
-
-		public override AssemblyDefinition LoadAssembly(string location, bool loadsymbols)
-		{
-			AssemblyDefinition assemblyDefinition = base.LoadAssembly(location, loadsymbols);
-			try
-			{
-				if (assemblyDefinition == null)
-				{
-					assemblyDefinition = AssemblyDefinition.ReadAssembly(location);
-
-					var newCollection = m_assemblies.OfType<AssemblyDefinition>().Union(new AssemblyDefinition[] { assemblyDefinition });
-
-					ReloadAssemblies(new List<AssemblyDefinition>(newCollection));
-				}
-				return assemblyDefinition;
-			}
-			catch
-			{
-				return null;
-			}
-		}
-
-		internal void LoadAssemblies(IEnumerable<IAssemblyDefinition> assemblies)
-		{
-			ReloadAssemblies(assemblies.Select(i => LoadAssembly(i.MainModule.FilePath, false))
-									   .ToList());
-		}
-
-		private void CheckAssemblyNode(object item)
-		{
-			if (item is ITreeViewItem == false)
-			{
-				throw new ArgumentNullException("item must be ITreeViewItem");
-			}
-		}
-
-		private T GetAssemblyNode<T>(object item) where T : ITreeViewItem
-		{
-			return (T)item;
-		}
-
-		private TypeDefinition FindTypeDefinition(string filePath, string fullName)
-		{
-			IAssemblyContext assemblyContext = this.GetAssemblyContext(filePath);
-
-			TypeDefinition typeDef = assemblyContext.AssemblyDefinition
-													.MainModule
-													.Types
-													.FirstOrDefault(t => t.FullName == fullName);
-
-			return typeDef;
-		}
-
-		protected MethodDefinition FindMethodDefinition(string fullName, TypeDefinition typeDefinition)
-		{
-			if (typeDefinition == null)
-			{
-				throw new ArgumentNullException("typeDefinition is null");
-			}
-			return typeDefinition.Methods.FirstOrDefault(m => m.FullName == fullName);
-		}
-
-		private FieldDefinition FindFieldDefinition(string fullName, TypeDefinition typeDefinition)
-		{
-			if (typeDefinition == null)
-			{
-				throw new ArgumentNullException("typeDefinition is null");
-			}
-			return typeDefinition.Fields.FirstOrDefault(m => m.FullName == fullName);
-		}
-
-		private PropertyDefinition FindPropertyDefinition(string fullName, TypeDefinition typeDefinition)
-		{
-			if (typeDefinition == null)
-			{
-				throw new ArgumentNullException("typeDefinition is null");
-			}
-			return typeDefinition.Properties.FirstOrDefault(m => m.FullName == fullName);
-		}
-
-		private EventDefinition FindEventDefinition(string fullName, TypeDefinition typeDefinition)
-		{
-			if (typeDefinition == null)
-			{
-				throw new ArgumentNullException("typeDefinition is null");
-			}
-			return typeDefinition.Events.FirstOrDefault(m => m.FullName == fullName);
-		}
-
-		private EmbeddedResource FindEmbeddedResource(IResource value, string filePath)
-		{
-			IAssemblyContext assemblyContext = this.GetAssemblyContext(filePath);
-
-			return assemblyContext.AssemblyDefinition
-								  .MainModule
-								  .Resources
-								  .Where(r => r.ResourceType == Mono.Cecil.ResourceType.Embedded)
-								  .Select(r => HandleEmbeddeResource(r as EmbeddedResource, value))
-								  .FirstOrDefault(r => r.Name == value.Name);
-		}
-
-		private EmbeddedResource HandleEmbeddeResource(EmbeddedResource r, IResource value)
-		{
-			if (!value.Name.EndsWith(".g.resources", StringComparison.InvariantCultureIgnoreCase) &&
-				r.Name.EndsWith(".g.resources", StringComparison.InvariantCultureIgnoreCase))
-			{
-				using (var resourceReader = new System.Resources.ResourceReader(r.GetResourceStream()))
-				{
-					DictionaryEntry de = resourceReader.OfType<DictionaryEntry>().FirstOrDefault(d => d.Key.ToString() == value.Name);
-
-					if (de.Value is System.IO.Stream == false)
-					{
-						return r;
-					}
-					var stream = de.Value as System.IO.Stream;
-					return new EmbeddedResource(value.Name, Mono.Cecil.ManifestResourceAttributes.Public, new System.IO.BinaryReader(stream).ReadBytes((int)stream.Length));
-				}
-			}
-			return r;
-		}
-	}
+        #endregion
+
+        #region EmbeddedResource
+        public override bool IsEmbeddedResourceHandled(object item)
+        {
+            CheckAssemblyNode(item);
+
+            return this.GetAssemblyNode<ITreeViewItem>(item).TreeNodeType == TreeNodeType.AssemblyResource;
+        }
+
+        public override EmbeddedResource GetEmbeddedResource(object item)
+        {
+            var resourceTreeViewItem = item as IResourceTreeViewItem;
+
+            EmbeddedResource resource = FindEmbeddedResource(resourceTreeViewItem.Resource, resourceTreeViewItem.AssemblyFile);
+
+            return resource;
+        }
+
+        #endregion
+
+        public override ICollection GetAssemblies(bool wrap)
+        {
+            if (wrap)
+            {
+                var result = new Collection<CecilStudioAssemblyWrapper>();
+                foreach (AssemblyDefinition adef in Assemblies)
+                {
+                    result.Add(new CecilStudioAssemblyWrapper(adef));
+                }
+                return result;
+            }
+            else
+            {
+                return Assemblies;
+            }
+        }
+
+        public override AssemblyDefinition LoadAssembly(string location, bool loadsymbols)
+        {
+            AssemblyDefinition assemblyDefinition = base.LoadAssembly(location, loadsymbols);
+            try
+            {
+                if (assemblyDefinition == null)
+                {
+                    assemblyDefinition = AssemblyDefinition.ReadAssembly(location);
+
+                    var newCollection = Assemblies.OfType<AssemblyDefinition>().Union(new AssemblyDefinition[] { assemblyDefinition });
+
+                    ReloadAssemblies(new List<AssemblyDefinition>(newCollection));
+                }
+                return assemblyDefinition;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        internal void LoadAssemblies(IEnumerable<IAssemblyDefinition> assemblies)
+        {
+            ReloadAssemblies(assemblies.Select(i => LoadAssembly(i.MainModule.FilePath, false))
+                                       .ToList());
+        }
+
+        private void CheckAssemblyNode(object item)
+        {
+            if (item is ITreeViewItem == false)
+            {
+                throw new ArgumentNullException("item must be ITreeViewItem");
+            }
+        }
+
+        private T GetAssemblyNode<T>(object item) where T : ITreeViewItem
+        {
+            return (T)item;
+        }
+
+        private TypeDefinition FindTypeDefinition(string filePath, string fullName)
+        {
+            IAssemblyContext assemblyContext = this.GetAssemblyContext(filePath);
+
+            TypeDefinition typeDef = assemblyContext.AssemblyDefinition
+                                                    .MainModule
+                                                    .Types
+                                                    .FirstOrDefault(t => t.FullName == fullName);
+
+            return typeDef;
+        }
+
+        protected MethodDefinition FindMethodDefinition(string fullName, TypeDefinition typeDefinition)
+        {
+            if (typeDefinition == null)
+            {
+                throw new ArgumentNullException("typeDefinition is null");
+            }
+            return typeDefinition.Methods.FirstOrDefault(m => m.FullName == fullName);
+        }
+
+        private FieldDefinition FindFieldDefinition(string fullName, TypeDefinition typeDefinition)
+        {
+            if (typeDefinition == null)
+            {
+                throw new ArgumentNullException("typeDefinition is null");
+            }
+            return typeDefinition.Fields.FirstOrDefault(m => m.FullName == fullName);
+        }
+
+        private PropertyDefinition FindPropertyDefinition(string fullName, TypeDefinition typeDefinition)
+        {
+            if (typeDefinition == null)
+            {
+                throw new ArgumentNullException("typeDefinition is null");
+            }
+            return typeDefinition.Properties.FirstOrDefault(m => m.FullName == fullName);
+        }
+
+        private EventDefinition FindEventDefinition(string fullName, TypeDefinition typeDefinition)
+        {
+            if (typeDefinition == null)
+            {
+                throw new ArgumentNullException("typeDefinition is null");
+            }
+            return typeDefinition.Events.FirstOrDefault(m => m.FullName == fullName);
+        }
+
+        private EmbeddedResource FindEmbeddedResource(IResource value, string filePath)
+        {
+            IAssemblyContext assemblyContext = this.GetAssemblyContext(filePath);
+
+            return assemblyContext.AssemblyDefinition
+                                  .MainModule
+                                  .Resources
+                                  .Where(r => r.ResourceType == Mono.Cecil.ResourceType.Embedded)
+                                  .Select(r => HandleEmbeddeResource(r as EmbeddedResource, value))
+                                  .FirstOrDefault(r => r.Name == value.Name);
+        }
+
+        private EmbeddedResource HandleEmbeddeResource(EmbeddedResource r, IResource value)
+        {
+            if (!value.Name.EndsWith(".g.resources", StringComparison.InvariantCultureIgnoreCase) &&
+                r.Name.EndsWith(".g.resources", StringComparison.InvariantCultureIgnoreCase))
+            {
+                using (var resourceReader = new System.Resources.ResourceReader(r.GetResourceStream()))
+                {
+                    DictionaryEntry de = resourceReader.OfType<DictionaryEntry>().FirstOrDefault(d => d.Key.ToString() == value.Name);
+
+                    if (de.Value is System.IO.Stream == false)
+                    {
+                        return r;
+                    }
+                    var stream = de.Value as System.IO.Stream;
+                    return new EmbeddedResource(value.Name, Mono.Cecil.ManifestResourceAttributes.Public, new System.IO.BinaryReader(stream).ReadBytes((int)stream.Length));
+                }
+            }
+            return r;
+        }
+    }
 }

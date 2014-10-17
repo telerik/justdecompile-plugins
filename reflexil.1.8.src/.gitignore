@@ -1,0 +1,7 @@
+bin
+obj
+
+/*.user
+/*.DotSettings
+/*.suo
+/Plugins/Reflexil.Reflector/*.user
