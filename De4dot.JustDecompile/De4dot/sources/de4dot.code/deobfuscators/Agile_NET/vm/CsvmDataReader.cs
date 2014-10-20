@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -33,7 +33,7 @@ namespace de4dot.code.deobfuscators.Agile_NET.vm {
 			this.reader = reader;
 		}
 
-		public List<CsvmMethodData> read() {
+		public List<CsvmMethodData> Read() {
 			int numMethods = reader.ReadInt32();
 			if (numMethods < 0)
 				throw new ApplicationException("Invalid number of methods");

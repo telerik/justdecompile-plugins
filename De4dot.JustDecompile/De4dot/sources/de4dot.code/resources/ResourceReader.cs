@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -34,27 +34,25 @@ namespace de4dot.code.resources {
 	}
 
 	struct ResourceReader {
-		ModuleDefMD module;
 		IBinaryReader reader;
 		ResourceDataCreator resourceDataCreator;
 
-		ResourceReader(ModuleDefMD module, IBinaryReader reader) {
-			this.module = module;
+		ResourceReader(ModuleDef module, IBinaryReader reader) {
 			this.reader = reader;
 			this.resourceDataCreator = new ResourceDataCreator(module);
 		}
 
-		public static ResourceElementSet read(ModuleDefMD module, IBinaryReader reader) {
-			return new ResourceReader(module, reader).read();
+		public static ResourceElementSet Read(ModuleDef module, IBinaryReader reader) {
+			return new ResourceReader(module, reader).Read();
 		}
 
-		ResourceElementSet read() {
+		ResourceElementSet Read() {
 			ResourceElementSet resources = new ResourceElementSet();
 
 			uint sig = reader.ReadUInt32();
 			if (sig != 0xBEEFCACE)
 				throw new ResourceReaderException(string.Format("Invalid resource sig: {0:X8}", sig));
-			if (!checkReaders())
+			if (!CheckReaders())
 				throw new ResourceReaderException("Invalid resource reader");
 			int version = reader.ReadInt32();
 			if (version != 2)
@@ -100,9 +98,9 @@ namespace de4dot.code.resources {
 				reader.Position = info.offset;
 				long nextDataOffset = i == infos.Count - 1 ? end : infos[i + 1].offset;
 				int size = (int)(nextDataOffset - info.offset);
-				element.ResourceData = readResourceData(userTypes, size);
+				element.ResourceData = ReadResourceData(userTypes, size);
 
-				resources.add(element);
+				resources.Add(element);
 			}
 
 			return resources;
@@ -120,36 +118,37 @@ namespace de4dot.code.resources {
 			}
 		}
 
-		IResourceData readResourceData(List<UserResourceType> userTypes, int size) {
-			uint code = readUInt32(reader);
+		IResourceData ReadResourceData(List<UserResourceType> userTypes, int size) {
+			uint code = ReadUInt32(reader);
 			switch ((ResourceTypeCode)code) {
-			case ResourceTypeCode.Null: return resourceDataCreator.createNull();
-			case ResourceTypeCode.String: return resourceDataCreator.create(reader.ReadString());
-			case ResourceTypeCode.Boolean: return resourceDataCreator.create(reader.ReadBoolean());
-			case ResourceTypeCode.Char: return resourceDataCreator.create((char)reader.ReadUInt16());
-			case ResourceTypeCode.Byte: return resourceDataCreator.create(reader.ReadByte());
-			case ResourceTypeCode.SByte: return resourceDataCreator.create(reader.ReadSByte());
-			case ResourceTypeCode.Int16: return resourceDataCreator.create(reader.ReadInt16());
-			case ResourceTypeCode.UInt16: return resourceDataCreator.create(reader.ReadUInt16());
-			case ResourceTypeCode.Int32: return resourceDataCreator.create(reader.ReadInt32());
-			case ResourceTypeCode.UInt32: return resourceDataCreator.create(reader.ReadUInt32());
-			case ResourceTypeCode.Int64: return resourceDataCreator.create(reader.ReadInt64());
-			case ResourceTypeCode.UInt64: return resourceDataCreator.create(reader.ReadUInt64());
-			case ResourceTypeCode.Single: return resourceDataCreator.create(reader.ReadSingle());
-			case ResourceTypeCode.Double: return resourceDataCreator.create(reader.ReadDouble());
-			case ResourceTypeCode.Decimal: return resourceDataCreator.create(reader.ReadDecimal());
-			case ResourceTypeCode.DateTime: return resourceDataCreator.create(new DateTime(reader.ReadInt64()));
-			case ResourceTypeCode.TimeSpan: return resourceDataCreator.create(new TimeSpan(reader.ReadInt64()));
-			case ResourceTypeCode.ByteArray: return resourceDataCreator.create(reader.ReadBytes(reader.ReadInt32()));
+			case ResourceTypeCode.Null: return resourceDataCreator.CreateNull();
+			case ResourceTypeCode.String: return resourceDataCreator.Create(reader.ReadString());
+			case ResourceTypeCode.Boolean: return resourceDataCreator.Create(reader.ReadBoolean());
+			case ResourceTypeCode.Char: return resourceDataCreator.Create((char)reader.ReadUInt16());
+			case ResourceTypeCode.Byte: return resourceDataCreator.Create(reader.ReadByte());
+			case ResourceTypeCode.SByte: return resourceDataCreator.Create(reader.ReadSByte());
+			case ResourceTypeCode.Int16: return resourceDataCreator.Create(reader.ReadInt16());
+			case ResourceTypeCode.UInt16: return resourceDataCreator.Create(reader.ReadUInt16());
+			case ResourceTypeCode.Int32: return resourceDataCreator.Create(reader.ReadInt32());
+			case ResourceTypeCode.UInt32: return resourceDataCreator.Create(reader.ReadUInt32());
+			case ResourceTypeCode.Int64: return resourceDataCreator.Create(reader.ReadInt64());
+			case ResourceTypeCode.UInt64: return resourceDataCreator.Create(reader.ReadUInt64());
+			case ResourceTypeCode.Single: return resourceDataCreator.Create(reader.ReadSingle());
+			case ResourceTypeCode.Double: return resourceDataCreator.Create(reader.ReadDouble());
+			case ResourceTypeCode.Decimal: return resourceDataCreator.Create(reader.ReadDecimal());
+			case ResourceTypeCode.DateTime: return resourceDataCreator.Create(new DateTime(reader.ReadInt64()));
+			case ResourceTypeCode.TimeSpan: return resourceDataCreator.Create(new TimeSpan(reader.ReadInt64()));
+			case ResourceTypeCode.ByteArray: return resourceDataCreator.Create(reader.ReadBytes(reader.ReadInt32()));
+			case ResourceTypeCode.Stream: return resourceDataCreator.CreateStream(reader.ReadBytes(reader.ReadInt32()));
 			default:
 				int userTypeIndex = (int)(code - (uint)ResourceTypeCode.UserTypes);
 				if (userTypeIndex < 0 || userTypeIndex >= userTypes.Count)
 					throw new ResourceReaderException(string.Format("Invalid resource data code: {0}", code));
-				return resourceDataCreator.createSerialized(reader.ReadBytes(size));
+				return resourceDataCreator.CreateSerialized(reader.ReadBytes(size));
 			}
 		}
 
-		static uint readUInt32(IBinaryReader reader) {
+		static uint ReadUInt32(IBinaryReader reader) {
 			try {
 				return reader.Read7BitEncodedUInt32();
 			}
@@ -158,7 +157,7 @@ namespace de4dot.code.resources {
 			}
 		}
 
-		bool checkReaders() {
+		bool CheckReaders() {
 			bool validReader = false;
 
 			int numReaders = reader.ReadInt32();

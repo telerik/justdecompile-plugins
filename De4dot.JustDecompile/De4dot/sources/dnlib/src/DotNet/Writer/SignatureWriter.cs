@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2013 de4dot@gmail.com
+    Copyright (C) 2012-2014 de4dot@gmail.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -48,10 +48,10 @@ namespace dnlib.DotNet.Writer {
 	/// Writes signatures
 	/// </summary>
 	public struct SignatureWriter : IDisposable {
-		ISignatureWriterHelper helper;
+		readonly ISignatureWriterHelper helper;
 		RecursionCounter recursionCounter;
-		MemoryStream outStream;
-		BinaryWriter writer;
+		readonly MemoryStream outStream;
+		readonly BinaryWriter writer;
 
 		/// <summary>
 		/// Write a <see cref="TypeSig"/> signature
@@ -113,16 +113,17 @@ namespace dnlib.DotNet.Writer {
 		}
 
 		void Write(TypeSig typeSig) {
+			const ElementType DEFAULT_ELEMENT_TYPE = ElementType.Boolean;
 			if (typeSig == null) {
 				helper.Error("TypeSig is null");
+				writer.Write((byte)DEFAULT_ELEMENT_TYPE);
 				return;
 			}
 			if (!recursionCounter.Increment()) {
 				helper.Error("Infinite recursion");
+				writer.Write((byte)DEFAULT_ELEMENT_TYPE);
 				return;
 			}
-
-			writer.Write((byte)typeSig.ElementType);
 
 			uint count;
 			switch (typeSig.ElementType) {
@@ -145,26 +146,31 @@ namespace dnlib.DotNet.Writer {
 			case ElementType.U:
 			case ElementType.Object:
 			case ElementType.Sentinel:
+				writer.Write((byte)typeSig.ElementType);
 				break;
 
 			case ElementType.Ptr:
 			case ElementType.ByRef:
 			case ElementType.SZArray:
 			case ElementType.Pinned:
+				writer.Write((byte)typeSig.ElementType);
 				Write(typeSig.Next);
 				break;
 
 			case ElementType.ValueType:
 			case ElementType.Class:
+				writer.Write((byte)typeSig.ElementType);
 				Write(((TypeDefOrRefSig)typeSig).TypeDefOrRef);
 				break;
 
 			case ElementType.Var:
 			case ElementType.MVar:
+				writer.Write((byte)typeSig.ElementType);
 				WriteCompressedUInt32(((GenericSig)typeSig).Number);
 				break;
 
 			case ElementType.Array:
+				writer.Write((byte)typeSig.ElementType);
 				var ary = (ArraySig)typeSig;
 				Write(ary.Next);
 				WriteCompressedUInt32(ary.Rank);
@@ -179,6 +185,7 @@ namespace dnlib.DotNet.Writer {
 				break;
 
 			case ElementType.GenericInst:
+				writer.Write((byte)typeSig.ElementType);
 				var gis = (GenericInstSig)typeSig;
 				Write(gis.GenericType);
 				count = WriteCompressedUInt32((uint)gis.GenericArguments.Count);
@@ -187,21 +194,25 @@ namespace dnlib.DotNet.Writer {
 				break;
 
 			case ElementType.ValueArray:
+				writer.Write((byte)typeSig.ElementType);
 				Write(typeSig.Next);
 				WriteCompressedUInt32((typeSig as ValueArraySig).Size);
 				break;
 
 			case ElementType.FnPtr:
+				writer.Write((byte)typeSig.ElementType);
 				Write((typeSig as FnPtrSig).Signature);
 				break;
 
 			case ElementType.CModReqd:
 			case ElementType.CModOpt:
+				writer.Write((byte)typeSig.ElementType);
 				Write((typeSig as ModifierSig).Modifier);
 				Write(typeSig.Next);
 				break;
 
 			case ElementType.Module:
+				writer.Write((byte)typeSig.ElementType);
 				WriteCompressedUInt32((typeSig as ModuleSig).Index);
 				Write(typeSig.Next);
 				break;
@@ -211,6 +222,7 @@ namespace dnlib.DotNet.Writer {
 			case ElementType.Internal:
 			default:
 				helper.Error("Unknown or unsupported element type");
+				writer.Write((byte)DEFAULT_ELEMENT_TYPE);
 				break;
 			}
 

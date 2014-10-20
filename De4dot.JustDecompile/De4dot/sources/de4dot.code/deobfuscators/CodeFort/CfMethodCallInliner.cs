@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -30,11 +30,11 @@ namespace de4dot.code.deobfuscators.CodeFort {
 			this.proxyCallFixer = proxyCallFixer;
 		}
 
-		protected override bool canInline(MethodDef method) {
-			return proxyCallFixer.isProxyTargetMethod(method);
+		protected override bool CanInline(MethodDef method) {
+			return proxyCallFixer.IsProxyTargetMethod(method);
 		}
 
-		protected override bool isCompatibleType(int paramIndex, IType origType, IType newType) {
+		protected override bool IsCompatibleType(int paramIndex, IType origType, IType newType) {
 			return true;
 		}
 	}

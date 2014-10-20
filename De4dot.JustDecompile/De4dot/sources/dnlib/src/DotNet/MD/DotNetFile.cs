@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2013 de4dot@gmail.com
+    Copyright (C) 2012-2014 de4dot@gmail.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -88,8 +88,37 @@ namespace dnlib.DotNet.MD {
 		/// <returns>A new <see cref="DotNetFile"/> instance</returns>
 		public static DotNetFile Load(IntPtr addr) {
 			IPEImage peImage = null;
+
+			// We don't know what layout it is. Memory is more common so try that first.
 			try {
-				return Load(peImage = new PEImage(addr));
+				return Load(peImage = new PEImage(addr, ImageLayout.Memory, true));
+			}
+			catch {
+				if (peImage != null)
+					peImage.Dispose();
+				peImage = null;
+			}
+
+			try {
+				return Load(peImage = new PEImage(addr, ImageLayout.File, true));
+			}
+			catch {
+				if (peImage != null)
+					peImage.Dispose();
+				throw;
+			}
+		}
+
+		/// <summary>
+		/// Create a <see cref="DotNetFile"/> instance
+		/// </summary>
+		/// <param name="addr">Address of a .NET file in memory</param>
+		/// <param name="imageLayout">Image layout of the file in memory</param>
+		/// <returns>A new <see cref="DotNetFile"/> instance</returns>
+		public static DotNetFile Load(IntPtr addr, ImageLayout imageLayout) {
+			IPEImage peImage = null;
+			try {
+				return Load(peImage = new PEImage(addr, imageLayout, true));
 			}
 			catch {
 				if (peImage != null)
@@ -123,8 +152,6 @@ namespace dnlib.DotNet.MD {
 				if (dotNetDir.Size < 0x48)
 					throw new BadImageFormatException(".NET data directory size < 0x48");
 				var cor20Header = new ImageCor20Header(cor20HeaderStream = peImage.CreateStream(dotNetDir.VirtualAddress, 0x48), verify);
-				if (cor20Header.HasNativeHeader)
-					throw new BadImageFormatException(".NET native header isn't supported");	//TODO: Fix this
 				if (cor20Header.MetaData.VirtualAddress == 0)
 					throw new BadImageFormatException(".NET MetaData RVA is 0");
 				if (cor20Header.MetaData.Size < 16)
@@ -184,8 +211,9 @@ namespace dnlib.DotNet.MD {
 
 		/// <inheritdoc/>
 		public void Dispose() {
-			if (metaData != null)
-				metaData.Dispose();
+			var md = metaData;
+			if (md != null)
+				md.Dispose();
 			metaData = null;
 		}
 	}

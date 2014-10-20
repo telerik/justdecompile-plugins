@@ -73,7 +73,7 @@ namespace De4dot.JustDecompile
 
 			try
 			{
-				ofile.load(CreateDeobfuscatorInfos().Select(di => di.createDeobfuscator()).ToList());
+				ofile.Load(CreateDeobfuscatorInfos().Select(di => di.CreateDeobfuscator()).ToList());
 			}
 			catch (Exception ex)
 			{

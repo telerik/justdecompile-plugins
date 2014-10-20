@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -18,21 +18,22 @@
 */
 
 using dnlib.DotNet;
+using AssemblyData;
 
 namespace de4dot.code.AssemblyClient {
 	public interface IAssemblyClientFactory {
-		IAssemblyClient create();
+		IAssemblyClient Create(AssemblyServiceType serviceType);
 	}
 
 	public class SameAppDomainAssemblyClientFactory : IAssemblyClientFactory {
-		public IAssemblyClient create() {
-			return new AssemblyClient(new SameAppDomainAssemblyServerLoader());
+		public IAssemblyClient Create(AssemblyServiceType serviceType) {
+			return new AssemblyClient(new SameAppDomainAssemblyServerLoader(serviceType));
 		}
 	}
 
 	public class NewAppDomainAssemblyClientFactory : IAssemblyClientFactory {
-		public IAssemblyClient create() {
-			return new AssemblyClient(new NewAppDomainAssemblyServerLoader());
+		public IAssemblyClient Create(AssemblyServiceType serviceType) {
+			return new AssemblyClient(new NewAppDomainAssemblyServerLoader(serviceType));
 		}
 	}
 
@@ -47,15 +48,15 @@ namespace de4dot.code.AssemblyClient {
 			this.serverVersion = serverVersion;
 		}
 
-		public IAssemblyClient create(ModuleDef module) {
-			return new AssemblyClient(new NewProcessAssemblyServerLoader(getServerClrVersion(module)));
+		public IAssemblyClient Create(AssemblyServiceType serviceType, ModuleDef module) {
+			return new AssemblyClient(new NewProcessAssemblyServerLoader(serviceType, GetServerClrVersion(module)));
 		}
 
-		public IAssemblyClient create() {
-			return new AssemblyClient(new NewProcessAssemblyServerLoader(serverVersion));
+		public IAssemblyClient Create(AssemblyServiceType serviceType) {
+			return new AssemblyClient(new NewProcessAssemblyServerLoader(serviceType, serverVersion));
 		}
 
-		internal static ServerClrVersion getServerClrVersion(ModuleDef module) {
+		internal static ServerClrVersion GetServerClrVersion(ModuleDef module) {
 			switch (module.GetPointerSize()) {
 			default:
 			case 4:

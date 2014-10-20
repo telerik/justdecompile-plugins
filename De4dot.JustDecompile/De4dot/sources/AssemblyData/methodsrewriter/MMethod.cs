@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -29,7 +29,7 @@ namespace AssemblyData.methodsrewriter {
 			this.methodDef = methodDef;
 		}
 
-		public bool hasInstructions() {
+		public bool HasInstructions() {
 			return methodDef.Body != null && methodDef.Body.Instructions.Count != 0;
 		}
 

@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\Debug\bin\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\Debug\bin\dnlib.xml</DocumentationFile>
@@ -40,8 +40,8 @@
   <ItemGroup>
     <Compile Include="DotNet\AccessChecker.cs" />
     <Compile Include="DotNet\AllTypesHelper.cs" />
-    <Compile Include="DotNet\AssemblyDef.cs" />
     <Compile Include="DotNet\AssemblyAttributes.cs" />
+    <Compile Include="DotNet\AssemblyDef.cs" />
     <Compile Include="DotNet\AssemblyHash.cs" />
     <Compile Include="DotNet\AssemblyHashAlgorithm.cs" />
     <Compile Include="DotNet\AssemblyNameComparer.cs" />
@@ -60,6 +60,7 @@
     <Compile Include="DotNet\DeclSecurityAction.cs" />
     <Compile Include="DotNet\ElementType.cs" />
     <Compile Include="DotNet\Emit\Code.cs" />
+    <Compile Include="DotNet\Emit\DynamicMethodBodyReader.cs" />
     <Compile Include="DotNet\Emit\ExceptionHandler.cs" />
     <Compile Include="DotNet\Emit\ExceptionHandlerType.cs" />
     <Compile Include="DotNet\Emit\Extensions.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="DotNet\Emit\MethodBody.cs" />
     <Compile Include="DotNet\Emit\MethodBodyReader.cs" />
     <Compile Include="DotNet\Emit\MethodBodyReaderBase.cs" />
+    <Compile Include="DotNet\Emit\MethodTableToTypeConverter.cs" />
     <Compile Include="DotNet\Emit\MethodUtils.cs" />
     <Compile Include="DotNet\Emit\OpCode.cs" />
     <Compile Include="DotNet\Emit\OpCodes.cs" />
@@ -116,6 +118,11 @@
     <Compile Include="DotNet\MD\DotNetTableSizes.cs" />
     <Compile Include="DotNet\MD\ENCMetaData.cs" />
     <Compile Include="DotNet\MD\GuidStream.cs" />
+    <Compile Include="DotNet\MD\HeapType.cs" />
+    <Compile Include="DotNet\MD\HotHeapStream.cs" />
+    <Compile Include="DotNet\MD\HotHeapVersion.cs" />
+    <Compile Include="DotNet\MD\HotStream.cs" />
+    <Compile Include="DotNet\MD\HotTableStream.cs" />
     <Compile Include="DotNet\MD\ImageCor20Header.cs" />
     <Compile Include="DotNet\MD\IMetaData.cs" />
     <Compile Include="DotNet\MD\IRowReaders.cs" />
@@ -164,10 +171,12 @@
     <Compile Include="DotNet\ResolveException.cs" />
     <Compile Include="DotNet\Resolver.cs" />
     <Compile Include="DotNet\Resource.cs" />
+    <Compile Include="DotNet\ResourceCollection.cs" />
     <Compile Include="DotNet\SerializationType.cs" />
     <Compile Include="DotNet\SigComparer.cs" />
     <Compile Include="DotNet\SignatureReader.cs" />
     <Compile Include="DotNet\StandAloneSig.cs" />
+    <Compile Include="DotNet\StrongNameKey.cs" />
     <Compile Include="DotNet\StrongNameSigner.cs" />
     <Compile Include="DotNet\TypeAttributes.cs" />
     <Compile Include="DotNet\TypeDef.cs" />
@@ -189,6 +198,9 @@
     <Compile Include="DotNet\Writer\Extensions.cs" />
     <Compile Include="DotNet\Writer\GuidHeap.cs" />
     <Compile Include="DotNet\Writer\HeapBase.cs" />
+    <Compile Include="DotNet\Writer\HotHeap.cs" />
+    <Compile Include="DotNet\Writer\HotPool.cs" />
+    <Compile Include="DotNet\Writer\HotTable.cs" />
     <Compile Include="DotNet\Writer\IChunk.cs" />
     <Compile Include="DotNet\Writer\IHeap.cs" />
     <Compile Include="DotNet\Writer\ImageCor20Header.cs" />
@@ -196,6 +208,7 @@
     <Compile Include="DotNet\Writer\IModuleWriterListener.cs" />
     <Compile Include="DotNet\Writer\ImportAddressTable.cs" />
     <Compile Include="DotNet\Writer\ImportDirectory.cs" />
+    <Compile Include="DotNet\Writer\IOffsetHeap.cs" />
     <Compile Include="DotNet\Writer\MaxStackCalculator.cs" />
     <Compile Include="DotNet\Writer\MDTable.cs" />
     <Compile Include="DotNet\Writer\MDTableWriter.cs" />
@@ -219,13 +232,13 @@
     <Compile Include="DotNet\Writer\SignatureWriter.cs" />
     <Compile Include="DotNet\Writer\StartupStub.cs" />
     <Compile Include="DotNet\Writer\StringsHeap.cs" />
-    <Compile Include="DotNet\StrongNameKey.cs" />
     <Compile Include="DotNet\Writer\StrongNameSignature.cs" />
     <Compile Include="DotNet\Writer\TablesHeap.cs" />
     <Compile Include="DotNet\Writer\UniqueChunkList.cs" />
     <Compile Include="DotNet\Writer\USHeap.cs" />
     <Compile Include="DotNet\Writer\Win32ResourcesChunk.cs" />
     <Compile Include="ExtensionAttribute.cs" />
+    <Compile Include="HandleProcessCorruptedStateExceptionsAttribute.cs" />
     <Compile Include="IO\BinaryReaderStream.cs" />
     <Compile Include="IO\FileOffset.cs" />
     <Compile Include="IO\FileSection.cs" />
@@ -258,6 +271,11 @@
     <Compile Include="PE\RVA.cs" />
     <Compile Include="PE\Subsystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Threading\Extensions.cs" />
+    <Compile Include="Threading\IThreadSafeList.cs" />
+    <Compile Include="Threading\Lock.cs" />
+    <Compile Include="Threading\ThreadSafeListCreator.cs" />
+    <Compile Include="Threading\ThreadSafeListWrapper.cs" />
     <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Utils\ILazyList.cs" />
     <Compile Include="Utils\LazyList.cs" />

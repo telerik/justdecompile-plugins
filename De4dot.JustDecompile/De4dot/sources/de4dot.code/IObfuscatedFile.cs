@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -35,12 +35,12 @@ namespace de4dot.code {
 		bool RemoveNamespaceWithOneType { get; }
 		bool RenameResourceKeys { get; }
 
-		void deobfuscateBegin();
-		void deobfuscate();
-		void deobfuscateEnd();
-		void deobfuscateCleanUp();
+		void DeobfuscateBegin();
+		void Deobfuscate();
+		void DeobfuscateEnd();
+		void DeobfuscateCleanUp();
 
-		void load(IList<IDeobfuscator> deobfuscators);
-		void save();
+		void Load(IList<IDeobfuscator> deobfuscators);
+		void Save();
 	}
 }

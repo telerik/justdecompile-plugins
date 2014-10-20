@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2013 de4dot@gmail.com
+    Copyright (C) 2012-2014 de4dot@gmail.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -53,7 +53,7 @@ namespace dnlib.DotNet {
 		/// <summary>
 		/// Compare assembly simple name, version, public key token and locale
 		/// </summary>
-		All = 0xF,
+		All = Name | Version | PublicKeyToken | Locale,
 	}
 
 	/// <summary>

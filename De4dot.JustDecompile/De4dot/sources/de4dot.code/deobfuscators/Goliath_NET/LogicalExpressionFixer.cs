@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -22,8 +22,8 @@ using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.Goliath_NET {
 	class LogicalExpressionFixer {
-		public void deobfuscate(Blocks blocks) {
-			foreach (var block in blocks.MethodBlocks.getAllBlocks()) {
+		public void Deobfuscate(Blocks blocks) {
+			foreach (var block in blocks.MethodBlocks.GetAllBlocks()) {
 				var instrs = block.Instructions;
 				for (int i = 0; i < instrs.Count - 1; i++) {
 					var first = instrs[i];

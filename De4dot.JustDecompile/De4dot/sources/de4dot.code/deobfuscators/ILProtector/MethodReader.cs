@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -31,6 +31,7 @@ namespace de4dot.code.deobfuscators.ILProtector {
 		ModuleDefMD module;
 		MethodFlags flags;
 		TypeDef delegateType;
+		bool hasDelegateTypeFlag;
 
 		[Flags]
 		enum MethodFlags {
@@ -38,6 +39,7 @@ namespace de4dot.code.deobfuscators.ILProtector {
 			HasLocals = 2,
 			HasInstructions = 4,
 			HasExceptionHandlers = 8,
+			HasDelegateType = 0x10,
 		}
 
 		public TypeDef DelegateType {
@@ -60,25 +62,36 @@ namespace de4dot.code.deobfuscators.ILProtector {
 			get { return (flags & MethodFlags.HasExceptionHandlers) != 0; }
 		}
 
+		bool HasDelegateType {
+			get { return !hasDelegateTypeFlag || (flags & MethodFlags.HasDelegateType) != 0; }
+		}
+
+		public bool HasDelegateTypeFlag {
+			get { return hasDelegateTypeFlag; }
+			set { hasDelegateTypeFlag = value; }
+		}
+
 		public MethodReader(ModuleDefMD module, byte[] data, IList<Parameter> parameters)
 			: base(MemoryImageStream.Create(data), parameters) {
 			this.module = module;
 		}
 
-		public void read() {
+		public void Read() {
 			flags = (MethodFlags)reader.ReadByte();
-			delegateType = resolve<TypeDef>(readTypeToken());
-			if (!DotNetUtils.derivesFromDelegate(delegateType))
-				throw new ApplicationException("Invalid delegate type");
+			if (HasDelegateType) {
+				delegateType = Resolve<TypeDef>(ReadTypeToken());
+				if (!DotNetUtils.DerivesFromDelegate(delegateType))
+					throw new ApplicationException("Invalid delegate type");
+			}
 			if (HasLocals)
-				readLocals((int)reader.Read7BitEncodedUInt32());
+				ReadLocals((int)reader.Read7BitEncodedUInt32());
 			if (HasInstructions)
 				ReadInstructions((int)reader.Read7BitEncodedUInt32());
 			if (HasExceptionHandlers)
-				readExceptionHandlers((int)reader.Read7BitEncodedUInt32());
+				ReadExceptionHandlers((int)reader.Read7BitEncodedUInt32());
 		}
 
-		int getTypeDefOrRefToken(uint token) {
+		int GetTypeDefOrRefToken(uint token) {
 			switch (token & 3) {
 			case 0: return 0x02000000 + (int)(token >> 2);
 			case 1: return 0x01000000 + (int)(token >> 2);
@@ -87,63 +100,63 @@ namespace de4dot.code.deobfuscators.ILProtector {
 			}
 		}
 
-		void readLocals(int numLocals) {
+		void ReadLocals(int numLocals) {
 			var localsTypes = new List<TypeSig>();
 			for (int i = 0; i < numLocals; i++)
-				localsTypes.Add(readType());
+				localsTypes.Add(ReadType());
 			SetLocals(localsTypes);
 		}
 
-		T resolve<T>(int token) {
+		T Resolve<T>(int token) {
 			return (T)module.ResolveToken(token);
 		}
 
-		int readTypeToken() {
-			return getTypeDefOrRefToken(reader.Read7BitEncodedUInt32());
+		int ReadTypeToken() {
+			return GetTypeDefOrRefToken(reader.Read7BitEncodedUInt32());
 		}
 
-		TypeSig readType() {
+		TypeSig ReadType() {
 			switch ((ElementType)reader.ReadByte()) {
-			case ElementType.Void: return module.CorLibTypes.Void;
-			case ElementType.Boolean: return module.CorLibTypes.Boolean;
-			case ElementType.Char: return module.CorLibTypes.Char;
-			case ElementType.I1: return module.CorLibTypes.SByte;
-			case ElementType.U1: return module.CorLibTypes.Byte;
-			case ElementType.I2: return module.CorLibTypes.Int16;
-			case ElementType.U2: return module.CorLibTypes.UInt16;
-			case ElementType.I4: return module.CorLibTypes.Int32;
-			case ElementType.U4: return module.CorLibTypes.UInt32;
-			case ElementType.I8: return module.CorLibTypes.Int64;
-			case ElementType.U8: return module.CorLibTypes.UInt64;
-			case ElementType.R4: return module.CorLibTypes.Single;
-			case ElementType.R8: return module.CorLibTypes.Double;
-			case ElementType.String: return module.CorLibTypes.String;
-			case ElementType.Ptr: return new PtrSig(readType());
-			case ElementType.ByRef: return new ByRefSig(readType());
-			case ElementType.TypedByRef: return module.CorLibTypes.TypedReference;
-			case ElementType.I: return module.CorLibTypes.IntPtr;
-			case ElementType.U: return module.CorLibTypes.UIntPtr;
-			case ElementType.Object: return module.CorLibTypes.Object;
-			case ElementType.SZArray: return new SZArraySig(readType());
-			case ElementType.Sentinel: readType(); return new SentinelSig();
-			case ElementType.Pinned: return new PinnedSig(readType());
+			case ElementType.Void:		return module.CorLibTypes.Void;
+			case ElementType.Boolean:	return module.CorLibTypes.Boolean;
+			case ElementType.Char:		return module.CorLibTypes.Char;
+			case ElementType.I1:		return module.CorLibTypes.SByte;
+			case ElementType.U1:		return module.CorLibTypes.Byte;
+			case ElementType.I2:		return module.CorLibTypes.Int16;
+			case ElementType.U2:		return module.CorLibTypes.UInt16;
+			case ElementType.I4:		return module.CorLibTypes.Int32;
+			case ElementType.U4:		return module.CorLibTypes.UInt32;
+			case ElementType.I8:		return module.CorLibTypes.Int64;
+			case ElementType.U8:		return module.CorLibTypes.UInt64;
+			case ElementType.R4:		return module.CorLibTypes.Single;
+			case ElementType.R8:		return module.CorLibTypes.Double;
+			case ElementType.String:	return module.CorLibTypes.String;
+			case ElementType.Ptr:		return new PtrSig(ReadType());
+			case ElementType.ByRef:		return new ByRefSig(ReadType());
+			case ElementType.TypedByRef:return module.CorLibTypes.TypedReference;
+			case ElementType.I:			return module.CorLibTypes.IntPtr;
+			case ElementType.U:			return module.CorLibTypes.UIntPtr;
+			case ElementType.Object:	return module.CorLibTypes.Object;
+			case ElementType.SZArray:	return new SZArraySig(ReadType());
+			case ElementType.Sentinel:	ReadType(); return new SentinelSig();
+			case ElementType.Pinned:	return new PinnedSig(ReadType());
 
 			case ElementType.ValueType:
 			case ElementType.Class:
-				return resolve<ITypeDefOrRef>(readTypeToken()).ToTypeSig();
+				return Resolve<ITypeDefOrRef>(ReadTypeToken()).ToTypeSig();
 
 			case ElementType.Array:
-				var arrayType = readType();
+				var arrayType = ReadType();
 				uint rank = reader.Read7BitEncodedUInt32();
 				return new ArraySig(arrayType, rank);
 
 			case ElementType.GenericInst:
 				reader.ReadByte();
-				var genericType = resolve<ITypeDefOrRef>(readTypeToken());
+				var genericType = Resolve<ITypeDefOrRef>(ReadTypeToken());
 				int numGenericArgs = (int)reader.Read7BitEncodedUInt32();
 				var git = new GenericInstSig(genericType.ToTypeSig() as ClassOrValueTypeSig);
 				for (int i = 0; i < numGenericArgs; i++)
-					git.GenericArguments.Add(readType());
+					git.GenericArguments.Add(ReadType());
 				return git;
 
 			case ElementType.Var:
@@ -158,11 +171,11 @@ namespace de4dot.code.deobfuscators.ILProtector {
 		}
 
 		protected override IField ReadInlineField(Instruction instr) {
-			return resolve<IField>(reader.ReadInt32());
+			return Resolve<IField>(reader.ReadInt32());
 		}
 
 		protected override IMethod ReadInlineMethod(Instruction instr) {
-			return resolve<IMethod>(reader.ReadInt32());
+			return Resolve<IMethod>(reader.ReadInt32());
 		}
 
 		protected override MethodSig ReadInlineSig(Instruction instr) {
@@ -178,20 +191,20 @@ namespace de4dot.code.deobfuscators.ILProtector {
 		}
 
 		protected override ITokenOperand ReadInlineTok(Instruction instr) {
-			return resolve<ITokenOperand>(reader.ReadInt32());
+			return Resolve<ITokenOperand>(reader.ReadInt32());
 		}
 
 		protected override ITypeDefOrRef ReadInlineType(Instruction instr) {
-			return resolve<ITypeDefOrRef>(reader.ReadInt32());
+			return Resolve<ITypeDefOrRef>(reader.ReadInt32());
 		}
 
-		void readExceptionHandlers(int numExceptionHandlers) {
+		void ReadExceptionHandlers(int numExceptionHandlers) {
 			exceptionHandlers = new List<ExceptionHandler>(numExceptionHandlers);
 			for (int i = 0; i < numExceptionHandlers; i++)
-				Add(readExceptionHandler());
+				Add(ReadExceptionHandler());
 		}
 
-		ExceptionHandler readExceptionHandler() {
+		ExceptionHandler ReadExceptionHandler() {
 			var eh = new ExceptionHandler((ExceptionHandlerType)(reader.Read7BitEncodedUInt32() & 7));
 
 			uint tryOffset = reader.Read7BitEncodedUInt32();
@@ -204,7 +217,7 @@ namespace de4dot.code.deobfuscators.ILProtector {
 
 			switch (eh.HandlerType) {
 			case ExceptionHandlerType.Catch:
-				eh.CatchType = resolve<ITypeDefOrRef>(reader.ReadInt32());
+				eh.CatchType = Resolve<ITypeDefOrRef>(reader.ReadInt32());
 				break;
 
 			case ExceptionHandlerType.Filter:

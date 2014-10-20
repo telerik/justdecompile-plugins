@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -43,56 +43,64 @@ namespace de4dot.code.deobfuscators.Dotfuscator {
 		public IEnumerable<MethodDef> StringDecrypters {
 			get {
 				var list = new List<MethodDef>(stringDecrypterMethods.Count);
-				foreach (var info in stringDecrypterMethods.getValues())
+				foreach (var info in stringDecrypterMethods.GetValues())
 					list.Add(info.method);
 				return list;
 			}
 		}
 
 		public IEnumerable<StringDecrypterInfo> StringDecrypterInfos {
-			get { return stringDecrypterMethods.getValues(); }
+			get { return stringDecrypterMethods.GetValues(); }
 		}
 
 		public StringDecrypter(ModuleDefMD module) {
 			this.module = module;
 		}
 
-		public void find(ISimpleDeobfuscator simpleDeobfuscator) {
+		public void Find(ISimpleDeobfuscator simpleDeobfuscator) {
 			foreach (var type in module.GetTypes())
-				findStringDecrypterMethods(type, simpleDeobfuscator);
+				FindStringDecrypterMethods(type, simpleDeobfuscator);
 		}
 
-		void findStringDecrypterMethods(TypeDef type, ISimpleDeobfuscator simpleDeobfuscator) {
-			foreach (var method in DotNetUtils.findMethods(type.Methods, "System.String", new string[] { "System.String", "System.Int32" })) {
+		void FindStringDecrypterMethods(TypeDef type, ISimpleDeobfuscator simpleDeobfuscator) {
+			foreach (var method in DotNetUtils.FindMethods(type.Methods, "System.String", new string[] { "System.String", "System.Int32" })) {
 				if (method.Body.HasExceptionHandlers)
 					continue;
 
-				if (DotNetUtils.getMethodCalls(method, "System.Char[] System.String::ToCharArray()") != 1)
+				if (DotNetUtils.GetMethodCalls(method, "System.Char[] System.String::ToCharArray()") != 1)
 					continue;
-				if (DotNetUtils.getMethodCalls(method, "System.String System.String::Intern(System.String)") != 1)
+				if (DotNetUtils.GetMethodCalls(method, "System.String System.String::Intern(System.String)") != 1)
 					continue;
 
-				simpleDeobfuscator.deobfuscate(method);
-				var instructions = method.Body.Instructions;
-				for (int i = 0; i <= instructions.Count - 3; i++) {
-					var ldci4 = method.Body.Instructions[i];
+				simpleDeobfuscator.Deobfuscate(method);
+				var instrs = method.Body.Instructions;
+				for (int i = 0; i < instrs.Count - 3; i++) {
+					var ldarg = instrs[i];
+					if (!ldarg.IsLdarg() || ldarg.GetParameterIndex() != 0)
+						continue;
+					var callvirt = instrs[i + 1];
+					if (callvirt.OpCode.Code != Code.Callvirt)
+						continue;
+					var calledMethod = callvirt.Operand as MemberRef;
+					if (calledMethod == null || calledMethod.FullName != "System.Char[] System.String::ToCharArray()")
+						continue;
+					var stloc = instrs[i + 2];
+					if (!stloc.IsStloc())
+						continue;
+					var ldci4 = instrs[i + 3];
 					if (!ldci4.IsLdcI4())
-						continue;
-					if (instructions[i + 1].OpCode.Code != Code.Ldarg_1)
-						continue;
-					if (instructions[i + 2].OpCode.Code != Code.Add)
 						continue;
 
 					var info = new StringDecrypterInfo(method, ldci4.GetLdcI4Value());
-					stringDecrypterMethods.add(info.method, info);
-					Logger.v("Found string decrypter method: {0}, magic: 0x{1:X8}", Utils.removeNewlines(info.method), info.magic);
+					stringDecrypterMethods.Add(info.method, info);
+					Logger.v("Found string decrypter method: {0}, magic: 0x{1:X8}", Utils.RemoveNewlines(info.method), info.magic);
 					break;
 				}
 			}
 		}
 
-		public string decrypt(IMethod method, string encrypted, int value) {
-			var info = stringDecrypterMethods.findAny(method);
+		public string Decrypt(IMethod method, string encrypted, int value) {
+			var info = stringDecrypterMethods.FindAny(method);
 			char[] chars = encrypted.ToCharArray();
 			byte key = (byte)(info.magic + value);
 			for (int i = 0; i < chars.Length; i++) {

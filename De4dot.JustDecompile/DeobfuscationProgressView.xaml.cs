@@ -54,13 +54,13 @@ namespace De4dot.JustDecompile
 					try
 					{
 						ReportProgress(0, "Preparing deobfuscation");
-						obfuscationFile.deobfuscateBegin();
+						obfuscationFile.DeobfuscateBegin();
 
 						ReportProgress(20, "Deobfuscating");
-						obfuscationFile.deobfuscate();
+						obfuscationFile.Deobfuscate();
 
 						ReportProgress(40, "Finishing deobfuscation");
-						obfuscationFile.deobfuscateEnd();
+						obfuscationFile.DeobfuscateEnd();
 
 						ReportProgress(60, "Renaming items");
 						// turn all flags on
@@ -70,14 +70,14 @@ namespace De4dot.JustDecompile
 											 RenamerFlags.RenameTypes | RenamerFlags.RestoreEvents | RenamerFlags.RestoreEventsFromNames | 
 											 RenamerFlags.RestoreProperties  | RenamerFlags.RestorePropertiesFromNames;
 						Renamer renamer = new Renamer(obfuscationFile.DeobfuscatorContext, new IObfuscatedFile[] { obfuscationFile }, flags);
-						renamer.rename();
+						renamer.Rename();
 
 						ReportProgress(80, "Saving");
-						obfuscationFile.save();
+						obfuscationFile.Save();
 					}
 					finally
 					{
-						obfuscationFile.deobfuscateCleanUp();
+						obfuscationFile.DeobfuscateCleanUp();
 					}
 				})
 				.ContinueWith(t =>

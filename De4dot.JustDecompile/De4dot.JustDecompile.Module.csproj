@@ -112,16 +112,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="De4dot\sources\de4dot.code\de4dot.code.csproj">
-      <Project>{4D10B9EB-3BF1-4D61-A389-CB019E8C9622}</Project>
-      <Name>de4dot.code</Name>
-    </ProjectReference>
-    <ProjectReference Include="De4dot\sources\dnlib\src\dnlib.csproj">
-      <Project>{fdfc1237-143f-4919-8318-4926901f4639}</Project>
-      <Name>dnlib</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="LicenseAgreements\COPYING" />
   </ItemGroup>
   <ItemGroup>
@@ -135,7 +125,16 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="De4dot\sources\de4dot.code\de4dot.code.csproj">
+      <Project>{4d10b9eb-3bf1-4d61-a389-cb019e8c9622}</Project>
+      <Name>de4dot.code</Name>
+    </ProjectReference>
+    <ProjectReference Include="De4dot\sources\dnlib\src\dnlib.csproj">
+      <Project>{fdfc1237-143f-4919-8318-4926901f4639}</Project>
+      <Name>dnlib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition=" '$(Configuration)' == 'DebugInternal' OR '$(Configuration)' == 'ReleaseInternal'">
     <PreBuildEvent>

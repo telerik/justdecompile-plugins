@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -25,12 +25,12 @@ using de4dot.blocks;
 namespace de4dot.code.deobfuscators.ILProtector {
 	class MainType {
 		ModuleDefMD module;
-		List<MethodDef> protectMethods;
+		List<RuntimeFileInfo> runtimeFileInfos;
 		TypeDef invokerDelegate;
 		FieldDef invokerInstanceField;
 
-		public IEnumerable<MethodDef> ProtectMethods {
-			get { return protectMethods; }
+		public List<RuntimeFileInfo> RuntimeFileInfos {
+			get { return runtimeFileInfos; }
 		}
 
 		public TypeDef InvokerDelegate {
@@ -42,49 +42,67 @@ namespace de4dot.code.deobfuscators.ILProtector {
 		}
 
 		public bool Detected {
-			get { return protectMethods != null; }
+			get { return runtimeFileInfos != null; }
 		}
 
 		public MainType(ModuleDefMD module) {
 			this.module = module;
 		}
 
-		public void find() {
-			checkMethod(DotNetUtils.getModuleTypeCctor(module));
+		public void Find() {
+			CheckMethod(DotNetUtils.GetModuleTypeCctor(module));
 		}
 
-		static string[] ilpLocals = new string[] {
+		static string[] ilpLocalsV1x = new string[] {
 			"System.Boolean",
 			"System.IntPtr",
 			"System.Object[]",
 		};
-		bool checkMethod(MethodDef cctor) {
+		static string[] ilpLocalsV2x = new string[] {
+			"System.IntPtr",
+		};
+		bool CheckMethod(MethodDef cctor) {
 			if (cctor == null || cctor.Body == null)
 				return false;
-			if (!new LocalTypes(cctor).exactly(ilpLocals))
+			var localTypes = new LocalTypes(cctor);
+			if (!localTypes.Exactly(ilpLocalsV1x) &&
+				!localTypes.Exactly(ilpLocalsV2x))
 				return false;
 
 			var type = cctor.DeclaringType;
-			var methods = getPinvokeMethods(type, "Protect");
+			var methods = GetPinvokeMethods(type, "Protect");
 			if (methods.Count == 0)
-				methods = getPinvokeMethods(type, "P0");
+				methods = GetPinvokeMethods(type, "P0");
 			if (methods.Count != 2)
 				return false;
-			if (type.Fields.Count != 1)
+			if (type.Fields.Count < 1 || type.Fields.Count > 2)
 				return false;
 
-			var theField = type.Fields[0];
-			var theDelegate = theField.FieldType.TryGetTypeDef();
-			if (theDelegate == null || !DotNetUtils.derivesFromDelegate(theDelegate))
+			if (!GetDelegate(type, out invokerInstanceField, out invokerDelegate))
 				return false;
 
-			protectMethods = methods;
-			invokerDelegate = theDelegate;
-			invokerInstanceField = theField;
+			runtimeFileInfos = new List<RuntimeFileInfo>(methods.Count);
+			foreach (var method in methods)
+				runtimeFileInfos.Add(new RuntimeFileInfo(method));
 			return true;
 		}
 
-		static List<MethodDef> getPinvokeMethods(TypeDef type, string name) {
+		bool GetDelegate(TypeDef type, out FieldDef field, out TypeDef del) {
+			foreach (var fld in type.Fields) {
+				var theDelegate = fld.FieldType.TryGetTypeDef();
+				if (theDelegate != null && DotNetUtils.DerivesFromDelegate(theDelegate)) {
+					field = fld;
+					del = theDelegate;
+					return true;
+				}
+			}
+
+			field = null;
+			del = null;
+			return false;
+		}
+
+		static List<MethodDef> GetPinvokeMethods(TypeDef type, string name) {
 			var list = new List<MethodDef>();
 			foreach (var method in type.Methods) {
 				if (method.ImplMap != null && method.ImplMap.Name == name)
@@ -93,8 +111,19 @@ namespace de4dot.code.deobfuscators.ILProtector {
 			return list;
 		}
 
-		public void cleanUp() {
-			var cctor = DotNetUtils.getModuleTypeCctor(module);
+		public string GetRuntimeVersionString() {
+			if (runtimeFileInfos == null)
+				return null;
+			foreach (var info in runtimeFileInfos) {
+				var version = info.GetVersion();
+				if (version != null)
+					return version.ToString();
+			}
+			return null;
+		}
+
+		public void CleanUp() {
+			var cctor = DotNetUtils.GetModuleTypeCctor(module);
 			if (cctor != null) {
 				cctor.Body.InitLocals = false;
 				cctor.Body.Variables.Clear();

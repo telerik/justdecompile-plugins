@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "De4dot.JustDecompile.Module", "De4dot.JustDecompile\De4dot.JustDecompile.Module.csproj", "{EB1CF1F1-F3F1-438B-B645-F24C86574454}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "De4Dot", "De4Dot", "{0E5DF3E9-0034-49FC-88A1-C675B8CEFFDC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssemblyData", "De4dot.JustDecompile\De4dot\sources\AssemblyData\AssemblyData.csproj", "{FBD84077-9D35-41FE-89DF-8D79EFE0B595}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "blocks", "De4dot.JustDecompile\De4dot\sources\blocks\blocks.csproj", "{045B96F2-AF80-4C4C-8D27-E38635AC705E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "de4dot.blocks", "De4dot.JustDecompile\De4dot\sources\de4dot.blocks\de4dot.blocks.csproj", "{045B96F2-AF80-4C4C-8D27-E38635AC705E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "de4dot.code", "De4dot.JustDecompile\De4dot\sources\de4dot.code\de4dot.code.csproj", "{4D10B9EB-3BF1-4D61-A389-CB019E8C9622}"
 EndProject
@@ -17,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dnlib", "De4dot.JustDecompi
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 4
+		SccNumberOfProjects = 1
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://tfs:8082/defaultcollection
 		SccProjectUniqueName0 = De4dot.JustDecompile\\De4dot.JustDecompile.Module.csproj
@@ -25,24 +27,6 @@ Global
 		SccAuxPath0 = http://tfs:8082/defaultcollection
 		SccLocalPath0 = De4dot.JustDecompile
 		SccProvider0 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccProjectUniqueName1 = De4dot.JustDecompile\\De4dot\\sources\\AssemblyData\\AssemblyData.csproj
-		SccProjectTopLevelParentUniqueName1 = JustDecompile.De4dotPlugin.sln
-		SccProjectName1 = De4dot.JustDecompile/De4dot/sources/AssemblyData
-		SccAuxPath1 = http://tfs:8082/defaultcollection
-		SccLocalPath1 = De4dot.JustDecompile\\De4dot\\sources\\AssemblyData
-		SccProvider1 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccProjectUniqueName2 = De4dot.JustDecompile\\De4dot\\sources\\blocks\\blocks.csproj
-		SccProjectTopLevelParentUniqueName2 = JustDecompile.De4dotPlugin.sln
-		SccProjectName2 = De4dot.JustDecompile/De4dot/sources/blocks
-		SccAuxPath2 = http://tfs:8082/defaultcollection
-		SccLocalPath2 = De4dot.JustDecompile\\De4dot\\sources\\blocks
-		SccProvider2 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccProjectUniqueName3 = De4dot.JustDecompile\\De4dot\\sources\\de4dot.code\\de4dot.code.csproj
-		SccProjectTopLevelParentUniqueName3 = JustDecompile.De4dotPlugin.sln
-		SccProjectName3 = De4dot.JustDecompile/De4dot/sources/de4dot.code
-		SccAuxPath3 = http://tfs:8082/defaultcollection
-		SccLocalPath3 = De4dot.JustDecompile\\De4dot\\sources\\de4dot.code
-		SccProvider3 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -26,6 +26,7 @@ namespace de4dot.code.deobfuscators.Rummage {
 		public const string THE_NAME = "Rummage";
 		public const string THE_TYPE = "rm";
 		const string DEFAULT_REGEX = @"!.";
+
 		public DeobfuscatorInfo()
 			: base(DEFAULT_REGEX) {
 		}
@@ -38,9 +39,9 @@ namespace de4dot.code.deobfuscators.Rummage {
 			get { return THE_TYPE; }
 		}
 
-		public override IDeobfuscator createDeobfuscator() {
+		public override IDeobfuscator CreateDeobfuscator() {
 			return new Deobfuscator(new Deobfuscator.Options {
-				ValidNameRegex = validNameRegex.get(),
+				ValidNameRegex = validNameRegex.Get(),
 			});
 		}
 	}
@@ -68,55 +69,55 @@ namespace de4dot.code.deobfuscators.Rummage {
 			: base(options) {
 		}
 
-		protected override int detectInternal() {
+		protected override int DetectInternal() {
 			int val = 0;
 
-			int sum = toInt32(stringDecrypter.Detected);
+			int sum = ToInt32(stringDecrypter.Detected);
 			if (sum > 0)
 				val += 100 + 10 * (sum - 1);
 
 			return val;
 		}
 
-		protected override void scanForObfuscator() {
+		protected override void ScanForObfuscator() {
 			stringDecrypter = new StringDecrypter(module);
-			stringDecrypter.find();
-			detectVersion();
+			stringDecrypter.Find();
+			DetectVersion();
 		}
 
-		void detectVersion() {
+		void DetectVersion() {
 			string version;
 			switch (stringDecrypter.Version) {
 			case RummageVersion.V1_1_445: version = "v1.1 - v2.0"; break;
-			case RummageVersion.V2_1_729: version = "v2.1 - v2.2"; break;
+			case RummageVersion.V2_1_729: version = "v2.1+"; break;
 			default: version = null; break;
 			}
 			if (version != null)
 				obfuscatorName += " " + version;
 		}
 
-		public override void deobfuscateBegin() {
-			base.deobfuscateBegin();
+		public override void DeobfuscateBegin() {
+			base.DeobfuscateBegin();
 
-			stringDecrypter.initialize();
+			stringDecrypter.Initialize();
 		}
 
 
-		public override void deobfuscateMethodEnd(Blocks blocks) {
+		public override void DeobfuscateMethodEnd(Blocks blocks) {
 			if (CanRemoveStringDecrypterType)
-				stringDecrypter.deobfuscate(blocks);
-			base.deobfuscateMethodEnd(blocks);
+				stringDecrypter.Deobfuscate(blocks);
+			base.DeobfuscateMethodEnd(blocks);
 		}
 
-		public override void deobfuscateEnd() {
+		public override void DeobfuscateEnd() {
 			if (CanRemoveStringDecrypterType) {
-				addTypeToBeRemoved(stringDecrypter.Type, "String decrypter type");
-				addTypesToBeRemoved(stringDecrypter.OtherTypes, "Decrypted string type");
+				AddTypeToBeRemoved(stringDecrypter.Type, "String decrypter type");
+				AddTypesToBeRemoved(stringDecrypter.OtherTypes, "Decrypted string type");
 			}
-			base.deobfuscateEnd();
+			base.DeobfuscateEnd();
 		}
 
-		public override IEnumerable<int> getStringDecrypterMethods() {
+		public override IEnumerable<int> GetStringDecrypterMethods() {
 			return new List<int>();
 		}
 	}

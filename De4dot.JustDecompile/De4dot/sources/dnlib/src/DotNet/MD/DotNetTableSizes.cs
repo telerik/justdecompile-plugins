@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2013 de4dot@gmail.com
+    Copyright (C) 2012-2014 de4dot@gmail.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -126,8 +126,7 @@ namespace dnlib.DotNet.MD {
 		/// <param name="maxPresentTables">Initialized to max present tables (eg. 42 or 45)</param>
 		/// <returns>All table infos (not completely initialized)</returns>
 		public TableInfo[] CreateTables(byte majorVersion, byte minorVersion, out int maxPresentTables) {
-			// v1.0 doesn't support generics. 1.1 supports generics but the GenericParam
-			// table is different from the 2.0 GenericParam table.
+			// The three extra generics tables aren't used by CLR 1.x
 			maxPresentTables = (majorVersion == 1 && minorVersion == 0) ? (int)Table.NestedClass + 1 : (int)Table.GenericParamConstraint + 1;
 
 			var tableInfos = new TableInfo[(int)Table.GenericParamConstraint + 1];
