@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2013 de4dot@gmail.com
+    Copyright (C) 2012-2014 de4dot@gmail.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -26,6 +26,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
+using dnlib.Threading;
+
+#if THREAD_SAFE
+using ThreadSafe = dnlib.Threading.Collections;
+#else
+using ThreadSafe = System.Collections.Generic;
+#endif
 
 namespace dnlib.DotNet {
 	/// <summary>
@@ -41,17 +48,20 @@ namespace dnlib.DotNet {
 		static readonly GacInfo gac4Info;	// .NET 4.x
 
 		ModuleContext defaultModuleContext;
-		Dictionary<ModuleDef, List<string>> moduleSearchPaths = new Dictionary<ModuleDef, List<string>>();
-		Dictionary<string, AssemblyDef> cachedAssemblies = new Dictionary<string, AssemblyDef>(StringComparer.Ordinal);
-		List<string> preSearchPaths = new List<string>();
-		List<string> postSearchPaths = new List<string>();
+		readonly Dictionary<ModuleDef, IList<string>> moduleSearchPaths = new Dictionary<ModuleDef, IList<string>>();
+		readonly Dictionary<string, AssemblyDef> cachedAssemblies = new Dictionary<string, AssemblyDef>(StringComparer.Ordinal);
+		readonly ThreadSafe.IList<string> preSearchPaths = ThreadSafeListCreator.Create<string>();
+		readonly ThreadSafe.IList<string> postSearchPaths = ThreadSafeListCreator.Create<string>();
 		bool findExactMatch;
 		bool enableTypeDefCache;
+#if THREAD_SAFE
+		readonly Lock theLock = Lock.Create();
+#endif
 
 		sealed class GacInfo {
-			public string path;
-			public string prefix;
-			public IList<string> subDirs;
+			public readonly string path;
+			public readonly string prefix;
+			public readonly IList<string> subDirs;
 
 			public GacInfo(string prefix, string path, IList<string> subDirs) {
 				this.prefix = prefix;
@@ -64,10 +74,10 @@ namespace dnlib.DotNet {
 			var windir = Environment.GetEnvironmentVariable("WINDIR");
 			if (!string.IsNullOrEmpty(windir)) {
 				gac2Info = new GacInfo("", Path.Combine(windir, "assembly"), new string[] {
-					"GAC_MSIL", "GAC_32", "GAC_64", "GAC"
+					"GAC_32", "GAC_64", "GAC_MSIL", "GAC"
 				});
 				gac4Info = new GacInfo("v4.0_", Path.Combine(Path.Combine(windir, "Microsoft.NET"), "assembly"), new string[] {
-					"GAC_MSIL", "GAC_32", "GAC_64"
+					"GAC_32", "GAC_64", "GAC_MSIL"
 				});
 			}
 		}
@@ -102,14 +112,14 @@ namespace dnlib.DotNet {
 		/// <summary>
 		/// Gets paths searched before trying the standard locations
 		/// </summary>
-		public IList<string> PreSearchPaths {
+		public ThreadSafe.IList<string> PreSearchPaths {
 			get { return preSearchPaths; }
 		}
 
 		/// <summary>
 		/// Gets paths searched after trying the standard locations
 		/// </summary>
-		public IList<string> PostSearchPaths {
+		public ThreadSafe.IList<string> PostSearchPaths {
 			get { return postSearchPaths; }
 		}
 
@@ -145,6 +155,9 @@ namespace dnlib.DotNet {
 			if (assembly == null)
 				return null;
 
+#if THREAD_SAFE
+			theLock.EnterWriteLock(); try {
+#endif
 			AssemblyDef resolvedAssembly = Resolve2(assembly, sourceModule);
 			if (resolvedAssembly == null) {
 				string asmName = UTF8String.ToSystemStringOrEmpty(assembly.Name);
@@ -176,8 +189,10 @@ namespace dnlib.DotNet {
 			if (asm1 != resolvedAssembly && asm2 != resolvedAssembly) {
 				// This assembly was just resolved
 				if (enableTypeDefCache) {
-					foreach (var module in resolvedAssembly.Modules)
-						module.EnableTypeDefFindCache = true;
+					foreach (var module in resolvedAssembly.Modules.GetSafeEnumerable()) {
+						if (module != null)
+							module.EnableTypeDefFindCache = true;
+					}
 				}
 			}
 
@@ -194,9 +209,13 @@ namespace dnlib.DotNet {
 				return resolvedAssembly;
 
 			// Dupe assembly. Don't insert it.
-			if (resolvedAssembly.ManifestModule != null)
-				resolvedAssembly.ManifestModule.Dispose();
+			var dupeModule = resolvedAssembly.ManifestModule;
+			if (dupeModule != null)
+				dupeModule.Dispose();
 			return asm1 ?? asm2;
+#if THREAD_SAFE
+			} finally { theLock.ExitWriteLock(); }
+#endif
 		}
 
 		/// <inheritdoc/>
@@ -205,10 +224,16 @@ namespace dnlib.DotNet {
 				return false;
 			var asmKey = GetAssemblyNameKey(new AssemblyNameInfo(asm));
 			AssemblyDef cachedAsm;
+#if THREAD_SAFE
+			theLock.EnterWriteLock(); try {
+#endif
 			if (cachedAssemblies.TryGetValue(asmKey, out cachedAsm) && cachedAsm != null)
 				return asm == cachedAsm;
 			cachedAssemblies[asmKey] = asm;
 			return true;
+#if THREAD_SAFE
+			} finally { theLock.ExitWriteLock(); }
+#endif
 		}
 
 		/// <inheritdoc/>
@@ -216,7 +241,13 @@ namespace dnlib.DotNet {
 			if (asm == null)
 				return false;
 			var asmKey = GetAssemblyNameKey(new AssemblyNameInfo(asm));
+#if THREAD_SAFE
+			theLock.EnterWriteLock(); try {
+#endif
 			return cachedAssemblies.Remove(asmKey);
+#if THREAD_SAFE
+			} finally { theLock.ExitWriteLock(); }
+#endif
 		}
 
 		static string GetAssemblyNameKey(AssemblyNameInfo asmName) {
@@ -262,7 +293,7 @@ namespace dnlib.DotNet {
 			if (paths == null)
 				return null;
 			var asmComparer = new AssemblyNameComparer(AssemblyNameComparerFlags.All);
-			foreach (var path in paths) {
+			foreach (var path in paths.GetSafeEnumerable()) {
 				ModuleDefMD mod = null;
 				try {
 					mod = ModuleDefMD.Load(path, moduleContext);
@@ -303,14 +334,17 @@ namespace dnlib.DotNet {
 			if (paths == null)
 				return closest;
 			var asmComparer = new AssemblyNameComparer(AssemblyNameComparerFlags.All);
-			foreach (var path in paths) {
+			foreach (var path in paths.GetSafeEnumerable()) {
 				ModuleDefMD mod = null;
 				try {
 					mod = ModuleDefMD.Load(path, moduleContext);
 					var asm = mod.Assembly;
 					if (asm != null && asmComparer.CompareClosest(assembly, new AssemblyNameInfo(closest), new AssemblyNameInfo(asm)) == 1) {
-						if (!IsCached(closest) && closest != null && closest.ManifestModule != null)
-							closest.ManifestModule.Dispose();
+						if (!IsCached(closest) && closest != null) {
+							var closeMod = closest.ManifestModule;
+							if (closeMod != null)
+								closeMod.Dispose();
+						}
 						closest = asm;
 						mod = null;
 					}
@@ -342,7 +376,7 @@ namespace dnlib.DotNet {
 			if (paths != null) {
 				var asmSimpleName = UTF8String.ToSystemStringOrEmpty(assembly.Name);
 				foreach (var ext in assemblyExtensions) {
-					foreach (var path in paths) {
+					foreach (var path in paths.GetSafeEnumerable()) {
 						var fullPath = Path.Combine(path, asmSimpleName + ext);
 						if (File.Exists(fullPath))
 							yield return fullPath;
@@ -456,7 +490,7 @@ namespace dnlib.DotNet {
 			string asmSimpleName = UTF8String.ToSystemStringOrEmpty(assembly.Name);
 			var searchPaths = GetSearchPaths(sourceModule);
 			foreach (var ext in assemblyExtensions) {
-				foreach (var path in searchPaths) {
+				foreach (var path in searchPaths.GetSafeEnumerable()) {
 					for (int i = 0; i < 2; i++) {
 						string path2;
 						if (i == 0)
@@ -479,7 +513,7 @@ namespace dnlib.DotNet {
 			ModuleDef keyModule = module;
 			if (keyModule == null)
 				keyModule = nullModule;
-			List<string> searchPaths;
+			IList<string> searchPaths;
 			if (moduleSearchPaths.TryGetValue(keyModule, out searchPaths))
 				return searchPaths;
 			moduleSearchPaths[keyModule] = searchPaths = new List<string>(GetModuleSearchPaths(module));
@@ -503,16 +537,19 @@ namespace dnlib.DotNet {
 		/// <param name="module">The module or <c>null</c> if unknown</param>
 		/// <returns>A list of search paths</returns>
 		protected IEnumerable<string> GetModulePrivateSearchPaths(ModuleDef module) {
-			if (module == null || module.Assembly == null)
-				return new List<string>();
-			module = module.Assembly.ManifestModule;
 			if (module == null)
-				return new List<string>();	// Should never happen
+				return new string[0];
+			var asm = module.Assembly;
+			if (asm == null)
+				return new string[0];
+			module = asm.ManifestModule;
+			if (module == null)
+				return new string[0];	// Should never happen
 
 			string baseDir = null;
 			try {
 				var imageName = module.Location;
-				if (imageName != "") {
+				if (imageName != string.Empty) {
 					baseDir = Directory.GetParent(imageName).FullName;
 					var configName = imageName + ".config";
 					if (File.Exists(configName))
@@ -523,7 +560,7 @@ namespace dnlib.DotNet {
 			}
 			if (baseDir != null)
 				return new List<string> { baseDir };
-			return new List<string>();
+			return new string[0];
 		}
 
 		IEnumerable<string> GetPrivatePaths(string baseDir, string configFileName) {
@@ -593,11 +630,17 @@ namespace dnlib.DotNet {
 			AddIfExists(paths, path, @"Reference Assemblies\Microsoft\Framework\Silverlight\v5.0");
 			AddIfExists(paths, path, @"Reference Assemblies\Microsoft\FSharp\2.0\Runtime\v2.0");
 			AddIfExists(paths, path, @"Reference Assemblies\Microsoft\FSharp\2.0\Runtime\v4.0");
+			AddIfExists(paths, path, @"Reference Assemblies\Microsoft\FSharp\3.0\Runtime\.NETPortable");
+			AddIfExists(paths, path, @"Reference Assemblies\Microsoft\FSharp\3.0\Runtime\v2.0");
+			AddIfExists(paths, path, @"Reference Assemblies\Microsoft\FSharp\3.0\Runtime\v4.0");
 			AddIfExists(paths, path, @"Reference Assemblies\Microsoft\WindowsPowerShell\v1.0");
+			AddIfExists(paths, path, @"Reference Assemblies\Microsoft\WindowsPowerShell\3.0");
 			AddIfExists(paths, path, @"Microsoft Visual Studio .NET\Common7\IDE\PublicAssemblies");
 			AddIfExists(paths, path, @"Microsoft Visual Studio .NET\Common7\IDE\PrivateAssemblies");
-			AddIfExists(paths, path, @"Microsoft Visual Studio 8.0\Common7\IDE\PublicAssemblies");
-			AddIfExists(paths, path, @"Microsoft Visual Studio 8.0\Common7\IDE\PrivateAssemblies");
+			AddIfExists(paths, path, @"Microsoft Visual Studio .NET 2003\Common7\IDE\PublicAssemblies");
+			AddIfExists(paths, path, @"Microsoft Visual Studio .NET 2003\Common7\IDE\PrivateAssemblies");
+			AddIfExists(paths, path, @"Microsoft Visual Studio 8\Common7\IDE\PublicAssemblies");
+			AddIfExists(paths, path, @"Microsoft Visual Studio 8\Common7\IDE\PrivateAssemblies");
 			AddIfExists(paths, path, @"Microsoft Visual Studio 9.0\Common7\IDE\PublicAssemblies");
 			AddIfExists(paths, path, @"Microsoft Visual Studio 9.0\Common7\IDE\PrivateAssemblies");
 			AddIfExists(paths, path, @"Microsoft Visual Studio 10.0\Common7\IDE\PublicAssemblies");

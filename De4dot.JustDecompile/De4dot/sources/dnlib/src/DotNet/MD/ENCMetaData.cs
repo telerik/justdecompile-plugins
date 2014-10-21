@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2013 de4dot@gmail.com
+    Copyright (C) 2012-2014 de4dot@gmail.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using dnlib.IO;
 using dnlib.PE;
+using dnlib.Threading;
 
 namespace dnlib.DotNet.MD {
 	/// <summary>
@@ -35,7 +36,10 @@ namespace dnlib.DotNet.MD {
 		static readonly UTF8String DeletedName = "_Deleted";
 		bool hasMethodPtr, hasFieldPtr, hasParamPtr, hasEventPtr, hasPropertyPtr;
 		bool hasDeletedRows;
-		Dictionary<Table, SortedTable> sortedTables = new Dictionary<Table, SortedTable>();
+		readonly Dictionary<Table, SortedTable> sortedTables = new Dictionary<Table, SortedTable>();
+#if THREAD_SAFE
+		readonly Lock theLock = Lock.Create();
+#endif
 
 		/// <summary>
 		/// Sorts a table by key column
@@ -48,8 +52,8 @@ namespace dnlib.DotNet.MD {
 			/// </summary>
 			[DebuggerDisplay("{rid} {key}")]
 			struct RowInfo : IComparable<RowInfo> {
-				public uint rid;
-				public uint key;
+				public readonly uint rid;
+				public readonly uint key;
 
 				/// <summary>
 				/// Constructor
@@ -86,13 +90,14 @@ namespace dnlib.DotNet.MD {
 				rows = new RowInfo[mdTable.Rows + 1];
 				if (mdTable.Rows == 0)
 					return;
-				var reader = mdTable.ImageStream;
-				reader.Position = keyColumn.Offset;
-				int increment = mdTable.TableInfo.RowSize - keyColumn.Size;
-				for (uint i = 1; i <= mdTable.Rows; i++) {
-					rows[i] = new RowInfo(i, keyColumn.Read(reader));
-					if (i < mdTable.Rows)
-						reader.Position += increment;
+				using (var reader = mdTable.CloneImageStream()) {
+					reader.Position = keyColumn.Offset;
+					int increment = mdTable.TableInfo.RowSize - keyColumn.Size;
+					for (uint i = 1; i <= mdTable.Rows; i++) {
+						rows[i] = new RowInfo(i, keyColumn.Read(reader));
+						if (i < mdTable.Rows)
+							reader.Position += increment;
+					}
 				}
 			}
 
@@ -125,7 +130,7 @@ namespace dnlib.DotNet.MD {
 			public RidList FindAllRows(uint key) {
 				int startIndex = BinarySearch(key);
 				if (startIndex == 0)
-					return ContiguousRidList.Empty;
+					return RidList.Empty;
 				int endIndex = startIndex + 1;
 				for (; startIndex > 1; startIndex--) {
 					if (key != rows[startIndex - 1].key)
@@ -148,7 +153,7 @@ namespace dnlib.DotNet.MD {
 		}
 
 		/// <inheritdoc/>
-		protected override void Initialize2() {
+		protected override void InitializeInternal() {
 			IImageStream imageStream = null;
 			DotNetStream dns = null;
 			try {
@@ -156,8 +161,8 @@ namespace dnlib.DotNet.MD {
 				foreach (var sh in mdHeader.StreamHeaders) {
 					var rva = mdRva + sh.Offset;
 					imageStream = peImage.CreateStream(rva, sh.StreamSize);
-					switch (sh.Name) {
-					case "#Strings":
+					switch (sh.Name.ToUpperInvariant()) {
+					case "#STRINGS":
 						if (stringsStream == null) {
 							stringsStream = new StringsStream(imageStream, sh);
 							imageStream = null;
@@ -175,7 +180,7 @@ namespace dnlib.DotNet.MD {
 						}
 						break;
 
-					case "#Blob":
+					case "#BLOB":
 						if (blobStream == null) {
 							blobStream = new BlobStream(imageStream, sh);
 							imageStream = null;
@@ -469,13 +474,13 @@ namespace dnlib.DotNet.MD {
 			var column = tableSource.TableInfo.Columns[colIndex];
 			uint startRid;
 			if (!tablesStream.ReadColumn(tableSource, tableSourceRid, column, out startRid))
-				return ContiguousRidList.Empty;
+				return RidList.Empty;
 			uint nextListRid;
 			bool hasNext = tablesStream.ReadColumn(tableSource, tableSourceRid + 1, column, out nextListRid);
 
 			uint lastRid = tableDest.Rows + 1;
 			if (startRid == 0 || startRid >= lastRid)
-				return ContiguousRidList.Empty;
+				return RidList.Empty;
 			uint endRid = hasNext && nextListRid != 0 ? nextListRid : lastRid;
 			if (endRid < startRid)
 				endRid = startRid;
@@ -534,12 +539,18 @@ namespace dnlib.DotNet.MD {
 		/// <inheritdoc/>
 		protected override RidList FindAllRowsUnsorted(MDTable tableSource, int keyColIndex, uint key) {
 			if (tableSource == null)
-				return ContiguousRidList.Empty;
+				return RidList.Empty;
 			if (tablesStream.IsSorted(tableSource))
 				return FindAllRows(tableSource, keyColIndex, key);
 			SortedTable sortedTable;
+#if THREAD_SAFE
+			theLock.EnterWriteLock(); try {
+#endif
 			if (!sortedTables.TryGetValue(tableSource.Table, out sortedTable))
 				sortedTables[tableSource.Table] = sortedTable = new SortedTable(tableSource, keyColIndex);
+#if THREAD_SAFE
+			} finally { theLock.ExitWriteLock(); }
+#endif
 			return sortedTable.FindAllRows(key);
 		}
 	}

@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -23,13 +23,11 @@ using de4dot.blocks;
 
 namespace de4dot.code.deobfuscators.Agile_NET.vm {
 	// Tries to restore the operands of the following CIL instructions:
-	//	ldelema
-	//	ldobj
-	//	stobj
+	//	ldelema, ldelem.*, stelem.*, ldobj, stobj
 	class CilOperandInstructionRestorer {
 		MethodDef method;
 
-		public bool restore(MethodDef method) {
+		public bool Restore(MethodDef method) {
 			this.method = method;
 			bool atLeastOneFailed = false;
 
@@ -42,40 +40,102 @@ namespace de4dot.code.deobfuscators.Agile_NET.vm {
 				if (instr.Operand != null)
 					continue;
 
-				TypeSig operandType = null;
+				TypeSig operandType = null, operandTypeTmp;
+				OpCode newOpCode = null;
+				SZArraySig arrayType;
 				switch (instr.OpCode.Code) {
+				case Code.Ldelem:
+					arrayType = MethodStack.GetLoadedType(method, instrs, i, 1) as SZArraySig;
+					if (arrayType == null)
+						break;
+					operandTypeTmp = arrayType.Next;
+					if (operandTypeTmp == null)
+						newOpCode = OpCodes.Ldelem_Ref;
+					else {
+						switch (operandTypeTmp.ElementType) {
+						case ElementType.Boolean: newOpCode = OpCodes.Ldelem_I1; break;
+						case ElementType.Char: newOpCode = OpCodes.Ldelem_U2; break;
+						case ElementType.I:  newOpCode = OpCodes.Ldelem_I; break;
+						case ElementType.I1: newOpCode = OpCodes.Ldelem_I1; break;
+						case ElementType.I2: newOpCode = OpCodes.Ldelem_I2; break;
+						case ElementType.I4: newOpCode = OpCodes.Ldelem_I4; break;
+						case ElementType.I8: newOpCode = OpCodes.Ldelem_I8; break;
+						case ElementType.U:  newOpCode = OpCodes.Ldelem_I; break;
+						case ElementType.U1: newOpCode = OpCodes.Ldelem_U1; break;
+						case ElementType.U2: newOpCode = OpCodes.Ldelem_U2; break;
+						case ElementType.U4: newOpCode = OpCodes.Ldelem_U4; break;
+						case ElementType.U8: newOpCode = OpCodes.Ldelem_I8; break;
+						case ElementType.R4: newOpCode = OpCodes.Ldelem_R4; break;
+						case ElementType.R8: newOpCode = OpCodes.Ldelem_R8; break;
+						default:             newOpCode = OpCodes.Ldelem_Ref; break;
+						//TODO: Ldelem
+						}
+					}
+					break;
+
+				case Code.Stelem:
+					arrayType = MethodStack.GetLoadedType(method, instrs, i, 2) as SZArraySig;
+					if (arrayType == null)
+						break;
+					operandTypeTmp = arrayType.Next;
+					if (operandTypeTmp == null)
+						newOpCode = OpCodes.Stelem_Ref;
+					else {
+						switch (operandTypeTmp.ElementType) {
+						case ElementType.U:
+						case ElementType.I:  newOpCode = OpCodes.Stelem_I; break;
+						case ElementType.Boolean:
+						case ElementType.U1:
+						case ElementType.I1: newOpCode = OpCodes.Stelem_I1; break;
+						case ElementType.Char:
+						case ElementType.U2:
+						case ElementType.I2: newOpCode = OpCodes.Stelem_I2; break;
+						case ElementType.U4:
+						case ElementType.I4: newOpCode = OpCodes.Stelem_I4; break;
+						case ElementType.U8:
+						case ElementType.I8: newOpCode = OpCodes.Stelem_I8; break;
+						case ElementType.R4: newOpCode = OpCodes.Stelem_R4; break;
+						case ElementType.R8: newOpCode = OpCodes.Stelem_R8; break;
+						default: newOpCode = OpCodes.Stelem_Ref; break;
+						//TODO: Stelem
+						}
+					}
+					break;
+
 				case Code.Ldelema:
-					var arrayType = MethodStack.getLoadedType(method, instrs, i, 1) as SZArraySig;
+					arrayType = MethodStack.GetLoadedType(method, instrs, i, 1) as SZArraySig;
 					if (arrayType == null)
 						break;
 					operandType = arrayType.Next;
 					break;
 
 				case Code.Ldobj:
-					operandType = getPtrElementType(MethodStack.getLoadedType(method, instrs, i, 0));
+					operandType = GetPtrElementType(MethodStack.GetLoadedType(method, instrs, i, 0));
 					break;
 
 				case Code.Stobj:
-					operandType = MethodStack.getLoadedType(method, instrs, i, 0);
-					if (!isValidType(operandType))
-						operandType = getPtrElementType(MethodStack.getLoadedType(method, instrs, i, 1));
+					operandType = MethodStack.GetLoadedType(method, instrs, i, 0);
+					if (!IsValidType(operandType))
+						operandType = GetPtrElementType(MethodStack.GetLoadedType(method, instrs, i, 1));
 					break;
 
 				default:
 					continue;
 				}
-				if (!isValidType(operandType)) {
+				if (newOpCode == null && !IsValidType(operandType)) {
 					atLeastOneFailed = true;
 					continue;
 				}
 
 				instr.Operand = operandType.ToTypeDefOrRef();
+				if (newOpCode != null)
+					instr.OpCode = newOpCode;
 			}
 
 			return !atLeastOneFailed;
 		}
 
-		static TypeSig getPtrElementType(TypeSig type) {
+		static TypeSig GetPtrElementType(TypeSig type) {
 			if (type == null)
 				return null;
 			if (type.IsPointer || type.IsByRef)
@@ -83,7 +143,7 @@ namespace de4dot.code.deobfuscators.Agile_NET.vm {
 			return null;
 		}
 
-		bool isValidType(TypeSig type) {
+		bool IsValidType(TypeSig type) {
 			type = type.RemovePinnedAndModifiers();
 			if (type == null)
 				return false;

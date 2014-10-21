@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -65,7 +65,7 @@ namespace de4dot.code.renamer.asmmodules {
 
 		public MMethodDef(MethodDef methodDef, MTypeDef owner, int index)
 			: base(methodDef, owner, index) {
-			genericParams = MGenericParamDef.createGenericParamDefList(MethodDef.GenericParameters);
+			genericParams = MGenericParamDef.CreateGenericParamDefList(MethodDef.GenericParameters);
 			visibleBaseIndex = methodDef.MethodSig != null && methodDef.MethodSig.HasThis ? 1 : 0;
 			for (int i = 0; i < methodDef.Parameters.Count; i++) {
 				var param = methodDef.Parameters[i];
@@ -76,19 +76,19 @@ namespace de4dot.code.renamer.asmmodules {
 			returnParamDef = new MParamDef(methodDef.Parameters.ReturnParameter, -1);
 		}
 
-		public bool isPublic() {
+		public bool IsPublic() {
 			return MethodDef.IsPublic;
 		}
 
-		public bool isVirtual() {
+		public bool IsVirtual() {
 			return MethodDef.IsVirtual;
 		}
 
-		public bool isNewSlot() {
+		public bool IsNewSlot() {
 			return MethodDef.IsNewSlot;
 		}
 
-		public bool isStatic() {
+		public bool IsStatic() {
 			return MethodDef.IsStatic;
 		}
 	}

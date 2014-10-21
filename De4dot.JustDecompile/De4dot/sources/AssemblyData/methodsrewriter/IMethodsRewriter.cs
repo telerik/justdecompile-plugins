@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -22,6 +22,6 @@ using System.Reflection;
 
 namespace AssemblyData.methodsrewriter {
 	interface IMethodsRewriter {
-		Type getDelegateType(MethodBase methodBase);
+		Type GetDelegateType(MethodBase methodBase);
 	}
 }

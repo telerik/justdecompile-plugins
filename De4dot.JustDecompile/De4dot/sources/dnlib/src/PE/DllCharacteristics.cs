@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2013 de4dot@gmail.com
+    Copyright (C) 2012-2014 de4dot@gmail.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -30,7 +30,7 @@ namespace dnlib.PE {
 	[Flags]
 	public enum DllCharacteristics {
 		/// <summary>Image can handle a high entropy 64-bit virtual address space.</summary>
-		HighEntrypyVA		= 0x0020,
+		HighEntropyVA		= 0x0020,
 		/// <summary>DLL can move.</summary>
 		DynamicBase			= 0x0040,
 		/// <summary>Code Integrity Image</summary>

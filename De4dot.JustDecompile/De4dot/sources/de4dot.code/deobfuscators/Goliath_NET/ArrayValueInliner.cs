@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -33,13 +33,13 @@ namespace de4dot.code.deobfuscators.Goliath_NET {
 			this.initializedDataCreator = initializedDataCreator;
 		}
 
-		protected override void inlineReturnValues(IList<CallResult> callResults) {
+		protected override void InlineReturnValues(IList<CallResult> callResults) {
 			foreach (var callResult in callResults) {
 				var block = callResult.block;
 				int num = callResult.callEndIndex - callResult.callStartIndex + 1;
 
 				var arrayData = (byte[])callResult.returnValue;
-				initializedDataCreator.addInitializeArrayCode(block, callResult.callStartIndex, num, module.CorLibTypes.Byte.TypeDefOrRef, arrayData);
+				initializedDataCreator.AddInitializeArrayCode(block, callResult.callStartIndex, num, module.CorLibTypes.Byte.TypeDefOrRef, arrayData);
 				Logger.v("Decrypted array: {0} bytes", arrayData.Length);
 			}
 		}

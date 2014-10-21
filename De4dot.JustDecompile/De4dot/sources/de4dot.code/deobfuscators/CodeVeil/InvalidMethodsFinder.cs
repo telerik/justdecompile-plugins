@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -22,18 +22,18 @@ using dnlib.DotNet;
 
 namespace de4dot.code.deobfuscators.CodeVeil {
 	class InvalidMethodsFinder {
-		public static List<MethodDef> findAll(ModuleDefMD module) {
+		public static List<MethodDef> FindAll(ModuleDefMD module) {
 			var list = new List<MethodDef>();
 			foreach (var type in module.GetTypes()) {
 				foreach (var method in type.Methods) {
-					if (isInvalidMethod(method))
+					if (IsInvalidMethod(method))
 						list.Add(method);
 				}
 			}
 			return list;
 		}
 
-		public static bool isInvalidMethod(MethodDef method) {
+		public static bool IsInvalidMethod(MethodDef method) {
 			if (method == null || method.IsStatic)
 				return false;
 			var sig = method.MethodSig;

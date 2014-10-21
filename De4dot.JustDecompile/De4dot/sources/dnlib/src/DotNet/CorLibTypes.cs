@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2013 de4dot@gmail.com
+    Copyright (C) 2012-2014 de4dot@gmail.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -25,7 +25,7 @@
 
 namespace dnlib.DotNet {
 	sealed class CorLibTypes : ICorLibTypes {
-		ModuleDef module;
+		readonly ModuleDef module;
 		CorLibTypeSig typeVoid;
 		CorLibTypeSig typeBoolean;
 		CorLibTypeSig typeChar;
@@ -44,7 +44,7 @@ namespace dnlib.DotNet {
 		CorLibTypeSig typeIntPtr;
 		CorLibTypeSig typeUIntPtr;
 		CorLibTypeSig typeObject;
-		AssemblyRef corLibAssemblyRef;
+		readonly AssemblyRef corLibAssemblyRef;
 
 		/// <inheritdoc/>
 		public CorLibTypeSig Void {

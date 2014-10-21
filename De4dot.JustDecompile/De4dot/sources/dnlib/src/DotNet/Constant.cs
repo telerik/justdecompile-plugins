@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2013 de4dot@gmail.com
+    Copyright (C) 2012-2014 de4dot@gmail.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -25,6 +25,7 @@
 using System.Text;
 using dnlib.Utils;
 using dnlib.DotNet.MD;
+using dnlib.Threading;
 
 namespace dnlib.DotNet {
 	/// <summary>
@@ -129,12 +130,15 @@ namespace dnlib.DotNet {
 	/// </summary>
 	sealed class ConstantMD : Constant {
 		/// <summary>The module where this instance is located</summary>
-		ModuleDefMD readerModule;
-		/// <summary>The raw table row. It's <c>null</c> until <see cref="InitializeRawRow"/> is called</summary>
+		readonly ModuleDefMD readerModule;
+		/// <summary>The raw table row. It's <c>null</c> until <see cref="InitializeRawRow_NoLock"/> is called</summary>
 		RawConstantRow rawRow;
 
 		UserValue<ElementType> type;
 		UserValue<object> value;
+#if THREAD_SAFE
+		readonly Lock theLock = Lock.Create();
+#endif
 
 		/// <inheritdoc/>
 		public override ElementType Type {
@@ -169,13 +173,17 @@ namespace dnlib.DotNet {
 
 		void Initialize() {
 			type.ReadOriginalValue = () => {
-				InitializeRawRow();
+				InitializeRawRow_NoLock();
 				return (ElementType)rawRow.Type;
 			};
 			value.ReadOriginalValue = () => {
-				InitializeRawRow();
+				InitializeRawRow_NoLock();
 				return GetValue((ElementType)rawRow.Type, readerModule.BlobStream.ReadNoNull(rawRow.Value));
 			};
+#if THREAD_SAFE
+			type.Lock = theLock;
+			value.Lock = theLock;
+#endif
 		}
 
 		static object GetValue(ElementType etype, byte[] data) {
@@ -253,7 +261,7 @@ namespace dnlib.DotNet {
 			}
 		}
 
-		void InitializeRawRow() {
+		void InitializeRawRow_NoLock() {
 			if (rawRow != null)
 				return;
 			rawRow = readerModule.TablesStream.ReadConstantRow(rid);

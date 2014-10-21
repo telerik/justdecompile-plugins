@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -37,12 +37,12 @@ namespace de4dot.code {
 			this.dumpedMethods = dumpedMethods;
 		}
 
-		DumpedMethod getDumpedMethod(uint rid) {
-			return dumpedMethods.get(0x06000000 | rid);
+		DumpedMethod GetDumpedMethod(uint rid) {
+			return dumpedMethods.Get(0x06000000 | rid);
 		}
 
 		public RawMethodRow ReadRow(uint rid) {
-			var dm = getDumpedMethod(rid);
+			var dm = GetDumpedMethod(rid);
 			if (dm == null)
 				return null;
 			return new RawMethodRow(dm.mdRVA, dm.mdImplFlags, dm.mdFlags, dm.mdName, dm.mdSignature, dm.mdParamList);
@@ -61,15 +61,14 @@ namespace de4dot.code {
 			return false;
 		}
 
-		public bool HasMethodBody(uint rid) {
-			return getDumpedMethod(rid) != null;
-		}
-
-		public MethodBody GetMethodBody(uint rid, RVA rva, IList<Parameter> parameters) {
-			var dm = getDumpedMethod(rid);
-			if (dm == null)
-				return null;
-			return MethodBodyReader.Create(module, dm.code, dm.extraSections, parameters, dm.mhFlags, dm.mhMaxStack, dm.mhCodeSize, dm.mhLocalVarSigTok);
+		public bool GetMethodBody(uint rid, RVA rva, IList<Parameter> parameters, out MethodBody methodBody) {
+			var dm = GetDumpedMethod(rid);
+			if (dm == null) {
+				methodBody = null;
+				return false;
+			}
+			methodBody = MethodBodyReader.CreateCilBody(module, dm.code, dm.extraSections, parameters, dm.mhFlags, dm.mhMaxStack, dm.mhCodeSize, dm.mhLocalVarSigTok);
+			return true;
 		}
 	}
 }

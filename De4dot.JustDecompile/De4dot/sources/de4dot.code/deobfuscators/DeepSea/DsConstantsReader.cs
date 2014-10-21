@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -27,12 +27,12 @@ namespace de4dot.code.deobfuscators.DeepSea {
 			: base(instrs) {
 		}
 
-		protected override bool getLocalConstantInt32(Instruction instr, out int value) {
+		protected override bool GetLocalConstantInt32(Instruction instr, out int value) {
 			value = 0;
 			return true;
 		}
 
-		protected override bool getArgConstantInt32(Instruction instr, out int value) {
+		protected override bool GetArgConstantInt32(Instruction instr, out int value) {
 			value = 0;
 			return true;
 		}

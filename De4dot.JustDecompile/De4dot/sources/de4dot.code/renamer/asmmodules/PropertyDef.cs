@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -33,7 +33,7 @@ namespace de4dot.code.renamer.asmmodules {
 			: base(propertyDef, owner, index) {
 		}
 
-		public IEnumerable<MethodDef> methodDefs() {
+		public IEnumerable<MethodDef> MethodDefs() {
 			if (PropertyDef.GetMethod != null)
 				yield return PropertyDef.GetMethod;
 			if (PropertyDef.SetMethod != null)
@@ -44,15 +44,15 @@ namespace de4dot.code.renamer.asmmodules {
 			}
 		}
 
-		public bool isVirtual() {
-			foreach (var method in methodDefs()) {
+		public bool IsVirtual() {
+			foreach (var method in MethodDefs()) {
 				if (method.IsVirtual)
 					return true;
 			}
 			return false;
 		}
 
-		public bool isItemProperty() {
+		public bool IsItemProperty() {
 			if (GetMethod != null && GetMethod.VisibleParameterCount >= 1)
 				return true;
 			if (SetMethod != null && SetMethod.VisibleParameterCount >= 2)

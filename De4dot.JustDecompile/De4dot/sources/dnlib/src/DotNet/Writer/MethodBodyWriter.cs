@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2013 de4dot@gmail.com
+    Copyright (C) 2012-2014 de4dot@gmail.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -59,9 +59,9 @@ namespace dnlib.DotNet.Writer {
 	/// Writes CIL method bodies
 	/// </summary>
 	public sealed class MethodBodyWriter : MethodBodyWriterBase {
-		ITokenCreator helper;
-		CilBody cilBody;
-		bool keepMaxStack;
+		readonly ITokenCreator helper;
+		readonly CilBody cilBody;
+		readonly bool keepMaxStack;
 		uint codeSize;
 		uint maxStack;
 		byte[] code;

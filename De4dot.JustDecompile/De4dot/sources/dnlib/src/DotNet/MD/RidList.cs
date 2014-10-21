@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2013 de4dot@gmail.com
+    Copyright (C) 2012-2014 de4dot@gmail.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -31,9 +31,19 @@ namespace dnlib.DotNet.MD {
 	[DebuggerDisplay("Length = {Length}")]
 	public abstract class RidList {
 		/// <summary>
-		/// Gets the number of rids it will iterate over
+		/// The empty <see cref="RidList"/>
+		/// </summary>
+		public static readonly RidList Empty = new ContiguousRidList(0, 0);
+
+		/// <summary>
+		/// Gets the number of rids it will iterate over (UInt32)
 		/// </summary>
 		public abstract uint Length { get; }
+
+		/// <summary>
+		/// Gets the number of rids it will iterate over (Int32)
+		/// </summary>
+		public abstract int Count { get; }
 
 		/// <summary>
 		/// Gets the <paramref name="index"/>'th rid
@@ -54,11 +64,6 @@ namespace dnlib.DotNet.MD {
 	/// A <see cref="RidList"/> where the rids are contiguous
 	/// </summary>
 	sealed class ContiguousRidList : RidList {
-		/// <summary>
-		/// The empty <see cref="RidList"/>
-		/// </summary>
-		public static readonly ContiguousRidList Empty = new ContiguousRidList(0, 0);
-
 		readonly uint startRid;
 		readonly uint length;
 
@@ -72,6 +77,11 @@ namespace dnlib.DotNet.MD {
 		/// <inheritdoc/>
 		public override uint Length {
 			get { return length; }
+		}
+
+		/// <inheritdoc/>
+		public override int Count {
+			get { return (int)length; }
 		}
 
 		/// <inheritdoc/>
@@ -109,6 +119,11 @@ namespace dnlib.DotNet.MD {
 		/// <inheritdoc/>
 		public override uint Length {
 			get { return (uint)indexToRid.Count; }
+		}
+
+		/// <inheritdoc/>
+		public override int Count {
+			get { return indexToRid.Count; }
 		}
 
 		/// <inheritdoc/>

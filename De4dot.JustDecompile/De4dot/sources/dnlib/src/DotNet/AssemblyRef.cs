@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2013 de4dot@gmail.com
+    Copyright (C) 2012-2014 de4dot@gmail.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -23,8 +23,10 @@
 
 ﻿using System;
 using System.Reflection;
+using System.Threading;
 using dnlib.Utils;
 using dnlib.DotNet.MD;
+using dnlib.Threading;
 
 namespace dnlib.DotNet {
 	/// <summary>
@@ -42,6 +44,13 @@ namespace dnlib.DotNet {
 		/// The row id in its table
 		/// </summary>
 		protected uint rid;
+
+#if THREAD_SAFE
+		/// <summary>
+		/// The lock
+		/// </summary>
+		internal readonly Lock theLock = Lock.Create();
+#endif
 
 		/// <inheritdoc/>
 		public MDToken MDToken {
@@ -89,13 +98,72 @@ namespace dnlib.DotNet {
 		/// <summary>
 		/// From column AssemblyRef.Flags
 		/// </summary>
-		public abstract AssemblyAttributes Attributes { get; set; }
+		public AssemblyAttributes Attributes {
+#if THREAD_SAFE
+			get {
+				theLock.EnterWriteLock();
+				try {
+					return Attributes_NoLock;
+				}
+				finally { theLock.ExitWriteLock(); }
+			}
+#else
+			get { return Attributes_NoLock; }
+#endif
+			set {
+#if THREAD_SAFE
+				theLock.EnterWriteLock(); try {
+#endif
+				Attributes_NoLock = (value & ~AssemblyAttributes.PublicKey) | (Attributes_NoLock & AssemblyAttributes.PublicKey);
+#if THREAD_SAFE
+				} finally { theLock.ExitWriteLock(); }
+#endif
+			}
+		}
+
+		/// <summary>
+		/// From column AssemblyRef.Flags
+		/// </summary>
+		protected abstract AssemblyAttributes Attributes_NoLock { get; set; }
 
 		/// <summary>
 		/// From column AssemblyRef.PublicKeyOrToken
 		/// </summary>
 		/// <exception cref="ArgumentNullException">If <paramref name="value"/> is <c>null</c></exception>
-		public abstract PublicKeyBase PublicKeyOrToken { get; set; }
+		public PublicKeyBase PublicKeyOrToken {
+#if THREAD_SAFE
+			get {
+				theLock.EnterWriteLock();
+				try {
+					return PublicKeyOrToken_NoLock;
+				}
+				finally { theLock.ExitWriteLock(); }
+			}
+#else
+			get { return PublicKeyOrToken_NoLock; }
+#endif
+			set {
+				if (value == null)
+					throw new ArgumentNullException("value");
+#if THREAD_SAFE
+				theLock.EnterWriteLock(); try {
+#endif
+				if (value is PublicKey)
+					Attributes_NoLock |= AssemblyAttributes.PublicKey;
+				else
+					Attributes_NoLock &= ~AssemblyAttributes.PublicKey;
+				PublicKeyOrToken_NoLock = value;
+#if THREAD_SAFE
+				} finally { theLock.ExitWriteLock(); }
+#endif
+			}
+		}
+
+		/// <summary>
+		/// From column AssemblyRef.PublicKeyOrToken
+		/// </summary>
+		/// <exception cref="ArgumentNullException">If <paramref name="value"/> is <c>null</c></exception>
+		protected abstract PublicKeyBase PublicKeyOrToken_NoLock { get; set; }
 
 		/// <summary>
 		/// From column AssemblyRef.Name
@@ -124,7 +192,49 @@ namespace dnlib.DotNet {
 
 		/// <inheritdoc/>
 		public string FullName {
+			get { return Utils.GetAssemblyNameString(Name, Version, Culture, PublicKeyBase.ToPublicKeyToken(PublicKeyOrToken)); }
+		}
+
+		/// <summary>
+		/// Same as <see cref="FullName"/>, except that it uses the <c>PublicKey</c> if available.
+		/// </summary>
+		public string RealFullName {
 			get { return Utils.GetAssemblyNameString(Name, Version, Culture, PublicKeyOrToken); }
+		}
+
+		/// <summary>
+		/// Modify <see cref="Attributes_NoLock"/> property: <see cref="Attributes_NoLock"/> =
+		/// (<see cref="Attributes_NoLock"/> &amp; <paramref name="andMask"/>) | <paramref name="orMask"/>.
+		/// </summary>
+		/// <param name="andMask">Value to <c>AND</c></param>
+		/// <param name="orMask">Value to OR</param>
+		void ModifyAttributes(AssemblyAttributes andMask, AssemblyAttributes orMask) {
+#if THREAD_SAFE
+			theLock.EnterWriteLock(); try {
+#endif
+				Attributes_NoLock = (Attributes_NoLock & andMask) | orMask;
+#if THREAD_SAFE
+			} finally { theLock.ExitWriteLock(); }
+#endif
+		}
+
+		/// <summary>
+		/// Set or clear flags in <see cref="Attributes_NoLock"/>
+		/// </summary>
+		/// <param name="set"><c>true</c> if flags should be set, <c>false</c> if flags should
+		/// be cleared</param>
+		/// <param name="flags">Flags to set or clear</param>
+		void ModifyAttributes(bool set, AssemblyAttributes flags) {
+#if THREAD_SAFE
+			theLock.EnterWriteLock(); try {
+#endif
+				if (set)
+					Attributes_NoLock |= flags;
+				else
+					Attributes_NoLock &= ~flags;
+#if THREAD_SAFE
+			} finally { theLock.ExitWriteLock(); }
+#endif
 		}
 
 		/// <summary>
@@ -132,12 +242,7 @@ namespace dnlib.DotNet {
 		/// </summary>
 		public bool HasPublicKey {
 			get { return (Attributes & AssemblyAttributes.PublicKey) != 0; }
-			set {
-				if (value)
-					Attributes |= AssemblyAttributes.PublicKey;
-				else
-					Attributes &= ~AssemblyAttributes.PublicKey;
-			}
+			set { ModifyAttributes(value, AssemblyAttributes.PublicKey); }
 		}
 
 		/// <summary>
@@ -145,7 +250,7 @@ namespace dnlib.DotNet {
 		/// </summary>
 		public AssemblyAttributes ProcessorArchitecture {
 			get { return Attributes & AssemblyAttributes.PA_Mask; }
-			set { Attributes = (Attributes & ~AssemblyAttributes.PA_Mask) | (value & AssemblyAttributes.PA_Mask); }
+			set { ModifyAttributes(~AssemblyAttributes.PA_Mask, value & AssemblyAttributes.PA_Mask); }
 		}
 
 		/// <summary>
@@ -153,7 +258,7 @@ namespace dnlib.DotNet {
 		/// </summary>
 		public AssemblyAttributes ProcessorArchitectureFull {
 			get { return Attributes & AssemblyAttributes.PA_FullMask; }
-			set { Attributes = (Attributes & ~AssemblyAttributes.PA_FullMask) | (value & AssemblyAttributes.PA_FullMask); }
+			set { ModifyAttributes(~AssemblyAttributes.PA_FullMask, value & AssemblyAttributes.PA_FullMask); }
 		}
 
 		/// <summary>
@@ -210,12 +315,7 @@ namespace dnlib.DotNet {
 		/// </summary>
 		public bool IsProcessorArchitectureSpecified {
 			get { return (Attributes & AssemblyAttributes.PA_Specified) != 0; }
-			set {
-				if (value)
-					Attributes |= AssemblyAttributes.PA_Specified;
-				else
-					Attributes &= ~AssemblyAttributes.PA_Specified;
-			}
+			set { ModifyAttributes(value, AssemblyAttributes.PA_Specified); }
 		}
 
 		/// <summary>
@@ -223,12 +323,7 @@ namespace dnlib.DotNet {
 		/// </summary>
 		public bool EnableJITcompileTracking {
 			get { return (Attributes & AssemblyAttributes.EnableJITcompileTracking) != 0; }
-			set {
-				if (value)
-					Attributes |= AssemblyAttributes.EnableJITcompileTracking;
-				else
-					Attributes &= ~AssemblyAttributes.EnableJITcompileTracking;
-			}
+			set { ModifyAttributes(value, AssemblyAttributes.EnableJITcompileTracking); }
 		}
 
 		/// <summary>
@@ -236,12 +331,7 @@ namespace dnlib.DotNet {
 		/// </summary>
 		public bool DisableJITcompileOptimizer {
 			get { return (Attributes & AssemblyAttributes.DisableJITcompileOptimizer) != 0; }
-			set {
-				if (value)
-					Attributes |= AssemblyAttributes.DisableJITcompileOptimizer;
-				else
-					Attributes &= ~AssemblyAttributes.DisableJITcompileOptimizer;
-			}
+			set { ModifyAttributes(value, AssemblyAttributes.DisableJITcompileOptimizer); }
 		}
 
 		/// <summary>
@@ -249,12 +339,7 @@ namespace dnlib.DotNet {
 		/// </summary>
 		public bool IsRetargetable {
 			get { return (Attributes & AssemblyAttributes.Retargetable) != 0; }
-			set {
-				if (value)
-					Attributes |= AssemblyAttributes.Retargetable;
-				else
-					Attributes &= ~AssemblyAttributes.Retargetable;
-			}
+			set { ModifyAttributes(value, AssemblyAttributes.Retargetable); }
 		}
 
 		/// <summary>
@@ -262,7 +347,7 @@ namespace dnlib.DotNet {
 		/// </summary>
 		public AssemblyAttributes ContentType {
 			get { return Attributes & AssemblyAttributes.ContentType_Mask; }
-			set { Attributes = (Attributes & ~AssemblyAttributes.ContentType_Mask) | (value & AssemblyAttributes.ContentType_Mask); }
+			set { ModifyAttributes(~AssemblyAttributes.ContentType_Mask, value & AssemblyAttributes.ContentType_Mask); }
 		}
 
 		/// <summary>
@@ -295,7 +380,7 @@ namespace dnlib.DotNet {
 		UTF8String name;
 		UTF8String locale;
 		byte[] hashValue;
-		CustomAttributeCollection customAttributeCollection = new CustomAttributeCollection();
+		readonly CustomAttributeCollection customAttributeCollection = new CustomAttributeCollection();
 
 		/// <inheritdoc/>
 		public override CustomAttributeCollection CustomAttributes {
@@ -313,23 +398,15 @@ namespace dnlib.DotNet {
 		}
 
 		/// <inheritdoc/>
-		public override AssemblyAttributes Attributes {
+		protected override AssemblyAttributes Attributes_NoLock {
 			get { return flags; }
-			set { flags = (value & ~AssemblyAttributes.PublicKey) | (flags & AssemblyAttributes.PublicKey); }
+			set { flags = value; }
 		}
 
 		/// <inheritdoc/>
-		public override PublicKeyBase PublicKeyOrToken {
+		protected override PublicKeyBase PublicKeyOrToken_NoLock {
 			get { return publicKeyOrToken; }
-			set {
-				if (value == null)
-					throw new ArgumentNullException("value");
-				if (value is PublicKey)
-					flags |= AssemblyAttributes.PublicKey;
-				else
-					flags &= ~AssemblyAttributes.PublicKey;
-				publicKeyOrToken = value;
-			}
+			set { publicKeyOrToken = value; }
 		}
 
 		/// <inheritdoc/>
@@ -484,8 +561,8 @@ namespace dnlib.DotNet {
 	/// </summary>
 	sealed class AssemblyRefMD : AssemblyRef {
 		/// <summary>The module where this instance is located</summary>
-		ModuleDefMD readerModule;
-		/// <summary>The raw table row. It's <c>null</c> until <see cref="InitializeRawRow"/> is called</summary>
+		readonly ModuleDefMD readerModule;
+		/// <summary>The raw table row. It's <c>null</c> until <see cref="InitializeRawRow_NoLock"/> is called</summary>
 		RawAssemblyRefRow rawRow;
 
 		CustomAttributeCollection customAttributeCollection;
@@ -501,7 +578,8 @@ namespace dnlib.DotNet {
 			get {
 				if (customAttributeCollection == null) {
 					var list = readerModule.MetaData.GetCustomAttributeRidList(Table.AssemblyRef, rid);
-					customAttributeCollection = new CustomAttributeCollection((int)list.Length, list, (list2, index) => readerModule.ReadCustomAttribute(((RidList)list2)[index]));
+					var tmp = new CustomAttributeCollection((int)list.Length, list, (list2, index) => readerModule.ReadCustomAttribute(((RidList)list2)[index]));
+					Interlocked.CompareExchange(ref customAttributeCollection, tmp, null);
 				}
 				return customAttributeCollection;
 			}
@@ -518,23 +596,15 @@ namespace dnlib.DotNet {
 		}
 
 		/// <inheritdoc/>
-		public override AssemblyAttributes Attributes {
+		protected override AssemblyAttributes Attributes_NoLock {
 			get { return flags.Value; }
-			set { flags.Value = (value & ~AssemblyAttributes.PublicKey) | (flags.Value & AssemblyAttributes.PublicKey); }
+			set { flags.Value = value; }
 		}
 
 		/// <inheritdoc/>
-		public override PublicKeyBase PublicKeyOrToken {
+		protected override PublicKeyBase PublicKeyOrToken_NoLock {
 			get { return publicKeyOrToken.Value; }
-			set {
-				if (value == null)
-					throw new ArgumentNullException("value");
-				if (value is PublicKey)
-					flags.Value |= AssemblyAttributes.PublicKey;
-				else
-					flags.Value &= ~AssemblyAttributes.PublicKey;
-				publicKeyOrToken.Value = value;
-			}
+			set { publicKeyOrToken.Value = value; }
 		}
 
 		/// <inheritdoc/>
@@ -576,35 +646,43 @@ namespace dnlib.DotNet {
 
 		void Initialize() {
 			version.ReadOriginalValue = () => {
-				InitializeRawRow();
+				InitializeRawRow_NoLock();
 				return new Version(rawRow.MajorVersion, rawRow.MinorVersion, rawRow.BuildNumber, rawRow.RevisionNumber);
 			};
 			flags.ReadOriginalValue = () => {
-				InitializeRawRow();
+				InitializeRawRow_NoLock();
 				return (AssemblyAttributes)rawRow.Flags;
 			};
 			publicKeyOrToken.ReadOriginalValue = () => {
-				InitializeRawRow();
+				InitializeRawRow_NoLock();
 				var pkData = readerModule.BlobStream.Read(rawRow.PublicKeyOrToken);
 				if ((rawRow.Flags & (uint)AssemblyAttributes.PublicKey) != 0)
 					return new PublicKey(pkData);
 				return new PublicKeyToken(pkData);
 			};
 			name.ReadOriginalValue = () => {
-				InitializeRawRow();
+				InitializeRawRow_NoLock();
 				return readerModule.StringsStream.ReadNoNull(rawRow.Name);
 			};
 			locale.ReadOriginalValue = () => {
-				InitializeRawRow();
+				InitializeRawRow_NoLock();
 				return readerModule.StringsStream.ReadNoNull(rawRow.Locale);
 			};
 			hashValue.ReadOriginalValue = () => {
-				InitializeRawRow();
+				InitializeRawRow_NoLock();
 				return readerModule.BlobStream.Read(rawRow.HashValue);
 			};
+#if THREAD_SAFE
+			version.Lock = theLock;
+			// flags.Lock = theLock;				No lock for this one
+			// publicKeyOrToken.Lock = theLock;		No lock for this one
+			name.Lock = theLock;
+			locale.Lock = theLock;
+			hashValue.Lock = theLock;
+#endif
 		}
 
-		void InitializeRawRow() {
+		void InitializeRawRow_NoLock() {
 			if (rawRow != null)
 				return;
 			rawRow = readerModule.TablesStream.ReadAssemblyRefRow(rid);

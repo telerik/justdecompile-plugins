@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2013 de4dot@gmail.com
+    Copyright (C) 2012-2014 de4dot@gmail.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -23,8 +23,10 @@
 
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using dnlib.Utils;
 using dnlib.DotNet.MD;
+using dnlib.Threading;
 
 namespace dnlib.DotNet {
 	/// <summary>
@@ -36,6 +38,13 @@ namespace dnlib.DotNet {
 		/// The row id in its table
 		/// </summary>
 		protected uint rid;
+
+#if THREAD_SAFE
+		/// <summary>
+		/// The lock
+		/// </summary>
+		internal readonly Lock theLock = Lock.Create();
+#endif
 
 		/// <inheritdoc/>
 		public MDToken MDToken {
@@ -61,7 +70,32 @@ namespace dnlib.DotNet {
 		/// <summary>
 		/// From column ManifestResource.Flags
 		/// </summary>
-		public abstract ManifestResourceAttributes Flags { get; set; }
+		public ManifestResourceAttributes Flags {
+#if THREAD_SAFE
+			get {
+				theLock.EnterWriteLock();
+				try {
+					return Flags_NoLock;
+				}
+				finally { theLock.ExitWriteLock(); }
+			}
+			set {
+				theLock.EnterWriteLock();
+				try {
+					Flags_NoLock = value;
+				}
+				finally { theLock.ExitWriteLock(); }
+			}
+#else
+			get { return Flags_NoLock; }
+			set { Flags_NoLock = value; }
+#endif
+		}
+
+		/// <summary>
+		/// From column ManifestResource.Flags
+		/// </summary>
+		protected abstract ManifestResourceAttributes Flags_NoLock { get; set; }
 
 		/// <summary>
 		/// From column ManifestResource.Name
@@ -84,11 +118,27 @@ namespace dnlib.DotNet {
 		}
 
 		/// <summary>
+		/// Modify <see cref="Flags_NoLock"/> property: <see cref="Flags_NoLock"/> =
+		/// (<see cref="Flags_NoLock"/> &amp; <paramref name="andMask"/>) | <paramref name="orMask"/>.
+		/// </summary>
+		/// <param name="andMask">Value to <c>AND</c></param>
+		/// <param name="orMask">Value to OR</param>
+		void ModifyAttributes(ManifestResourceAttributes andMask, ManifestResourceAttributes orMask) {
+#if THREAD_SAFE
+			theLock.EnterWriteLock(); try {
+#endif
+				Flags_NoLock = (Flags_NoLock & andMask) | orMask;
+#if THREAD_SAFE
+			} finally { theLock.ExitWriteLock(); }
+#endif
+		}
+
+		/// <summary>
 		/// Gets/sets the visibility
 		/// </summary>
 		public ManifestResourceAttributes Visibility {
 			get { return Flags & ManifestResourceAttributes.VisibilityMask; }
-			set { Flags = (Flags & ~ManifestResourceAttributes.VisibilityMask) | (value & ManifestResourceAttributes.VisibilityMask); }
+			set { ModifyAttributes(~ManifestResourceAttributes.VisibilityMask, value & ManifestResourceAttributes.VisibilityMask); }
 		}
 
 		/// <summary>
@@ -114,7 +164,7 @@ namespace dnlib.DotNet {
 		ManifestResourceAttributes flags;
 		UTF8String name;
 		IImplementation implementation;
-		CustomAttributeCollection customAttributeCollection = new CustomAttributeCollection();
+		readonly CustomAttributeCollection customAttributeCollection = new CustomAttributeCollection();
 
 		/// <inheritdoc/>
 		public override uint Offset {
@@ -123,7 +173,7 @@ namespace dnlib.DotNet {
 		}
 
 		/// <inheritdoc/>
-		public override ManifestResourceAttributes Flags {
+		protected override ManifestResourceAttributes Flags_NoLock {
 			get { return flags; }
 			set { flags = value; }
 		}
@@ -190,8 +240,8 @@ namespace dnlib.DotNet {
 	/// </summary>
 	sealed class ManifestResourceMD : ManifestResource {
 		/// <summary>The module where this instance is located</summary>
-		ModuleDefMD readerModule;
-		/// <summary>The raw table row. It's <c>null</c> until <see cref="InitializeRawRow"/> is called</summary>
+		readonly ModuleDefMD readerModule;
+		/// <summary>The raw table row. It's <c>null</c> until <see cref="InitializeRawRow_NoLock"/> is called</summary>
 		RawManifestResourceRow rawRow;
 
 		UserValue<uint> offset;
@@ -207,7 +257,7 @@ namespace dnlib.DotNet {
 		}
 
 		/// <inheritdoc/>
-		public override ManifestResourceAttributes Flags {
+		protected override ManifestResourceAttributes Flags_NoLock {
 			get { return flags.Value; }
 			set { flags.Value = value; }
 		}
@@ -229,7 +279,8 @@ namespace dnlib.DotNet {
 			get {
 				if (customAttributeCollection == null) {
 					var list = readerModule.MetaData.GetCustomAttributeRidList(Table.ManifestResource, rid);
-					customAttributeCollection = new CustomAttributeCollection((int)list.Length, list, (list2, index) => readerModule.ReadCustomAttribute(((RidList)list2)[index]));
+					var tmp = new CustomAttributeCollection((int)list.Length, list, (list2, index) => readerModule.ReadCustomAttribute(((RidList)list2)[index]));
+					Interlocked.CompareExchange(ref customAttributeCollection, tmp, null);
 				}
 				return customAttributeCollection;
 			}
@@ -256,24 +307,30 @@ namespace dnlib.DotNet {
 
 		void Initialize() {
 			offset.ReadOriginalValue = () => {
-				InitializeRawRow();
+				InitializeRawRow_NoLock();
 				return rawRow.Offset;
 			};
 			flags.ReadOriginalValue = () => {
-				InitializeRawRow();
+				InitializeRawRow_NoLock();
 				return (ManifestResourceAttributes)rawRow.Flags;
 			};
 			name.ReadOriginalValue = () => {
-				InitializeRawRow();
+				InitializeRawRow_NoLock();
 				return readerModule.StringsStream.ReadNoNull(rawRow.Name);
 			};
 			implementation.ReadOriginalValue = () => {
-				InitializeRawRow();
+				InitializeRawRow_NoLock();
 				return readerModule.ResolveImplementation(rawRow.Implementation);
 			};
+#if THREAD_SAFE
+			offset.Lock = theLock;
+			// flags.Lock = theLock;	No lock for this one
+			name.Lock = theLock;
+			implementation.Lock = theLock;
+#endif
 		}
 
-		void InitializeRawRow() {
+		void InitializeRawRow_NoLock() {
 			if (rawRow != null)
 				return;
 			rawRow = readerModule.TablesStream.ReadManifestResourceRow(rid);

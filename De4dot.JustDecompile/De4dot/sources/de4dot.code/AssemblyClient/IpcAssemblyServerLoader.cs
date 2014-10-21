@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -35,20 +35,22 @@ namespace de4dot.code.AssemblyClient {
 		readonly string assemblyServerFilename;
 		protected string ipcName;
 		protected string ipcUri;
+		protected AssemblyServiceType serviceType;
 		string url;
 
-		protected IpcAssemblyServerLoader()
-			: this(ServerClrVersion.CLR_ANY_ANYCPU) {
+		protected IpcAssemblyServerLoader(AssemblyServiceType serviceType)
+			: this(serviceType, ServerClrVersion.CLR_ANY_ANYCPU) {
 		}
 
-		protected IpcAssemblyServerLoader(ServerClrVersion serverVersion) {
-			assemblyServerFilename = getServerName(serverVersion);
-			ipcName = Utils.randomName(15, 20);
-			ipcUri = Utils.randomName(15, 20);
+		protected IpcAssemblyServerLoader(AssemblyServiceType serviceType, ServerClrVersion serverVersion) {
+			this.serviceType = serviceType;
+			assemblyServerFilename = GetServerName(serverVersion);
+			ipcName = Utils.RandomName(15, 20);
+			ipcUri = Utils.RandomName(15, 20);
 			url = string.Format("ipc://{0}/{1}", ipcName, ipcUri);
 		}
 
-		static string getServerName(ServerClrVersion serverVersion) {
+		static string GetServerName(ServerClrVersion serverVersion) {
 			if (serverVersion == ServerClrVersion.CLR_ANY_ANYCPU)
 				serverVersion = IntPtr.Size == 4 ? ServerClrVersion.CLR_ANY_x86 : ServerClrVersion.CLR_ANY_x64;
 			switch (serverVersion) {
@@ -62,14 +64,14 @@ namespace de4dot.code.AssemblyClient {
 			}
 		}
 
-		public void loadServer() {
-			loadServer(Utils.getPathOfOurFile(assemblyServerFilename));
+		public void LoadServer() {
+			LoadServer(Utils.GetPathOfOurFile(assemblyServerFilename));
 		}
 
-		public abstract void loadServer(string filename);
+		public abstract void LoadServer(string filename);
 
-		public IAssemblyService createService() {
-			return (IAssemblyService)Activator.GetObject(typeof(AssemblyService), url);
+		public IAssemblyService CreateService() {
+			return (IAssemblyService)Activator.GetObject(AssemblyService.GetType(serviceType), url);
 		}
 
 		public abstract void Dispose();

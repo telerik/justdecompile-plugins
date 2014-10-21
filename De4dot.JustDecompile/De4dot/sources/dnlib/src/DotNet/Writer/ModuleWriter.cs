@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2013 de4dot@gmail.com
+    Copyright (C) 2012-2014 de4dot@gmail.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -232,7 +232,7 @@ namespace dnlib.DotNet.Writer {
 
 		/// <inheritdoc/>
 		protected override Win32Resources GetWin32Resources() {
-			return module.Win32Resources ?? Options.Win32Resources;
+			return Options.Win32Resources ?? module.Win32Resources;
 		}
 
 		void CreateSections() {

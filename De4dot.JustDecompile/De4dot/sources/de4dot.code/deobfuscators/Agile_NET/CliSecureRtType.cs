@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright (C) 2011-2013 de4dot@gmail.com
+    Copyright (C) 2011-2014 de4dot@gmail.com
 
     This file is part of de4dot.
 
@@ -29,7 +29,7 @@ namespace de4dot.code.deobfuscators.Agile_NET {
 		TypeDef cliSecureRtType;
 		MethodDef postInitializeMethod;
 		MethodDef initializeMethod;
-		MethodDef stringDecrypterMethod;
+		Dictionary<StringDecrypterInfo, bool> stringDecrypterInfos = new Dictionary<StringDecrypterInfo, bool>();
 		MethodDef loadMethod;
 		bool foundSig;
 
@@ -41,8 +41,8 @@ namespace de4dot.code.deobfuscators.Agile_NET {
 			get { return cliSecureRtType; }
 		}
 
-		public MethodDef StringDecrypterMethod {
-			get { return stringDecrypterMethod; }
+		public IEnumerable<StringDecrypterInfo> StringDecrypterInfos {
+			get { return stringDecrypterInfos.Keys; }
 		}
 
 		public MethodDef PostInitializeMethod {
@@ -63,62 +63,52 @@ namespace de4dot.code.deobfuscators.Agile_NET {
 
 		public CliSecureRtType(ModuleDefMD module, CliSecureRtType oldOne) {
 			this.module = module;
-			cliSecureRtType = lookup(oldOne.cliSecureRtType, "Could not find CliSecureRt type");
-			postInitializeMethod = lookup(oldOne.postInitializeMethod, "Could not find postInitializeMethod method");
-			initializeMethod = lookup(oldOne.initializeMethod, "Could not find initializeMethod method");
-			stringDecrypterMethod = lookup(oldOne.stringDecrypterMethod, "Could not find stringDecrypterMethod method");
-			loadMethod = lookup(oldOne.loadMethod, "Could not find loadMethod method");
+			cliSecureRtType = Lookup(oldOne.cliSecureRtType, "Could not find CliSecureRt type");
+			postInitializeMethod = Lookup(oldOne.postInitializeMethod, "Could not find postInitializeMethod method");
+			initializeMethod = Lookup(oldOne.initializeMethod, "Could not find initializeMethod method");
+			foreach (var info in oldOne.stringDecrypterInfos.Keys) {
+				var m = Lookup(info.Method, "Could not find string decrypter method");
+				var f = Lookup(info.Field, "Could not find string decrypter field");
+				stringDecrypterInfos[new StringDecrypterInfo(m, f)] = true;
+			}
+			loadMethod = Lookup(oldOne.loadMethod, "Could not find loadMethod method");
 			foundSig = oldOne.foundSig;
 		}
 
-		T lookup<T>(T def, string errorMessage) where T : class, ICodedToken {
-			return DeobUtils.lookup(module, def, errorMessage);
+		T Lookup<T>(T def, string errorMessage) where T : class, ICodedToken {
+			return DeobUtils.Lookup(module, def, errorMessage);
 		}
 
-		public void find(byte[] moduleBytes) {
+		public void Find(byte[] moduleBytes) {
 			if (cliSecureRtType != null)
 				return;
-			if (find2())
+			if (Find2())
 				return;
-			if (find3())
+			if (Find3())
 				return;
-			findNativeCode(moduleBytes);
+			FindNativeCode(moduleBytes);
 		}
 
 		static readonly string[] requiredFields1 = new string[] {
 			"System.Boolean",
 		};
-		static readonly string[] requiredFields2 = new string[] {
-			"System.Boolean",
-			"System.Reflection.Assembly",
-		};
-		static readonly string[] requiredFields3 = new string[] {
-			"System.Boolean",
-			"System.Byte[]",
-		};
-		static readonly string[] requiredFields4 = new string[] {
-			"System.Boolean",
-			"System.Reflection.Assembly",
-			"System.Byte[]",
-		};
-		bool find2() {
-			foreach (var cctor in DeobUtils.getInitCctors(module, 3)) {
-				foreach (var calledMethod in DotNetUtils.getCalledMethods(module, cctor)) {
+		bool Find2() {
+			foreach (var cctor in DeobUtils.GetInitCctors(module, 3)) {
+				foreach (var calledMethod in DotNetUtils.GetCalledMethods(module, cctor)) {
 					var type = calledMethod.DeclaringType;
 					if (type.IsPublic)
 						continue;
 					var fieldTypes = new FieldTypes(type);
-					if (!fieldTypes.exactly(requiredFields1) && !fieldTypes.exactly(requiredFields2) &&
-						!fieldTypes.exactly(requiredFields3) && !fieldTypes.exactly(requiredFields4))
+					if (!fieldTypes.All(requiredFields1))
 						continue;
-					if (!hasInitializeMethod(type, "_Initialize") && !hasInitializeMethod(type, "_Initialize64"))
+					if (!HasInitializeMethod(type, "_Initialize") && !HasInitializeMethod(type, "_Initialize64"))
 						continue;
 
-					stringDecrypterMethod = findStringDecrypterMethod(type);
 					initializeMethod = calledMethod;
-					postInitializeMethod = findMethod(type, "System.Void", "PostInitialize", "()");
-					loadMethod = findMethod(type, "System.IntPtr", "Load", "()");
+					postInitializeMethod = FindMethod(type, "System.Void", "PostInitialize", "()");
+					loadMethod = FindMethod(type, "System.IntPtr", "Load", "()");
 					cliSecureRtType = type;
+					FindStringDecrypters();
 					return true;
 				}
 			}
@@ -126,11 +116,28 @@ namespace de4dot.code.deobfuscators.Agile_NET {
 			return false;
 		}
 
-		bool find3() {
+		void FindStringDecrypters() {
+			AddStringDecrypterMethod(FindStringDecrypterMethod(cliSecureRtType));
+		}
+
+		void AddStringDecrypterMethod(MethodDef method) {
+			if (method != null)
+				stringDecrypterInfos[new StringDecrypterInfo(method)] = true;
+		}
+
+		static string[] requiredFields6 = new string[] {
+			"System.Byte[]",
+		};
+		static string[] requiredFields7 = new string[] {
+			"System.Byte[]",
+			"System.Collections.Hashtable",
+		};
+		bool Find3() {
 			foreach (var type in module.Types) {
-				if (type.Fields.Count != 1)
+				if (type.Fields.Count < 1 || type.Fields.Count > 2)
 					continue;
-				if (type.Fields[0].FieldSig.GetFieldType().GetFullName() != "System.Byte[]")
+				var fieldTypes = new FieldTypes(type);
+				if (!fieldTypes.Exactly(requiredFields6) && !fieldTypes.Exactly(requiredFields7))
 					continue;
 				if (type.Methods.Count != 2)
 					continue;
@@ -140,7 +147,7 @@ namespace de4dot.code.deobfuscators.Agile_NET {
 				if (cs == null)
 					continue;
 
-				stringDecrypterMethod = cs;
+				AddStringDecrypterMethod(cs);
 				cliSecureRtType = type;
 				return true;
 			}
@@ -148,11 +155,11 @@ namespace de4dot.code.deobfuscators.Agile_NET {
 			return false;
 		}
 
-		static MethodDef findStringDecrypterMethod(TypeDef type) {
+		static MethodDef FindStringDecrypterMethod(TypeDef type) {
 			foreach (var method in type.Methods) {
 				if (method.Body == null || !method.IsStatic)
 					continue;
-				if (!DotNetUtils.isMethod(method, "System.String", "(System.String)"))
+				if (!DotNetUtils.IsMethod(method, "System.String", "(System.String)"))
 					continue;
 
 				return method;
@@ -161,7 +168,7 @@ namespace de4dot.code.deobfuscators.Agile_NET {
 			return null;
 		}
 
-		static MethodDef findMethod(TypeDef type, string returnType, string name, string parameters) {
+		static MethodDef FindMethod(TypeDef type, string returnType, string name, string parameters) {
 			var methodName = returnType + " " + type.FullName + "::" + name + parameters;
 			foreach (var method in type.Methods) {
 				if (method.Body == null || !method.IsStatic)
@@ -175,8 +182,8 @@ namespace de4dot.code.deobfuscators.Agile_NET {
 			return null;
 		}
 
-		static bool hasInitializeMethod(TypeDef type, string name) {
-			var method = DotNetUtils.getPInvokeMethod(type, name);
+		static bool HasInitializeMethod(TypeDef type, string name) {
+			var method = DotNetUtils.GetPInvokeMethod(type, name);
 			if (method == null)
 				return false;
 			var sig = method.MethodSig;
@@ -190,17 +197,17 @@ namespace de4dot.code.deobfuscators.Agile_NET {
 			return true;
 		}
 
-		bool findNativeCode(byte[] moduleBytes) {
-			var bytes = moduleBytes != null ? moduleBytes : DeobUtils.readModule(module);
+		bool FindNativeCode(byte[] moduleBytes) {
+			var bytes = moduleBytes != null ? moduleBytes : DeobUtils.ReadModule(module);
 			using (var peImage = new MyPEImage(bytes))
-				return foundSig = MethodsDecrypter.detect(peImage);
+				return foundSig = MethodsDecrypter.Detect(peImage);
 		}
 
-		public bool isAtLeastVersion50() {
-			return DotNetUtils.hasPinvokeMethod(cliSecureRtType, "LoadLibraryA");
+		public bool IsAtLeastVersion50() {
+			return DotNetUtils.HasPinvokeMethod(cliSecureRtType, "LoadLibraryA");
 		}
 
-		public void findStringDecrypterMethod() {
+		public void FindStringDecrypterMethod() {
 			if (cliSecureRtType != null)
 				return;
 
@@ -210,21 +217,21 @@ namespace de4dot.code.deobfuscators.Agile_NET {
 				if (type.Methods.Count != 1)
 					continue;
 				var cs = type.Methods[0];
-				if (!isOldStringDecrypterMethod(cs))
+				if (!IsOldStringDecrypterMethod(cs))
 					continue;
 
 				cliSecureRtType = type;
-				stringDecrypterMethod = cs;
+				AddStringDecrypterMethod(cs);
 				return;
 			}
 		}
 
-		static bool isOldStringDecrypterMethod(MethodDef method) {
+		static bool IsOldStringDecrypterMethod(MethodDef method) {
 			if (method == null || method.Body == null || !method.IsStatic)
 				return false;
-			if (!DotNetUtils.isMethod(method, "System.String", "(System.String)"))
+			if (!DotNetUtils.IsMethod(method, "System.String", "(System.String)"))
 				return false;
-			if (!DeobUtils.hasInteger(method, 0xFF))
+			if (!DeobUtils.HasInteger(method, 0xFF))
 				return false;
 
 			return true;
