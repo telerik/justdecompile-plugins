@@ -26,6 +26,16 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup  Condition="'$(Configuration)|$(Platform)' == 'DebugInternal|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Source\UI\DebugBuild\Plugins\Reflexil\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PreBuildEvent>"$(MsbuildBinPath)\msbuild" "$(SolutionDir)JustDecompileApi.sln" /p:Configuration=ReleaseInternal</PreBuildEvent>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
@@ -52,12 +62,23 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseInternal|AnyCPU'">
+    <OutputPath>..\..\Source\UI\ReleaseBuild\Plugins\Reflexil\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <PreBuildEvent>"$(MsbuildBinPath)\msbuild" "$(SolutionDir)JustDecompileApi.sln" /p:Configuration=ReleaseInternal</PreBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Cecil.Decompiler.Gui.Services">
-      <HintPath>..\reflexil.1.8.src\Plugins\Reflexil.CecilStudio\Libs\Binaries\Cecil.Decompiler.Gui.Services.dll</HintPath>
+      <HintPath>reflexil.1.8.src\Plugins\Reflexil.CecilStudio\Libs\Binaries\Cecil.Decompiler.Gui.Services.dll</HintPath>
     </Reference>
     <Reference Include="JustDecompile.API">
-      <HintPath>D:\Work\Behemoth\Trunk\JustDecompile Plugins\References\JustDecompile.API.dll</HintPath>
+      <HintPath>..\References\JustDecompile.API.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -95,23 +116,23 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\reflexil.1.8.src\Libs\Sources\Mono.Cecil.Mdb\Mono.Cecil.Mdb.csproj">
+    <ProjectReference Include="reflexil.1.8.src\Libs\Sources\Mono.Cecil.Mdb\Mono.Cecil.Mdb.csproj">
       <Project>{c5d12431-9c20-4789-8fec-46094b0f81b5}</Project>
       <Name>Mono.Cecil.Mdb</Name>
     </ProjectReference>
-    <ProjectReference Include="..\reflexil.1.8.src\Libs\Sources\Mono.Cecil.Pdb\Mono.Cecil.Pdb.csproj">
+    <ProjectReference Include="reflexil.1.8.src\Libs\Sources\Mono.Cecil.Pdb\Mono.Cecil.Pdb.csproj">
       <Project>{4febbb25-d5c0-48f0-a822-2e0d6f3d777e}</Project>
       <Name>Mono.Cecil.Pdb</Name>
     </ProjectReference>
-    <ProjectReference Include="..\reflexil.1.8.src\Libs\Sources\Mono.Cecil\Mono.Cecil.csproj">
+    <ProjectReference Include="reflexil.1.8.src\Libs\Sources\Mono.Cecil\Mono.Cecil.csproj">
       <Project>{d8f63dff-5230-43e4-9ab2-da6e721a1fae}</Project>
       <Name>Mono.Cecil</Name>
     </ProjectReference>
-    <ProjectReference Include="..\reflexil.1.8.src\Plugins\Reflexil.CecilStudio\Reflexil.CecilStudio.csproj">
+    <ProjectReference Include="reflexil.1.8.src\Plugins\Reflexil.CecilStudio\Reflexil.CecilStudio.csproj">
       <Project>{e95bf266-ca23-4488-b519-2b15395297ad}</Project>
       <Name>Reflexil.CecilStudio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\reflexil.1.8.src\Reflexil.csproj">
+    <ProjectReference Include="reflexil.1.8.src\Reflexil.csproj">
       <Project>{dc7b5e39-ff49-4fe9-922b-3ae3de36f2c6}</Project>
       <Name>Reflexil</Name>
     </ProjectReference>
@@ -121,6 +142,9 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Compile Include="..\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\gray_close_button.png" />
@@ -129,6 +153,9 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!--<PropertyGroup>
+    <PreBuildEvent>"$(MsbuildBinPath)\msbuild" "$(SolutionDir)JustDecompileApi.sln" /p:Configuration=ReleaseInternal</PreBuildEvent>
+  </PropertyGroup>-->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

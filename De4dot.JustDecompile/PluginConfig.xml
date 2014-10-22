@@ -8,7 +8,7 @@
     - Suitable for cases like deobfuscating .NET malware, your lost source code for which you have only obfuscated .NET assembly.
     - Verify whether an obfuscated .NET assembly contains the claimed source code, optimizing program code and getting rid of obfuscator generated code.
   </Description>
-  <Version>2013.1.314.0</Version>
+  <Version> 2014.1.225.0</Version>
   <SupportedJDversion>2013.1.305.4</SupportedJDversion>
   <Guid>2DE1911A-564D-457B-A4EF-77200C39AB42</Guid>
   <Url>http://www.telerik.com/products/decompiler/extensions.aspx#de4dot-deobfuscator</Url>
