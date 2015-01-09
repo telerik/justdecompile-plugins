@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{C5D12431-9C20-4789-8FEC-46094B0F81B5}</ProjectGuid>
+    <ProjectGuid>{4FEBBB25-D5C0-48F0-A822-2E0D6F3D777E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Mono.Cecil.Mdb</RootNamespace>
-    <AssemblyName>Mono.Cecil.Mdb</AssemblyName>
+    <RootNamespace>Mono.Cecil.Pdb</RootNamespace>
+    <AssemblyName>Reflexil.Mono.Cecil.Pdb</AssemblyName>
     <StartupObject>
     </StartupObject>
     <SignAssembly>true</SignAssembly>
@@ -21,7 +21,7 @@
     </UpgradeBackupLocation>
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <PublishUrl>http://localhost/Mono.Cecil.Mdb/</PublishUrl>
+    <PublishUrl>http://localhost/Mono.Cecil.Pdb/</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -46,18 +46,18 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;CECIL;NET_3_5</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NET_3_5</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>0</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;CECIL;NET_3_5</DefineConstants>
+    <DefineConstants>TRACE;NET_3_5</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>0</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
@@ -69,18 +69,50 @@
   </Target>
   -->
   <ItemGroup>
+    <Compile Include="Microsoft.Cci.Pdb\BitAccess.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\BitSet.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\CvInfo.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\DataStream.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\DbiDbgHdr.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\DbiHeader.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\DbiModuleInfo.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\DbiSecCon.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\Interfaces.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\IntHashTable.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\MsfDirectory.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\PdbConstant.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\PdbDebugException.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\PdbException.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\PdbFile.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\PdbFileHeader.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\PdbFunction.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\PdbLine.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\PdbLines.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\PdbReader.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\PdbScope.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\PdbSlot.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\PdbSource.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\PdbTokenLine.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\SourceLocationProvider.cs" />
+    <Compile Include="Mono.Cecil.Pdb\ISymUnmanagedDocumentWriter.cs" />
+    <Compile Include="Mono.Cecil.Pdb\ISymUnmanagedWriter2.cs" />
+    <Compile Include="Mono.Cecil.Pdb\ModuleMetadata.cs" />
+    <Compile Include="Mono.Cecil.Pdb\SymDocumentWriter.cs" />
+    <Compile Include="Mono.Cecil.Pdb\SymWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Mono.Cecil.Mdb\MdbReader.cs" />
-    <Compile Include="Mono.Cecil.Mdb\MdbWriter.cs" />
-    <Compile Include="Mono.CompilerServices.SymbolWriter\MonoSymbolFile.cs" />
-    <Compile Include="Mono.CompilerServices.SymbolWriter\MonoSymbolTable.cs" />
-    <Compile Include="Mono.CompilerServices.SymbolWriter\MonoSymbolWriter.cs" />
-    <Compile Include="Mono.CompilerServices.SymbolWriter\SymbolWriterImpl.cs" />
+    <Compile Include="Mono.Cecil.Pdb\PdbReader.cs" />
+    <Compile Include="Mono.Cecil.Pdb\PdbWriter.cs" />
+    <Compile Include="Mono.Cecil.Pdb\PdbHelper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="ISymWrapper" />
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mono.Cecil\Reflexil.Mono.Cecil.csproj">
+      <Project>{D8F63DFF-5230-43E4-9AB2-DA6E721A1FAE}</Project>
+      <Name>Reflexil.Mono.Cecil</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -110,9 +142,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mono.Cecil\Mono.Cecil.csproj">
-      <Project>{D8F63DFF-5230-43E4-9AB2-DA6E721A1FAE}</Project>
-      <Name>Mono.Cecil</Name>
-    </ProjectReference>
+    <None Include="Microsoft.Cci.Pdb\LICENSE" />
   </ItemGroup>
 </Project>

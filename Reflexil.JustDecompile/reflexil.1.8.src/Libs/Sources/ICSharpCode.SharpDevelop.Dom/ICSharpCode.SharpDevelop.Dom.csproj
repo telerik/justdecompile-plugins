@@ -53,9 +53,9 @@
       <Project>{A4F3E313-3DC9-4E7E-A008-21F954C5B12E}</Project>
       <Name>ICSharpCode.NRefactory</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Mono.Cecil\Mono.Cecil.csproj">
+    <ProjectReference Include="..\Mono.Cecil\Reflexil.Mono.Cecil.csproj">
       <Project>{D8F63DFF-5230-43E4-9AB2-DA6E721A1FAE}</Project>
-      <Name>Mono.Cecil</Name>
+      <Name>Reflexil.Mono.Cecil</Name>
       <Aliases>global</Aliases>
     </ProjectReference>
   </ItemGroup>

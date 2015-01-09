@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reflexil", "Reflexil", "{FE836106-A87E-417D-BD75-5FB589390EF7}"
 EndProject
@@ -9,11 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "JustDecompile", "JustDecomp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reflexil", "Reflexil.JustDecompile\reflexil.1.8.src\Reflexil.csproj", "{DC7B5E39-FF49-4FE9-922B-3AE3DE36F2C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil", "Reflexil.JustDecompile\reflexil.1.8.src\Libs\Sources\Mono.Cecil\Mono.Cecil.csproj", "{D8F63DFF-5230-43E4-9AB2-DA6E721A1FAE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reflexil.Mono.Cecil", "Reflexil.JustDecompile\reflexil.1.8.src\Libs\Sources\Mono.Cecil\Reflexil.Mono.Cecil.csproj", "{D8F63DFF-5230-43E4-9AB2-DA6E721A1FAE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil.Pdb", "Reflexil.JustDecompile\reflexil.1.8.src\Libs\Sources\Mono.Cecil.Pdb\Mono.Cecil.Pdb.csproj", "{4FEBBB25-D5C0-48F0-A822-2E0D6F3D777E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reflexil.Mono.Cecil.Pdb", "Reflexil.JustDecompile\reflexil.1.8.src\Libs\Sources\Mono.Cecil.Pdb\Reflexil.Mono.Cecil.Pdb.csproj", "{4FEBBB25-D5C0-48F0-A822-2E0D6F3D777E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil.Mdb", "Reflexil.JustDecompile\reflexil.1.8.src\Libs\Sources\Mono.Cecil.Mdb\Mono.Cecil.Mdb.csproj", "{C5D12431-9C20-4789-8FEC-46094B0F81B5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reflexil.Mono.Cecil.Mdb", "Reflexil.JustDecompile\reflexil.1.8.src\Libs\Sources\Mono.Cecil.Mdb\Reflexil.Mono.Cecil.Mdb.csproj", "{C5D12431-9C20-4789-8FEC-46094B0F81B5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSharpCode.TextEditor", "Reflexil.JustDecompile\reflexil.1.8.src\Libs\Sources\ICSharpCode.TextEditor\ICSharpCode.TextEditor.csproj", "{2D18BE89-D210-49EB-A9DD-2246FBB3DF6D}"
 EndProject
@@ -25,9 +25,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reflexil.CecilStudio", "Ref
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reflexil.JustDecompile.Module", "Reflexil.JustDecompile\Reflexil.JustDecompile.Module.csproj", "{784AE381-3320-48DA-9B63-2F257351195C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cecil.Decompiler.Gui.Services", "Reflexil.JustDecompile\reflexil.1.8.src\Plugins\Cecil.Decompiler.Gui.Services\Cecil.Decompiler.Gui.Services.csproj", "{CBEA373D-D8EC-4746-8EE8-C3C296A2BFA1}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 10
+		SccNumberOfProjects = 11
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://tfs:8082/defaultcollection
 		SccLocalPath0 = .
@@ -35,38 +37,42 @@ Global
 		SccProjectTopLevelParentUniqueName1 = JustDecompile.ReflexilPlugin.sln
 		SccProjectName1 = Reflexil.JustDecompile/reflexil.1.8.src
 		SccLocalPath1 = Reflexil.JustDecompile\\reflexil.1.8.src
-		SccProjectUniqueName2 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\Mono.Cecil\\Mono.Cecil.csproj
+		SccProjectUniqueName2 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\ICSharpCode.TextEditor\\ICSharpCode.TextEditor.csproj
 		SccProjectTopLevelParentUniqueName2 = JustDecompile.ReflexilPlugin.sln
-		SccProjectName2 = Reflexil.JustDecompile/reflexil.1.8.src/Libs/Sources/Mono.Cecil
-		SccLocalPath2 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\Mono.Cecil
-		SccProjectUniqueName3 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\Mono.Cecil.Pdb\\Mono.Cecil.Pdb.csproj
+		SccProjectName2 = Reflexil.JustDecompile/reflexil.1.8.src/Libs/Sources/ICSharpCode.TextEditor
+		SccLocalPath2 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\ICSharpCode.TextEditor
+		SccProjectUniqueName3 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\ICSharpCode.SharpDevelop.Dom\\ICSharpCode.SharpDevelop.Dom.csproj
 		SccProjectTopLevelParentUniqueName3 = JustDecompile.ReflexilPlugin.sln
-		SccProjectName3 = Reflexil.JustDecompile/reflexil.1.8.src/Libs/Sources/Mono.Cecil.Pdb
-		SccLocalPath3 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\Mono.Cecil.Pdb
-		SccProjectUniqueName4 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\Mono.Cecil.Mdb\\Mono.Cecil.Mdb.csproj
+		SccProjectName3 = Reflexil.JustDecompile/reflexil.1.8.src/Libs/Sources/ICSharpCode.SharpDevelop.Dom
+		SccLocalPath3 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\ICSharpCode.SharpDevelop.Dom
+		SccProjectUniqueName4 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\ICSharpCode.NRefactory\\ICSharpCode.NRefactory.csproj
 		SccProjectTopLevelParentUniqueName4 = JustDecompile.ReflexilPlugin.sln
-		SccProjectName4 = Reflexil.JustDecompile/reflexil.1.8.src/Libs/Sources/Mono.Cecil.Mdb
-		SccLocalPath4 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\Mono.Cecil.Mdb
-		SccProjectUniqueName5 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\ICSharpCode.TextEditor\\ICSharpCode.TextEditor.csproj
+		SccProjectName4 = Reflexil.JustDecompile/reflexil.1.8.src/Libs/Sources/ICSharpCode.NRefactory
+		SccLocalPath4 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\ICSharpCode.NRefactory
+		SccProjectUniqueName5 = Reflexil.JustDecompile\\reflexil.1.8.src\\Plugins\\Reflexil.CecilStudio\\Reflexil.CecilStudio.csproj
 		SccProjectTopLevelParentUniqueName5 = JustDecompile.ReflexilPlugin.sln
-		SccProjectName5 = Reflexil.JustDecompile/reflexil.1.8.src/Libs/Sources/ICSharpCode.TextEditor
-		SccLocalPath5 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\ICSharpCode.TextEditor
-		SccProjectUniqueName6 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\ICSharpCode.SharpDevelop.Dom\\ICSharpCode.SharpDevelop.Dom.csproj
+		SccProjectName5 = Reflexil.JustDecompile/reflexil.1.8.src/Plugins/Reflexil.CecilStudio
+		SccLocalPath5 = Reflexil.JustDecompile\\reflexil.1.8.src\\Plugins\\Reflexil.CecilStudio
+		SccProjectUniqueName6 = Reflexil.JustDecompile\\Reflexil.JustDecompile.Module.csproj
 		SccProjectTopLevelParentUniqueName6 = JustDecompile.ReflexilPlugin.sln
-		SccProjectName6 = Reflexil.JustDecompile/reflexil.1.8.src/Libs/Sources/ICSharpCode.SharpDevelop.Dom
-		SccLocalPath6 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\ICSharpCode.SharpDevelop.Dom
-		SccProjectUniqueName7 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\ICSharpCode.NRefactory\\ICSharpCode.NRefactory.csproj
+		SccProjectName6 = Reflexil.JustDecompile
+		SccLocalPath6 = Reflexil.JustDecompile
+		SccProjectUniqueName7 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\Mono.Cecil\\Reflexil.Mono.Cecil.csproj
 		SccProjectTopLevelParentUniqueName7 = JustDecompile.ReflexilPlugin.sln
-		SccProjectName7 = Reflexil.JustDecompile/reflexil.1.8.src/Libs/Sources/ICSharpCode.NRefactory
-		SccLocalPath7 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\ICSharpCode.NRefactory
-		SccProjectUniqueName8 = Reflexil.JustDecompile\\reflexil.1.8.src\\Plugins\\Reflexil.CecilStudio\\Reflexil.CecilStudio.csproj
+		SccProjectName7 = Reflexil.JustDecompile/reflexil.1.8.src/Libs/Sources/Mono.Cecil
+		SccLocalPath7 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\Mono.Cecil
+		SccProjectUniqueName8 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\Mono.Cecil.Mdb\\Reflexil.Mono.Cecil.Mdb.csproj
 		SccProjectTopLevelParentUniqueName8 = JustDecompile.ReflexilPlugin.sln
-		SccProjectName8 = Reflexil.JustDecompile/reflexil.1.8.src/Plugins/Reflexil.CecilStudio
-		SccLocalPath8 = Reflexil.JustDecompile\\reflexil.1.8.src\\Plugins\\Reflexil.CecilStudio
-		SccProjectUniqueName9 = Reflexil.JustDecompile\\Reflexil.JustDecompile.Module.csproj
+		SccProjectName8 = Reflexil.JustDecompile/reflexil.1.8.src/Libs/Sources/Mono.Cecil.Mdb
+		SccLocalPath8 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\Mono.Cecil.Mdb
+		SccProjectUniqueName9 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\Mono.Cecil.Pdb\\Reflexil.Mono.Cecil.Pdb.csproj
 		SccProjectTopLevelParentUniqueName9 = JustDecompile.ReflexilPlugin.sln
-		SccProjectName9 = Reflexil.JustDecompile
-		SccLocalPath9 = Reflexil.JustDecompile
+		SccProjectName9 = Reflexil.JustDecompile/reflexil.1.8.src/Libs/Sources/Mono.Cecil.Pdb
+		SccLocalPath9 = Reflexil.JustDecompile\\reflexil.1.8.src\\Libs\\Sources\\Mono.Cecil.Pdb
+		SccProjectUniqueName10 = Reflexil.JustDecompile\\reflexil.1.8.src\\Plugins\\Cecil.Decompiler.Gui.Services\\Cecil.Decompiler.Gui.Services.csproj
+		SccProjectTopLevelParentUniqueName10 = JustDecompile.ReflexilPlugin.sln
+		SccProjectName10 = Reflexil.JustDecompile/reflexil.1.8.src/Plugins/Cecil.Decompiler.Gui.Services
+		SccLocalPath10 = Reflexil.JustDecompile\\reflexil.1.8.src\\Plugins\\Cecil.Decompiler.Gui.Services
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -207,6 +213,18 @@ Global
 		{784AE381-3320-48DA-9B63-2F257351195C}.ReleaseInternal|Any CPU.Build.0 = ReleaseInternal|Any CPU
 		{784AE381-3320-48DA-9B63-2F257351195C}.ReleaseInternal|x86.ActiveCfg = Release|Any CPU
 		{784AE381-3320-48DA-9B63-2F257351195C}.ReleaseInternal|x86.Build.0 = Release|Any CPU
+		{CBEA373D-D8EC-4746-8EE8-C3C296A2BFA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBEA373D-D8EC-4746-8EE8-C3C296A2BFA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBEA373D-D8EC-4746-8EE8-C3C296A2BFA1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CBEA373D-D8EC-4746-8EE8-C3C296A2BFA1}.DebugInternal|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBEA373D-D8EC-4746-8EE8-C3C296A2BFA1}.DebugInternal|Any CPU.Build.0 = Debug|Any CPU
+		{CBEA373D-D8EC-4746-8EE8-C3C296A2BFA1}.DebugInternal|x86.ActiveCfg = Debug|Any CPU
+		{CBEA373D-D8EC-4746-8EE8-C3C296A2BFA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBEA373D-D8EC-4746-8EE8-C3C296A2BFA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBEA373D-D8EC-4746-8EE8-C3C296A2BFA1}.Release|x86.ActiveCfg = Release|Any CPU
+		{CBEA373D-D8EC-4746-8EE8-C3C296A2BFA1}.ReleaseInternal|Any CPU.ActiveCfg = Release|Any CPU
+		{CBEA373D-D8EC-4746-8EE8-C3C296A2BFA1}.ReleaseInternal|Any CPU.Build.0 = Release|Any CPU
+		{CBEA373D-D8EC-4746-8EE8-C3C296A2BFA1}.ReleaseInternal|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -221,5 +239,6 @@ Global
 		{A4F3E313-3DC9-4E7E-A008-21F954C5B12E} = {FE836106-A87E-417D-BD75-5FB589390EF7}
 		{E95BF266-CA23-4488-B519-2B15395297AD} = {FE836106-A87E-417D-BD75-5FB589390EF7}
 		{784AE381-3320-48DA-9B63-2F257351195C} = {A633F0D6-C773-4694-9E7A-C5C38DD4F26D}
+		{CBEA373D-D8EC-4746-8EE8-C3C296A2BFA1} = {FE836106-A87E-417D-BD75-5FB589390EF7}
 	EndGlobalSection
 EndGlobal
