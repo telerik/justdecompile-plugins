@@ -47,11 +47,6 @@
     <AssemblyOriginatorKeyFile>..\..\Keys\reflexil.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Cecil.Decompiler.Gui.Services, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <Private>False</Private>
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Libs\Binaries\Cecil.Decompiler.Gui.Services.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -73,17 +68,18 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Libs\Sources\Mono.Cecil\Mono.Cecil.csproj">
-      <Project>{D8F63DFF-5230-43E4-9AB2-DA6E721A1FAE}</Project>
-      <Name>Mono.Cecil</Name>
+    <ProjectReference Include="..\..\Libs\Sources\Mono.Cecil\Reflexil.Mono.Cecil.csproj">
+      <Project>{d8f63dff-5230-43e4-9ab2-da6e721a1fae}</Project>
+      <Name>Reflexil.Mono.Cecil</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Reflexil.csproj">
       <Project>{DC7B5E39-FF49-4FE9-922B-3AE3DE36F2C6}</Project>
       <Name>Reflexil</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Libs\Binaries\Cecil.Decompiler.Gui.Services.dll" />
+    <ProjectReference Include="..\Cecil.Decompiler.Gui.Services\Cecil.Decompiler.Gui.Services.csproj">
+      <Project>{cbea373d-d8ec-4746-8ee8-c3c296a2bfa1}</Project>
+      <Name>Cecil.Decompiler.Gui.Services</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

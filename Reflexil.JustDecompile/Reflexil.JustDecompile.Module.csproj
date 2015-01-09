@@ -26,7 +26,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup  Condition="'$(Configuration)|$(Platform)' == 'DebugInternal|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugInternal|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -73,9 +73,6 @@
     <PreBuildEvent>"$(MsbuildBinPath)\msbuild" "$(SolutionDir)JustDecompileApi.sln" /p:Configuration=ReleaseInternal</PreBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Cecil.Decompiler.Gui.Services">
-      <HintPath>reflexil.1.8.src\Plugins\Reflexil.CecilStudio\Libs\Binaries\Cecil.Decompiler.Gui.Services.dll</HintPath>
-    </Reference>
     <Reference Include="JustDecompile.API">
       <HintPath>..\References\JustDecompile.API.dll</HintPath>
       <Private>False</Private>
@@ -116,17 +113,21 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="reflexil.1.8.src\Libs\Sources\Mono.Cecil.Mdb\Mono.Cecil.Mdb.csproj">
+    <ProjectReference Include="reflexil.1.8.src\Libs\Sources\Mono.Cecil.Mdb\Reflexil.Mono.Cecil.Mdb.csproj">
       <Project>{c5d12431-9c20-4789-8fec-46094b0f81b5}</Project>
-      <Name>Mono.Cecil.Mdb</Name>
+      <Name>Reflexil.Mono.Cecil.Mdb</Name>
     </ProjectReference>
-    <ProjectReference Include="reflexil.1.8.src\Libs\Sources\Mono.Cecil.Pdb\Mono.Cecil.Pdb.csproj">
+    <ProjectReference Include="reflexil.1.8.src\Libs\Sources\Mono.Cecil.Pdb\Reflexil.Mono.Cecil.Pdb.csproj">
       <Project>{4febbb25-d5c0-48f0-a822-2e0d6f3d777e}</Project>
-      <Name>Mono.Cecil.Pdb</Name>
+      <Name>Reflexil.Mono.Cecil.Pdb</Name>
     </ProjectReference>
-    <ProjectReference Include="reflexil.1.8.src\Libs\Sources\Mono.Cecil\Mono.Cecil.csproj">
+    <ProjectReference Include="reflexil.1.8.src\Libs\Sources\Mono.Cecil\Reflexil.Mono.Cecil.csproj">
       <Project>{d8f63dff-5230-43e4-9ab2-da6e721a1fae}</Project>
-      <Name>Mono.Cecil</Name>
+      <Name>Reflexil.Mono.Cecil</Name>
+    </ProjectReference>
+    <ProjectReference Include="reflexil.1.8.src\Plugins\Cecil.Decompiler.Gui.Services\Cecil.Decompiler.Gui.Services.csproj">
+      <Project>{cbea373d-d8ec-4746-8ee8-c3c296a2bfa1}</Project>
+      <Name>Cecil.Decompiler.Gui.Services</Name>
     </ProjectReference>
     <ProjectReference Include="reflexil.1.8.src\Plugins\Reflexil.CecilStudio\Reflexil.CecilStudio.csproj">
       <Project>{e95bf266-ca23-4488-b519-2b15395297ad}</Project>

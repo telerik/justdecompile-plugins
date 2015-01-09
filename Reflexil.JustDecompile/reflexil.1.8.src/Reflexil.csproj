@@ -1188,17 +1188,17 @@
       <Project>{2D18BE89-D210-49EB-A9DD-2246FBB3DF6D}</Project>
       <Name>ICSharpCode.TextEditor</Name>
     </ProjectReference>
-    <ProjectReference Include="Libs\Sources\Mono.Cecil.Mdb\Mono.Cecil.Mdb.csproj">
+    <ProjectReference Include="Libs\Sources\Mono.Cecil.Mdb\Reflexil.Mono.Cecil.Mdb.csproj">
       <Project>{C5D12431-9C20-4789-8FEC-46094B0F81B5}</Project>
-      <Name>Mono.Cecil.Mdb</Name>
+      <Name>Reflexil.Mono.Cecil.Mdb</Name>
     </ProjectReference>
-    <ProjectReference Include="Libs\Sources\Mono.Cecil.Pdb\Mono.Cecil.Pdb.csproj">
+    <ProjectReference Include="Libs\Sources\Mono.Cecil.Pdb\Reflexil.Mono.Cecil.Pdb.csproj">
       <Project>{4FEBBB25-D5C0-48F0-A822-2E0D6F3D777E}</Project>
-      <Name>Mono.Cecil.Pdb</Name>
+      <Name>Reflexil.Mono.Cecil.Pdb</Name>
     </ProjectReference>
-    <ProjectReference Include="Libs\Sources\Mono.Cecil\Mono.Cecil.csproj">
+    <ProjectReference Include="Libs\Sources\Mono.Cecil\Reflexil.Mono.Cecil.csproj">
       <Project>{D8F63DFF-5230-43E4-9AB2-DA6E721A1FAE}</Project>
-      <Name>Mono.Cecil</Name>
+      <Name>Reflexil.Mono.Cecil</Name>
       <Aliases>global</Aliases>
     </ProjectReference>
   </ItemGroup>
