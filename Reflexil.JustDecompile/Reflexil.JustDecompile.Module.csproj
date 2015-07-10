@@ -72,10 +72,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <PreBuildEvent>"$(MsbuildBinPath)\msbuild" "$(SolutionDir)JustDecompileApi.sln" /p:Configuration=ReleaseInternal</PreBuildEvent>
   </PropertyGroup>
-    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
-    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
-    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="JustDecompile.API">
       <HintPath>..\References\JustDecompile.API.dll</HintPath>
