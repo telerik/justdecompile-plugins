@@ -11,68 +11,56 @@
 			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
 
-		<Grid Height="20"
+        <Grid Height="20"
 			  VerticalAlignment="Top"
 			  Background="#FFC1DBFC">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition  />
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition  />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-			<TextBlock x:Name="header"
+            <TextBlock x:Name="header"
 					   Margin="5 2 0 0"
 					   Text="{Binding Header}" />
 
-            
+
             <Button x:Name="btnClose"
 					Grid.Column="1"
 					Margin="0 2 4 0"
 					HorizontalAlignment="Right"
 					Cursor="Hand">
-				<Button.Style>
-					<Style TargetType="{x:Type Button}">
-						<Setter Property="Opacity" Value=".8" />
-						<Setter Property="Template">
-							<Setter.Value>
-								<ControlTemplate TargetType="{x:Type Button}">
-									<Grid x:Name="root">
-										<ContentPresenter />
-									</Grid>
-								</ControlTemplate>
-							</Setter.Value>
-						</Setter>
-						<Style.Triggers>
-							<Trigger Property="IsEnabled" Value="false">
-								<Setter Property="Visibility" Value="Collapsed" />
-							</Trigger>
-							<Trigger Property="IsMouseOver" Value="True">
-								<Setter Property="Opacity" Value="1" />
-							</Trigger>
-							<Trigger Property="IsPressed" Value="True">
-								<Setter Property="Opacity" Value=".8" />
-							</Trigger>
-						</Style.Triggers>
-					</Style>
-				</Button.Style>
-				<Image Width="13"
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="Opacity" Value=".8" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Grid x:Name="root">
+                                        <ContentPresenter />
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="1" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value=".8" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Image Width="13"
 					   Height="13"
 					   Source="Images/gray_close_button.png" />
-			</Button>
-		</Grid>
-                <Image Width="13"
-                       Height="13"
-                       Source="Images/gray_close_button.png" />
             </Button>
         </Grid>
 
         <Grid x:Name="root"
-              Grid.Row="1"
-              Margin="0 2 0 0"
-              SizeChanged="RootSizeChanged" />
-
-    </Grid>
-
-		<Grid x:Name="root"
 			  Grid.Row="1"
 			  Margin="0 2 0 0"
 			  SizeChanged="RootSizeChanged" />

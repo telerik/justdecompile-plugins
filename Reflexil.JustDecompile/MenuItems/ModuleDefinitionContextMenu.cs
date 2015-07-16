@@ -117,8 +117,6 @@ namespace Reflexil.JustDecompile.MenuItems
                 {
                     item.TreeNodeVisuals.SetForeground(null);
                 }
-                    }
-                }
             }
         }
 
