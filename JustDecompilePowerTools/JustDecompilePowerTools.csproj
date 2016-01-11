@@ -1,5 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+    <InternalBuild>false</InternalBuild>
+    <InternalBuild Condition="Exists('$(SolutionDir)..\Source\Tools\JustDecompile.Core\JustDecompile.API.csproj')">true</InternalBuild>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseInternal|AnyCPU'">
     <OutputPath>..\..\Source\UI\ReleaseBuild\Plugins\JustDecompilePowerTools\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -15,13 +21,6 @@
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\GoToEntryPoint.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -57,11 +56,29 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <Choose>
+    <When Condition="$(InternalBuild)">
+      <PropertyGroup>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\GoToEntryPoint.snk</AssemblyOriginatorKeyFile>
+      </PropertyGroup>
+      <ItemGroup>
+        <Reference Include="JustDecompile.API">
+          <HintPath>..\References\JustDecompile.API.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <Reference Include="JustDecompile.API">
+          <HintPath>$(MSBuildProgramFiles32)\Telerik\JustDecompile\Libraries\JustDecompile.API.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
   <ItemGroup>
-    <Reference Include="JustDecompile.API">
-      <HintPath>..\References\JustDecompile.API.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -91,10 +108,8 @@
     <Content Include="LICENSE.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup Condition=" '$(Configuration)' == 'DebugInternal' OR '$(Configuration)' == 'ReleaseInternal'">
-    <PreBuildEvent>
-		call $(MsbuildBinPath)\msbuild "$(SolutionDir)JustDecompileApi.sln" /p:Configuration=ReleaseInternal
-	</PreBuildEvent>
+  <PropertyGroup Condition="$(InternalBuild)">
+    <PreBuildEvent>call "$(MsbuildBinPath)\msbuild" "$(SolutionDir)JustDecompileApi.sln" /p:Configuration=ReleaseInternal</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
