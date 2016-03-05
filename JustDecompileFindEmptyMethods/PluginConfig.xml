@@ -8,7 +8,7 @@
   <Version>0.2</Version>
   <SupportedJDversion>2016.1.112.1</SupportedJDversion>
   <Guid>ADB069FE-9315-4FC1-A1C3-0BEF7240B8A4</Guid>
-  <Url>http://www.telerik.com/products/decompiler/extensions.aspx</Url>
+  <Url>https://github.com/dogfuntom/justdecompile-plugins</Url>
   <Licenses>
     <License Title="LICENSE">
       <![CDATA[
