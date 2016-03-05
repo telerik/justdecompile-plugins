@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FindEmptyMethods.Module", "FindEmptyMethods.Module\FindEmptyMethods.Module.csproj", "{0C37AE10-6303-41C0-A358-3D92F297843F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FindEmptyMethods.Module", "JustDecompileFindEmptyMethods\FindEmptyMethods.Module.csproj", "{0C37AE10-6303-41C0-A358-3D92F297843F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
