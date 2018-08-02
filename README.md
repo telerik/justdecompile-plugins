@@ -1,4 +1,4 @@
-Justdecompile Plugins
+JustDecompile Plugins
 =====================
 
 About
@@ -10,7 +10,7 @@ product.
 How to Contribute
 --------------------
 
-Justdecompile Plugins are free and open-source. We encourage and support an active, healthy community that accepts contributions 
+JustDecompile Plugins are free and open-source. We encourage and support an active, healthy community that accepts contributions 
 from the public. We'd like you to be a part of that community.
 
 Before submitting a pull request, please, read and sign the [Contributors License Agreement] (https://docs.google.com/a/telerik.com/forms/d/1xMm2knAHL_CYNP7efOwZ3WT9kDop6Wc1EbnHtiOORfE/viewform)
